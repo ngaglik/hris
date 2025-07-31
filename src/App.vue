@@ -62,7 +62,6 @@
 </template>
 
 <script src="./App.ts"/>
-
 <style scoped>
 .app-layout-sider__title {
   display: flex;
