@@ -2,18 +2,15 @@
   <div>  
         <h3>Referensi Pegawai</h3>
         <n-layout >
-          <n-layout-content content-style="padding: 24px;">
-            
-                <selectTree />
-            
-            
-          </n-layout-content>
-          
+          <n-layout-content content-style="padding: 24px;">            
+                <selectTree @update="onOrgSelected" />    
+          </n-layout-content>         
           
         </n-layout>
-        
-              
+                    
         <n-space vertical>
+          <n-space horizontal>
+          </n-space>
           <n-space horizontal>
             <n-button type="primary" @click="openAddModal" class="mb-4">
               Tambah Data
@@ -46,8 +43,17 @@
   </div>
   <n-modal v-model:show="isModalOpen" :title="isEditMode ? 'Edit Data' : 'Tambah Data'" preset="dialog" :style="{ width: '600px' }">
       <n-form :model="formData" label-width="100">
+        <n-form-item label="NIK">
+          <n-input v-model:value="formData.national_id_number" />
+        </n-form-item>
+        <n-form-item label="Title Depan">
+          <n-input v-model:value="formData.front_title" />
+        </n-form-item>
         <n-form-item label="Name">
           <n-input v-model:value="formData.name" />
+        </n-form-item>
+        <n-form-item label="Title Belakang">
+          <n-input v-model:value="formData.end_title" />
         </n-form-item>
         <n-form-item label="Tgl Lahir">
           <n-input v-model:value="formData.birth_date" />
@@ -66,6 +72,12 @@
           placeholder="Masukkan alamat lengkap"
           clearable/>
         </n-form-item>
+        <n-form-item label="No HP">
+          <n-input v-model:value="formData.phone_number" />
+        </n-form-item>
+        <n-form-item label="Email">
+          <n-input v-model:value="formData.email" />
+        </n-form-item>
       </n-form>
       <n-space horizontal>
         <n-button @click="closeModal">Batal</n-button>
@@ -74,6 +86,5 @@
         </n-button>
       </n-space>
     </n-modal>
-
 </template>
 <script src="./Employee.ts"/>

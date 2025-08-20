@@ -2,7 +2,7 @@ export const LAYOUT_ITEMS = [
 		
 	{
 	  label: 'Coba',
-	  key: '/selectTree',
+	  key: '/Table',
 	},
 	{
 	  label: 'Profile',
