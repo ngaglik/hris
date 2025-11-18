@@ -1,76 +1,103 @@
-import { onMounted,defineComponent, ref, h } from 'vue'
-import { useMessage,useDialog, NButton, NDatePicker } from 'naive-ui'
+import { onMounted, defineComponent, ref, h } from 'vue'
+import { useMessage, useDialog, NButton } from 'naive-ui'
 import { Config } from '@/constant/config'
 import { CheckBearerExpired } from '../../secured'
 import selectTree from '@/container/selectTree/selectTree.vue'
+import UserProfile from '../profile/UserProfile.vue'
 
 export default defineComponent({
   components: {
-    selectTree
+    selectTree,
+    UserProfile
   },
   setup() {
     const dialog = useDialog()
     const message = useMessage()
+
+    // state
     const inputSearch = ref('')
     const selectedOrgId = ref<string | number | null>(null)
-    const tableData = ref([])
+    const tableData = ref<any[]>([])
     const current = ref(1)
     const pageSize = ref(50)
     const total = ref(0)
     const loading = ref(false)
+
+    // ambil session data
+    const getAuth = () => {
+      const localData = JSON.parse(localStorage.getItem(Config.TokenName) || '{}')
+      return {
+        token: localData?.token || '',
+        session: localData?.session || '',
+        employee: localData?.employee?.[0] || null
+      }
+    }
+
+    const { token, session, employee } = getAuth()
 
     const genderOptions = [
       { label: 'Laki-Laki', value: 'L' },
       { label: 'Perempuan', value: 'P' }
     ]
 
-    const onOrgSelected = (orgId: string | number | null) => {
-      selectedOrgId.value = orgId;
-      console.log('Selected Org ID:', selectedOrgId.value)
-      fetchData(current.value)
-    }
-
+    // fetch data
     const fetchData = async (page = 1) => {
       tableData.value = []
-      const token = localStorage.getItem(Config.TokenName)
-      const session = localStorage.getItem(Config.SessionName)
+      const { token, session } = getAuth()
+
       if (!token) {
         console.error('No token found!')
-        return false
+        return
       }
+
       loading.value = true
-      const response = await fetch(
-        `${Config.UrlBackend}/api/employee?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}&selectedOrgId=${selectedOrgId.value}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            uSession: `${session}`
+      try {
+        const response = await fetch(
+          `${Config.UrlBackend}/api/employee?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}&selectedOrgId=${selectedOrgId.value}`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              uSession: `${session}`
+            }
           }
+        )
+
+        CheckBearerExpired(response.status)
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
-      )
-      CheckBearerExpired(response.status)
-      const result = await response.json()
-      tableData.value = result.data
-      current.value = result.page
-      total.value = result.total
-      loading.value = false
+
+        const result = await response.json()
+        tableData.value = result.data || []
+        current.value = result.page || 1
+        total.value = result.total || 0
+      } catch (err) {
+        console.error('Error fetching data:', err)
+        message.error('Gagal memuat data')
+      } finally {
+        loading.value = false
+      }
     }
 
+    // modal state
     const isModalOpen = ref(false)
     const isEditMode = ref(false)
+    const isPreviewOpen = ref(false)
 
     const formData = ref({
       id: null,
-      national_id_number:'',
-      front_title:'',
+      person_id: '',
+      national_id_number: '',
+      front_title: '',
       name: '',
-      end_title:'',
+      end_title: '',
       birth_date: '',
       gender: '',
       address: '',
-      phone_number:'',
-      email:''
+      phone_number: '',
+      email: ''
     })
 
     const formDataFilter = ref({
@@ -78,52 +105,58 @@ export default defineComponent({
       professional_group_id: ''
     })
 
+    // modal methods
     const openAddModal = () => {
       isEditMode.value = false
       formData.value = {
         id: null,
-        national_id_number:'',
-        front_title:'',
+        person_id: '',
+        national_id_number: '',
+        front_title: '',
         name: '',
-        end_title:'',
+        end_title: '',
         birth_date: '',
         gender: '',
         address: '',
-        phone_number:'',
-        email:''
+        phone_number: '',
+        email: ''
       }
       isModalOpen.value = true
     }
 
-    const openEditModal = (row) => {
+    const openEditModal = (row: any) => {
+      isPreviewOpen.value = false
       isEditMode.value = true
       formData.value = { ...row }
       isModalOpen.value = true
     }
-    const openProfile = (row) => {
-      isEditMode.value = true
+
+    const openProfile = (row: any) => {
+      isModalOpen.value = false
       formData.value = { ...row }
-      isModalOpen.value = true
+      isPreviewOpen.value = true
     }
+
     const closeModal = () => {
       isModalOpen.value = false
     }
- 
+
+    // table & pagination
     const handleInputSearch = () => {
       fetchData(current.value)
     }
 
-    const handlePageChange = (page) => {
+    const handlePageChange = (page: number) => {
       current.value = page
       fetchData(page)
     }
 
+    // form submit
     const submitForm = async () => {
-      const token = localStorage.getItem(Config.TokenName)
-      const session = localStorage.getItem(Config.SessionName)
+      const { token, session } = getAuth()
       if (!token) {
         console.error('No token found!')
-        return false
+        return
       }
 
       loading.value = true
@@ -139,27 +172,16 @@ export default defineComponent({
             Authorization: `Bearer ${token}`,
             uSession: `${session}`
           },
-          body: JSON.stringify({
-            id: formData.value.id,
-            national_id_number: formData.value.national_id_number,
-            front_title: formData.value.front_title,
-            name: formData.value.name,
-            end_title: formData.value.end_title,
-            birth_date: formData.value.birth_date,
-            gender: formData.value.gender,
-            address: formData.value.address,
-            phone_number: formData.value.phone_number,
-            email: formData.value.email
-          })
+          body: JSON.stringify(formData.value)
         })
 
         if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`)
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
 
         const data = await response.json()
         message.success(data.message || (isEditMode.value ? 'Data diperbarui' : 'Data ditambahkan'))
-        await fetchData(current.value) // refresh table
+        await fetchData(current.value)
         isModalOpen.value = false
       } catch (error) {
         console.error(error)
@@ -169,59 +191,61 @@ export default defineComponent({
       }
     }
 
-
-    const columns = [      
+    // table columns
+    const columns = [
+      {
+        title: 'Aksi',
+        key: 'actions',
+        fixed: 'left',
+        width: 150,
+        render(row: any) {
+          return h(
+            'div',
+            { class: 'flex gap-2' },
+            [
+              h(
+                NButton,
+                {
+                  size: 'small',
+                  type: 'primary',
+                  onClick: () => openEditModal(row)
+                },
+                { default: () => 'Ubah' }
+              ),
+              h(
+                NButton,
+                {
+                  size: 'small',
+                  type: 'success',
+                  onClick: () => openProfile(row)
+                },
+                { default: () => 'Lihat Profil' }
+              )
+            ]
+          )
+        }
+      },
       { title: 'ID', key: 'employee_id' },
       { title: 'Title depan', key: 'front_title' },
-      { title: 'Name', key: 'name',fixed: 'left' },
+      { title: 'Name', key: 'name', fixed: 'left' },
       { title: 'Title belakang', key: 'end_title' },
       { title: 'NIP', key: 'national_employee_id_number' },
       { title: 'Status Pegawai', key: 'employee_category_name' },
       { title: 'Jabatan profesi', key: 'professional_name' },
-      { title: 'Unit kerja', key: 'organization_name' },      
+      { title: 'Unit kerja', key: 'organization_name' },
       { title: 'Jabatan manajerial', key: 'position_name' },
       { title: 'NIK', key: 'national_id_number' },
       { title: 'Tgl Lahir', key: 'birth_date' },
       { title: 'JKel', key: 'gender' },
       { title: 'Alamat', key: 'address' },
       { title: 'Phone', key: 'phone_number' },
-      { title: 'Email', key: 'email' },
-      {
-        title: 'Aksi',
-        key: 'actions',
-        fixed: 'right',
-        width: 120,
-        render(row) {
-          return h(
-          'div',
-          { class: 'flex gap-2' },
-          [
-            h(
-              NButton,
-              {
-                size: 'small',
-                type: 'primary',
-                onClick: () => openEditModal(row)
-              },
-              { default: () => 'Ubah Personal' }
-            ),
-            h(
-              NButton,
-              {
-                size: 'small',
-                type: 'success',
-                onClick: () => openProfile(row)
-              },
-              { default: () => 'Lihat Profil' }
-            )
-          ]
-        )
-        }
-      },
+      { title: 'Email', key: 'email' }
     ]
 
-    // Fetch data once created
-   // fetchData(current.value)
+    // load pertama kali
+    onMounted(() => {
+      fetchData(current.value)
+    })
 
     return {
       columns,
@@ -233,8 +257,11 @@ export default defineComponent({
       inputSearch,
       handleInputSearch,
       handlePageChange,
-      onOrgSelected,
-
+      onOrgSelected: (orgId: string | number | null) => {
+        selectedOrgId.value = orgId
+        fetchData(current.value)
+      },
+      isPreviewOpen,
       isModalOpen,
       isEditMode,
       formData,
@@ -244,7 +271,7 @@ export default defineComponent({
       closeModal,
       submitForm,
       genderOptions,
-
+      employee,
       formDataFilter
     }
   }

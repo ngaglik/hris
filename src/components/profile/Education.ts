@@ -4,7 +4,19 @@ import { Config } from '@/constant/config'
 import { CheckBearerExpired } from '../../secured'
 
 export default defineComponent({
-  setup() {
+  props: {
+    personId: {
+      type: String,
+      default: ''
+    }
+  },
+  data() {
+    return {
+      profile: {},
+      loading: false
+    }
+  },
+  setup(props) {
     const dialog = useDialog()
     const message = useMessage()
     const inputSearch = ref('')
@@ -14,16 +26,19 @@ export default defineComponent({
     const total = ref(0)
     const loading = ref(false)
     
+    const localData = JSON.parse(localStorage.getItem(Config.TokenName) || "{}")
+    const token = localData.token
+    const session = localData.session
+    const employee = localData.employee[0]
+
     const fetchData = async (page = 1) => {
-      const localData = JSON.parse(localStorage.getItem(Config.TokenName) || "{}");
-      const token = localData.token;
-      const session = localData.session; 
+      
       if (!token) {
         console.error('No token found!');
         return false;
       }
       loading.value = true
-      const response = await fetch(Config.UrlBackend+`/api/religion?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`, {
+      const response = await fetch(Config.UrlBackend+`/api/education?personId=${props.personId}&page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -101,7 +116,13 @@ export default defineComponent({
           )
         }
       },
-      { title: 'Name', key: 'name' },
+      { title: 'Degree', key: 'graduation.name' },
+      { title: 'Institusi', key: 'institutionName' },
+      { title: 'Lokasi', key: 'institutionLocation' },
+      { title: 'Akreditasi', key: 'accreditation' },
+      { title: 'Nomor Ijazah', key: 'certificateNumber' },
+      { title: 'Pejabat Penandatangan', key: 'certificateSigned' },
+      { title: 'Tanggal Ijazah', key: 'certificateDate' },
     ]
 
     // Fetch data once created
@@ -124,6 +145,9 @@ export default defineComponent({
       openAddModal,
       openEditModal,
       closeModal,
+      employee,
+      token,
+      session,
       submitForm
     }
   }

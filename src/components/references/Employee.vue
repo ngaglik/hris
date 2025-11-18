@@ -41,8 +41,16 @@
         />      
         </n-space>
   </div>
+  <n-modal v-model:show="isPreviewOpen" :title="formData.name" :style="{width:'90%'}" preset="dialog">
+    <n-card title="Profile" style="margin-bottom: 16px">
+    <UserProfile :employeeId="formData.id"/>
+    </n-card>
+  </n-modal>
   <n-modal v-model:show="isModalOpen" :title="isEditMode ? 'Edit Data' : 'Tambah Data'" preset="dialog" :style="{ width: '600px' }">
       <n-form :model="formData" label-width="100">
+        <n-form-item label="ID">
+          {{formData.id}}
+        </n-form-item>
         <n-form-item label="NIK">
           <n-input v-model:value="formData.national_id_number" />
         </n-form-item>

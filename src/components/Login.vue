@@ -92,13 +92,10 @@ const submit = () => {
         const data = await response.json()
 
         // Simpan token misalnya ke localStorage
-        localStorage.setItem(Config.TokenName, data.token)
-        localStorage.setItem(Config.SessionName, data.session)
+        localStorage.setItem(Config.TokenName, JSON.stringify(data))
+        //localStorage.setItem(Config.SessionName, data.session)
         message.success('Login berhasil!')
 
-        // 🔥 fetch secure endpoint
-        
-        
         emit('login-success')
       } catch (error) {
         console.error(error)

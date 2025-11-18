@@ -15,11 +15,12 @@ export default defineComponent({
     const loading = ref(false)
     
     const fetchData = async (page = 1) => {
-      const token = localStorage.getItem(Config.TokenName)
-      const session = localStorage.getItem(Config.SessionName)
+      const localData = JSON.parse(localStorage.getItem(Config.TokenName) || "{}");
+      const token = localData.token;
+      const session = localData.session; 
       if (!token) {
-        console.error('No token found!')
-        return false
+        console.error('No token found!');
+        return false;
       }
       loading.value = true
       const response = await fetch(Config.UrlBackend+`/api/location?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`, {

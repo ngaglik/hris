@@ -11,7 +11,7 @@
           :width="280"
           :collapsed="collapsed"
           class="app-layout-sider"
-          show-trigger="bar"
+          show-trigger="arrow-circle"
           style="border-top-right-radius: 16px;"
           @collapse="collapsed = true"
           @expand="collapsed = false"
@@ -32,12 +32,13 @@
             @update:value="handleMenuSelect"
           />
         </n-layout-sider>
+       
         <n-layout
           position="absolute"
-          style="min-width:1080px; transition: all 0.3s;"
+          style=" transition: all 0.3s;"
           :style="{ left: collapsed ? '10px' : '280px' }"
-        >
-          <n-layout-header bordered>
+        >    
+        <n-layout-header bordered>
             <div style="padding-right: 40px;">
               <span style="margin-right: 20px;" @click="changeTheme">{{ theme === null ? 'Dark' : 'Light' }}</span>
               <span @click="changeLang">{{ showLang }}</span>
@@ -45,16 +46,15 @@
             <ProfileBar @logout="handleLogout"/>
           </n-layout-header>
 
-          <n-layout-content
+          <n-layout-content 
             class="layout-content"
-            style="border-radius: 0 16px 16px;"
+            style="min-width:1080px; border-radius: 0 16px 16px;"
           >
-            <div style="padding: 20px 40px;">
               <router-view v-slot="{ Component }">
                 <component :is="Component" :key="$route.path" />
               </router-view>
-            </div>
           </n-layout-content>
+
         </n-layout>
       </n-layout>
     </template>
@@ -75,7 +75,7 @@
   font-size: 20px;
 }
 .n-layout-header {
-  padding: 24px;
+  padding: 10px;
   display: flex;
   justify-content: flex-end;
 }

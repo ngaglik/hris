@@ -1,6 +1,6 @@
 <template>
   <div>  
-        <h3>Daftar Pegawai Unit </h3>
+        <h3>Jadwal</h3>
         <n-space vertical>
           <n-space horizontal>           
             <n-input-group>
@@ -27,4 +27,4 @@
         </n-space>
   </div>
 </template>
-<script src="./UnitProfile.ts"/>
+<script src="./Schedule.ts"/>

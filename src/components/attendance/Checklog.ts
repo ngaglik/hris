@@ -1,16 +1,16 @@
 import { defineComponent, ref, h } from 'vue'
 import { useMessage,useDialog, NButton, NDatePicker } from 'naive-ui'
-import { Config } from '@/constant/config'
+import { Config, generalOptions } from '@/constant/config'
 import { CheckBearerExpired } from '../../secured'
 
 export default defineComponent({
   setup() {
-    const dialog = useDialog()
     const message = useMessage()
     const inputSearch = ref('')
+    
     const tableData = ref([])
     const current = ref(1)
-    const pageSize = ref(20)
+    const pageSize = ref(100)
     const total = ref(0)
     const loading = ref(false)
     
@@ -23,13 +23,16 @@ export default defineComponent({
         return false;
       }
       loading.value = true
-      const response = await fetch(Config.UrlBackend+`/api/religion?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          uSession: `${session}`,
-        },
-      });
+      const response = await fetch(
+        `${Config.UrlBackend}/api/employee/unit?sessionId=${session}&page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            uSession: `${session}`
+          }
+        }
+      )
       CheckBearerExpired(response.status)
       const result = await response.json()
       tableData.value = result.data
@@ -38,33 +41,13 @@ export default defineComponent({
       loading.value = false
     }
 
-    const isModalOpen = ref(false)
-    const isEditMode = ref(false)
-
-    const formData = ref({
+    const formFilter = ref({
       id: null,
-      name: ''
+      year: 2025,
+      month: 1,
     })
 
-    const openAddModal = () => {
-      isEditMode.value = false
-      formData.value = {
-        id: null,
-        name: ''
-      }
-      isModalOpen.value = true
-    }
-
-    const openEditModal = (row) => {
-      isEditMode.value = true
-      formData.value = { ...row }
-      isModalOpen.value = true
-    }
-
-    const closeModal = () => {
-      isModalOpen.value = false
-    }
- 
+     
     const handleInputSearch = () => {
       fetchData(current.value)
     }
@@ -76,32 +59,21 @@ export default defineComponent({
 
     const submitForm = () => {
       if (isEditMode.value) {
-        message.success(`Data updated: ${formData.value.name}`)
+        message.success(`Data updated: ${formData.value.asset_name}`)
         // TODO: panggil API update
       } else {
-        message.success(`Data added: ${formData.value.name}`)
+        message.success(`Data added: ${formData.value.asset_name}`)
         // TODO: panggil API add
       }
       isModalOpen.value = false
     }
 
     const columns = [
-      {
-        title: 'Aksi',
-        key: 'actions',
-        render(row) {
-          return h(
-            NButton,
-            {
-              size: 'small',
-              type: 'primary',
-              onClick: () => openEditModal(row)
-            },
-            { default: () => 'Edit' }
-          )
-        }
-      },
+      
       { title: 'Name', key: 'name' },
+      { title: 'Tgl Lahir', key: 'birth_date' },
+      { title: 'JKel', key: 'gender' },
+      { title: 'Alamat', key: 'address' }
     ]
 
     // Fetch data once created
@@ -118,13 +90,9 @@ export default defineComponent({
       handleInputSearch,
       handlePageChange,
 
-      isModalOpen,
-      isEditMode,
-      formData,
-      openAddModal,
-      openEditModal,
-      closeModal,
-      submitForm
+      generalOptions,
+      formFilter,
+      submitForm,
     }
   }
 })

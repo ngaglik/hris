@@ -1,9 +1,9 @@
 export const LAYOUT_ITEMS = [
 		
 	{
-	  label: 'Coba',
-	  key: '/Table',
-	},
+	  label: 'Presensi',
+	  key: '/Attendance',
+	},	
 	{
 	  label: 'Profile',
 	  key: '/Profile',

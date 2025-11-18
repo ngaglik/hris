@@ -1,14 +1,14 @@
 import { defineComponent, ref } from 'vue'
 import { Config } from '@/constant/config'
 import { CheckBearerExpired } from '../../secured'
-import UserProfile from './UserProfile.vue'
-import UnitProfile from './UnitProfile.vue'
+import Checklog from './Checklog.vue'
+import Schedule from './Schedule.vue'
 
 
 export default defineComponent({
   components: {
-    UserProfile,
-    UnitProfile
+    Checklog,
+    Schedule
   },  
   created() {
     const localData = JSON.parse(localStorage.getItem(Config.TokenName) || "{}");

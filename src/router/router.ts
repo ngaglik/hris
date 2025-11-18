@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/container/home/Home.vue'
+import Attendance from '@/components/attendance/Attendance.vue'
 import Employee from '@/components/references/Employee.vue'
 import Location from '@/components/references/Location.vue'
 import Organization from '@/components/references/Organization.vue'
@@ -11,6 +12,7 @@ import Position from '@/components/references/Position.vue'
 import Profile from '@/components/profile/Profile.vue'
 import UserProfile from '@/components/profile/UserProfile.vue'
 import UnitProfile from '@/components/profile/UnitProfile.vue'
+import Education from '@/components/profile/Education.vue'
 import ProfileBar from '@/components/ProfileBar.vue'
 import Table from '@/components/Table.vue'
 import selectTree from '@/container/selectTree/selectTree.vue'
@@ -21,8 +23,12 @@ const router = createRouter({
 	routes: [
 		{
 			path: '/',
-			component: Home,
-		},		
+			component: Attendance,
+		},	
+		{
+			path: '/Attendance',
+			component: Attendance,
+		},	
 		{
 			path: '/Profile',
 			component: Profile,
