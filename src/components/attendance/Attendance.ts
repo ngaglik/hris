@@ -1,6 +1,6 @@
 import { defineComponent, ref } from 'vue'
 import { Config } from '@/constant/config'
-import { CheckBearerExpired } from '../../secured'
+import { getAuthData, saveAuthData, logout } from "@/services/authService"
 import Checklog from './Checklog.vue'
 import Schedule from './Schedule.vue'
 
@@ -11,9 +11,9 @@ export default defineComponent({
     Schedule
   },  
   created() {
-    const localData = JSON.parse(localStorage.getItem(Config.TokenName) || "{}");
-    const token = localData.token;
-    const session = localData.session; 
+    let auth = getAuthData()
+    let token = auth?.token
+    let session = auth?.session
     if (!token) {
       console.error('No token found!');
       return false;

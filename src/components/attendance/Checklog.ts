@@ -1,7 +1,8 @@
 import { defineComponent, ref, h } from 'vue'
 import { useMessage,useDialog, NButton, NDatePicker } from 'naive-ui'
 import { Config, generalOptions } from '@/constant/config'
-import { CheckBearerExpired } from '../../secured'
+import { apiFetch } from "@/services/apiClient"
+import { getAuthData, saveAuthData, logout } from "@/services/authService"
 
 export default defineComponent({
   setup() {
@@ -13,27 +14,23 @@ export default defineComponent({
     const pageSize = ref(100)
     const total = ref(0)
     const loading = ref(false)
-    
+    const formFilter = ref({
+      id: null,
+      year: 2025,
+      month: new Date().getMonth() + 1,
+    })
+
     const fetchData = async (page = 1) => {
-      const localData = JSON.parse(localStorage.getItem(Config.TokenName) || "{}");
-      const token = localData.token;
-      const session = localData.session; 
-      if (!token) {
-        console.error('No token found!');
-        return false;
-      }
-      loading.value = true
-      const response = await fetch(
-        `${Config.UrlBackend}/api/employee/unit?sessionId=${session}&page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            uSession: `${session}`
-          }
-        }
-      )
-      CheckBearerExpired(response.status)
+      let auth = getAuthData()
+      let token = auth?.token
+      let session = auth?.session
+      let employeeId = auth?.employee?.[0].id
+
+      loading.value = true      
+      const response = await apiFetch(`${Config.UrlBackend}/api/attendance/getfingerlog?employeeId=${employeeId}&year=${formFilter.value.year}&month=${formFilter.value.month}&page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`, {
+        method: "GET"
+      });
+      if (!response.ok) return false;
       const result = await response.json()
       tableData.value = result.data
       current.value = result.page
@@ -41,11 +38,7 @@ export default defineComponent({
       loading.value = false
     }
 
-    const formFilter = ref({
-      id: null,
-      year: 2025,
-      month: 1,
-    })
+    
 
      
     const handleInputSearch = () => {
@@ -57,23 +50,12 @@ export default defineComponent({
       fetchData(page)
     }
 
-    const submitForm = () => {
-      if (isEditMode.value) {
-        message.success(`Data updated: ${formData.value.asset_name}`)
-        // TODO: panggil API update
-      } else {
-        message.success(`Data added: ${formData.value.asset_name}`)
-        // TODO: panggil API add
-      }
-      isModalOpen.value = false
-    }
-
     const columns = [
       
-      { title: 'Name', key: 'name' },
-      { title: 'Tgl Lahir', key: 'birth_date' },
-      { title: 'JKel', key: 'gender' },
-      { title: 'Alamat', key: 'address' }
+      { title: 'Nama', key: 'employee_name' },
+      { title: 'Tanggal', key: 'dateonly_input' },
+      { title: 'Jam', key: 'timeonly_input' },
+      { title: 'Ket', key: 'annotaion' }
     ]
 
     // Fetch data once created
@@ -92,7 +74,7 @@ export default defineComponent({
 
       generalOptions,
       formFilter,
-      submitForm,
+      
     }
   }
 })

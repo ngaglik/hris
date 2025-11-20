@@ -1,10 +1,12 @@
-import { defineComponent } from 'vue'
+import { defineComponent, ref, computed, onMounted } from 'vue'
 import { Config } from '@/constant/config'
-import { CheckBearerExpired } from '../../secured'
+import { apiFetch } from "@/services/apiClient"
+import { getAuthData, saveAuthData, logout } from "@/services/authService"
 import Education from './Education.vue'
 
 export default defineComponent({
   components: { Education },
+
   props: {
     employeeId: {
       type: String,
@@ -15,67 +17,47 @@ export default defineComponent({
       default: ''
     }
   },
-  data() {
+
+  setup(props) {
+    const profile = ref<any>({})
+    const loading = ref(false)
+    let auth = getAuthData()
+    let token = auth?.token
+    let session = auth?.session
+
+    const persId = computed(() => {
+      const employee = auth?.employee?.[0]
+      return props.personId || props.employeeId || employee?.personId || ''
+    })
+
+    const empId = computed(() => {
+      const employee = auth?.employee?.[0]
+
+      return props.employeeId || employee?.id || ''
+    })
+    
+
+    const fetchData = async () => {      
+      loading.value = true
+      const response = await apiFetch(`${Config.UrlBackend}/api/person/${persId.value}`, {
+        method: "GET"
+      });
+      const result = await response.json()
+      profile.value = Array.isArray(result) ? result[0] : result
+      tableData.value = result.data
+      current.value = result.page
+      total.value = result.total
+      loading.value = false
+    }
+
+    onMounted(() => fetchData())
+
     return {
-      profile: {},
-      loading: false
+      profile,
+      loading,
+      empId,
+      persId,
+      fetchData
     }
-  },
-  computed: {
-    persId() {
-      const localData = JSON.parse(localStorage.getItem(Config.TokenName) || "{}");
-      const employee = localData?.employee?.[0];
-      return this.employeeId || employee?.personId || '';
-    },
-    empId() {
-      const localData = JSON.parse(localStorage.getItem(Config.TokenName) || "{}");
-      const employee = localData?.employee?.[0];
-      return this.employeeId || employee?.id || '';
-    }
-  },
-  methods: {
-    async fetchData() {
-      const localData = JSON.parse(localStorage.getItem(Config.TokenName) || "{}");
-      const token = localData?.token;
-      const session = localData?.session;
-
-      if (!token) {
-        console.error('No token found!');
-        return false;
-      }
-
-      if (!this.persId) {
-        console.error('Person ID not found!');
-        return false;
-      }
-
-      this.loading = true;
-
-      const url = `${Config.UrlBackend}/api/person/${this.persId}`;
-
-      try {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            uSession: `${session}`,
-          },
-        });
-
-        CheckBearerExpired(response.status);
-
-        const result = await response.json();
-        this.profile = Array.isArray(result) ? result[0] : result;
-
-        console.log(this.profile);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        this.loading = false;
-      }
-    },
-  },
-  created() {
-    this.fetchData();
   }
 })

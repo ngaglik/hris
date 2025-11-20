@@ -1,5 +1,6 @@
 import type { Component } from 'vue'
 import router from '@/router/router'
+import { getAuthData, saveAuthData, logout } from "@/services/authService";
 
 import {
   Pencil as EditIcon,

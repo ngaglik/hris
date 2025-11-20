@@ -1,6 +1,6 @@
 import { defineComponent, ref } from 'vue'
 import { Config } from '@/constant/config'
-import { CheckBearerExpired } from '../../secured'
+import { getAuthData, saveAuthData, logout } from "@/services/authService"
 import UserProfile from './UserProfile.vue'
 import UnitProfile from './UnitProfile.vue'
 
@@ -11,9 +11,8 @@ export default defineComponent({
     UnitProfile
   },  
   created() {
-    const localData = JSON.parse(localStorage.getItem(Config.TokenName) || "{}");
-    const token = localData.token;
-    const session = localData.session; 
+    let auth = getAuthData()
+    let token = auth?.token
     if (!token) {
       console.error('No token found!');
       return false;

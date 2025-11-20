@@ -1,7 +1,8 @@
 import { defineComponent, ref, h } from 'vue'
 import { useMessage,useDialog, NButton, NDatePicker } from 'naive-ui'
 import { Config } from '@/constant/config'
-import { CheckBearerExpired } from '../../secured'
+import { apiFetch } from "@/services/apiClient";
+import { getAuthData, saveAuthData, logout } from "@/services/authService";
 
 export default defineComponent({
   props: {
@@ -26,26 +27,16 @@ export default defineComponent({
     const total = ref(0)
     const loading = ref(false)
     
-    const localData = JSON.parse(localStorage.getItem(Config.TokenName) || "{}")
-    const token = localData.token
-    const session = localData.session
-    const employee = localData.employee[0]
+    let auth = getAuthData();
+    let token = auth?.token
+    let session = auth?.session
+    let employee = auth?.employee[0]
 
     const fetchData = async (page = 1) => {
-      
-      if (!token) {
-        console.error('No token found!');
-        return false;
-      }
       loading.value = true
-      const response = await fetch(Config.UrlBackend+`/api/education?personId=${props.personId}&page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          uSession: `${session}`,
-        },
+      const response = await apiFetch(`${Config.UrlBackend}/api/education?personId=${props.personId}&page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`, {
+        method: "GET"
       });
-      CheckBearerExpired(response.status)
       const result = await response.json()
       tableData.value = result.data
       current.value = result.page

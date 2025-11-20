@@ -28,7 +28,7 @@
               </n-form-item>
 
               <n-form-item>
-                <n-button @click="handleValidateClick">
+                <n-button @click="handleInputSearch">
                   Tampilkan
                 </n-button>
               </n-form-item>

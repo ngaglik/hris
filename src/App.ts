@@ -1,5 +1,6 @@
 import { Config } from '@/constant/config'
 import { checkLogin } from './secured'
+import { getAuthData, saveAuthData, logout } from "@/services/authService";
 
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { idID, dateId } from './locales/idID'
@@ -32,13 +33,12 @@ export default defineComponent({
 
     // Cek login status saat mounted
     onMounted(async () => {
-     try {
-		    isLoggedIn.value = await checkLogin()
-		  } catch (err) {
-		    console.error('Login check failed:', err)
-		    isLoggedIn.value = false
-		  }
-
+      let auth = getAuthData();
+      if(!auth?.token)
+        isLoggedIn.value = false
+      else
+        isLoggedIn.value = true
+    
       // Collapse sidebar otomatis jika layar kecil
       const handleResize = () => {
         collapsed.value = window.innerWidth < 768
@@ -59,10 +59,8 @@ export default defineComponent({
     }
 
     const handleLogout = () => {
-      localStorage.removeItem(Config.TokenName)
-      localStorage.removeItem(Config.SessionName)
+      logout();
       isLoggedIn.value = false
-      window.$message?.info('Anda berhasil logout.')
     }
 
     const { theme, lang, changeTheme, changeLang } = useConfig()

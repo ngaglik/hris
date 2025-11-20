@@ -1,7 +1,8 @@
 import { onMounted, defineComponent, ref, h } from 'vue'
 import { useMessage, useDialog, NButton } from 'naive-ui'
 import { Config } from '@/constant/config'
-import { CheckBearerExpired } from '../../secured'
+import { apiFetch } from "@/services/apiClient"
+import { getAuthData, saveAuthData, logout } from "@/services/authService"
 import selectTree from '@/container/selectTree/selectTree.vue'
 import UserProfile from '../profile/UserProfile.vue'
 
@@ -22,63 +23,26 @@ export default defineComponent({
     const pageSize = ref(50)
     const total = ref(0)
     const loading = ref(false)
-
-    // ambil session data
-    const getAuth = () => {
-      const localData = JSON.parse(localStorage.getItem(Config.TokenName) || '{}')
-      return {
-        token: localData?.token || '',
-        session: localData?.session || '',
-        employee: localData?.employee?.[0] || null
-      }
-    }
-
-    const { token, session, employee } = getAuth()
-
+    let auth = getAuthData()
+    let token = auth?.token
+    let session = auth?.session
+    let employee = auth?.employee
+   
     const genderOptions = [
       { label: 'Laki-Laki', value: 'L' },
       { label: 'Perempuan', value: 'P' }
     ]
 
-    // fetch data
     const fetchData = async (page = 1) => {
-      tableData.value = []
-      const { token, session } = getAuth()
-
-      if (!token) {
-        console.error('No token found!')
-        return
-      }
-
       loading.value = true
-      try {
-        const response = await fetch(
-          `${Config.UrlBackend}/api/employee?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}&selectedOrgId=${selectedOrgId.value}`,
-          {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              uSession: `${session}`
-            }
-          }
-        )
-
-        CheckBearerExpired(response.status)
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const result = await response.json()
-        tableData.value = result.data || []
-        current.value = result.page || 1
-        total.value = result.total || 0
-      } catch (err) {
-        console.error('Error fetching data:', err)
-        message.error('Gagal memuat data')
-      } finally {
-        loading.value = false
-      }
+      const response = await apiFetch(`${Config.UrlBackend}/api/employee?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}&selectedOrgId=${selectedOrgId.value}`, {
+        method: "GET"
+      });
+      const result = await response.json()
+      tableData.value = result.data || []
+      current.value = result.page || 1
+      total.value = result.total || 0
+      loading.value = false
     }
 
     // modal state
@@ -153,7 +117,6 @@ export default defineComponent({
 
     // form submit
     const submitForm = async () => {
-      const { token, session } = getAuth()
       if (!token) {
         console.error('No token found!')
         return
@@ -165,15 +128,13 @@ export default defineComponent({
           ? `${Config.UrlBackend}/api/person/update`
           : `${Config.UrlBackend}/api/person/create`
 
-        const response = await fetch(url, {
-          method: 'POST',
+        const response = await apiFetch(url, {
+          method: "POST",
+          body: JSON.stringify(formData.value),
           headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-            uSession: `${session}`
-          },
-          body: JSON.stringify(formData.value)
-        })
+            "Content-Type": "application/json"
+          }
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
