@@ -16,7 +16,7 @@ export default defineComponent({
     const loading = ref(false)
     const formFilter = ref({
       id: null,
-      year: 2025,
+      year: new Date().getFullYear(),
       month: new Date().getMonth() + 1,
     })
 

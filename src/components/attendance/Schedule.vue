@@ -1,18 +1,39 @@
 <template>
   <div>  
-        <h3>Jadwal</h3>
-        <n-space vertical>
-          <n-space horizontal>           
-            <n-input-group>
-              <n-button type="primary">
-                Search
-              </n-button>
-              <n-input :style="{ width: '50%' }" v-model:value="inputSearch" @keydown.enter="handleInputSearch" />
-              <n-button type="primary" ghost>
-                Search
-              </n-button>
-            </n-input-group>
-          </n-space>
+        <h3>Schedule</h3>
+            <n-form
+              ref="formRef"
+              inline
+              :label-width="200"
+              :model="formFilter"
+              :rules="rules"
+              :size="size"
+            >
+              <n-form-item label="Tahun" path="formFilter.year">
+                <n-select
+                  v-model:value="formFilter.year"
+                  style="width: 100px"
+                  placeholder="Select"
+                  :options="generalOptions.year"
+                />
+              </n-form-item>
+              
+              <n-form-item label="Bulan" path="formFilter.month">
+                <n-select
+                  v-model:value="formFilter.month"
+                  style="width: 200px"
+                  placeholder="Select"
+                  :options="generalOptions.month"
+                />
+              </n-form-item>
+
+              <n-form-item>
+                <n-button @click="handleInputSearch">
+                  Tampilkan
+                </n-button>
+              </n-form-item>
+            </n-form>
+
               <n-data-table
                 :columns="columns"
                 :data="tableData"
@@ -24,7 +45,6 @@
           :page-count="Math.ceil(total / pageSize)"
           @update:page="handlePageChange"
         />      
-        </n-space>
   </div>
 </template>
 <script src="./Schedule.ts"/>
