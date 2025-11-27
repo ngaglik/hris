@@ -1,7 +1,13 @@
 import { Config } from "@/constant/config";
 
 export const getAuthData = () => {
-  return JSON.parse(localStorage.getItem(Config.TokenName) || "{}");
+  const token = localStorage.getItem(Config.TokenName);
+  try {
+    return JSON.parse(token);
+  } catch (error) {
+    logout();
+    return null;
+  }
 };
 
 export const saveAuthData = (data: any) => {

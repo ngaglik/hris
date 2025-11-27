@@ -1,5 +1,4 @@
 import { Config } from '@/constant/config'
-import { checkLogin } from './secured'
 import { getAuthData, saveAuthData, logout } from "@/services/authService";
 
 import { defineComponent, ref, computed, onMounted } from 'vue'

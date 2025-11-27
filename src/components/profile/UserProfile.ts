@@ -22,6 +22,10 @@ export default defineComponent({
     const profile = ref<any>({})
     const loading = ref(false)
     let auth = getAuthData()
+    if (!auth) {
+        logout();
+        return null;
+      }
     let token = auth?.token
     let session = auth?.session
 

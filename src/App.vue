@@ -12,11 +12,11 @@
           </n-button>
 
           <span>
-            <n-h1 prefix="bar">
+            <n-h4 prefix="bar">
               <n-text type="primary">HRIS</n-text>
-            </n-h1>
+            </n-h4>
           </span>
-
+          <div style="flex:1"></div>
           <div class="right">
             <n-button text size="small" @click="changeTheme">{{ theme === null ? 'Dark' : 'Light' }}</n-button> 
             <n-button text size="small" @click="changeLang">{{ showLang }}</n-button> 
@@ -28,9 +28,9 @@
         <div class="desktop-header">
           <div class="left">
             <span>
-              <n-h1 prefix="bar">
+              <n-h4 prefix="bar">
                 <n-text type="primary">HRIS</n-text>
-              </n-h1>
+              </n-h4>
             </span>
           </div>
           <div class="right">
@@ -134,7 +134,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px;
+    padding: 3px;
     border-bottom: 1px solid #ddd;
     position: sticky;
     top: 0;
@@ -146,7 +146,7 @@
     margin-left: 0 !important;
     padding-top: 0 !important;
   }
-
+  
   .app-layout-sider {
     position: fixed !important;
     z-index: 99;

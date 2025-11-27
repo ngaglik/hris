@@ -28,6 +28,10 @@ export default defineComponent({
     const loading = ref(false)
     
     let auth = getAuthData();
+    if (!auth) {
+        logout();
+        return null;
+      }
     let token = auth?.token
     let session = auth?.session
     let employee = auth?.employee[0]

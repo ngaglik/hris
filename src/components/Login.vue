@@ -51,8 +51,8 @@ const loading = ref(false)
 const message = useMessage()
 
 const form = ref({
-  username: 'admin',
-  password: '123456'
+  username: '',
+  password: ''
 })
 
 const rules = {

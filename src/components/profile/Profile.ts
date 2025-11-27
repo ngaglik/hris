@@ -12,6 +12,10 @@ export default defineComponent({
   },  
   created() {
     let auth = getAuthData()
+    if (!auth) {
+        logout();
+        return null;
+      }
     let token = auth?.token
     if (!token) {
       console.error('No token found!');

@@ -26,3 +26,5 @@ export const generalOptions = {
         { label: 'Desember', value: 12 }
       ]
 }
+
+export const dictHari = new Map<string, string>([ ["Sunday", "Minggu"], ["Monday", "Senin"], ["Tuesday", "Selasa"], ["Wednesday", "Rabu"], ["Thursday", "Kamis"], ["Friday", "Jumat"], ["Saturday", "Sabtu"], ]);

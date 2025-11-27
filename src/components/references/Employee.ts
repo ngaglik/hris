@@ -24,6 +24,10 @@ export default defineComponent({
     const total = ref(0)
     const loading = ref(false)
     let auth = getAuthData()
+    if (!auth) {
+        logout();
+        return null;
+      }
     let token = auth?.token
     let session = auth?.session
     let employee = auth?.employee
@@ -61,7 +65,8 @@ export default defineComponent({
       gender: '',
       address: '',
       phone_number: '',
-      email: ''
+      email: '',
+      tags: '',
     })
 
     const formDataFilter = ref({
@@ -83,7 +88,8 @@ export default defineComponent({
         gender: '',
         address: '',
         phone_number: '',
-        email: ''
+        email: '',
+        tags: '',
       }
       isModalOpen.value = true
     }
@@ -200,7 +206,8 @@ export default defineComponent({
       { title: 'JKel', key: 'gender' },
       { title: 'Alamat', key: 'address' },
       { title: 'Phone', key: 'phone_number' },
-      { title: 'Email', key: 'email' }
+      { title: 'Email', key: 'email' },
+      { title: 'Tags', key: 'tags' }
     ]
 
     // load pertama kali

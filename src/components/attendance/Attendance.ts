@@ -12,6 +12,10 @@ export default defineComponent({
   },  
   created() {
     let auth = getAuthData()
+    if (!auth) {
+        logout();
+        return null;
+      }
     let token = auth?.token
     let session = auth?.session
     if (!token) {
