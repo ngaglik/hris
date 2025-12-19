@@ -38,7 +38,17 @@ export default defineComponent({
     }
     const fetchScheduleGroup = async () => {
       try {
-        const res = await apiFetch(`${Config.UrlBackend}/api/option/schedule_group/-/true`)
+        let auth = getAuthData()
+        if (!auth) {
+          logout();
+          return null;
+        }
+        let token = auth?.token
+        let session = auth?.session
+        let employeeId = auth?.employee?.[0].id
+        let tags = auth?.employee?.[0].tags
+
+        const res = await apiFetch(`${Config.UrlBackend}/api/option/schedule_group/${tags}/true`)
         const result = await res.json()
 
         scheduleGroupOptions.value = result.data.map((x: any) => ({
