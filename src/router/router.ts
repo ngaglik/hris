@@ -13,6 +13,7 @@ import Profile from '@/components/profile/Profile.vue'
 import UserProfile from '@/components/profile/UserProfile.vue'
 import UnitProfile from '@/components/profile/UnitProfile.vue'
 import Education from '@/components/profile/Education.vue'
+import Family from '@/components/profile/Family.vue'
 import ProfileBar from '@/components/ProfileBar.vue'
 import Table from '@/components/Table.vue'
 import selectTree from '@/container/selectTree/selectTree.vue'
@@ -23,7 +24,7 @@ const router = createRouter({
 	routes: [
 		{
 			path: '/',
-			component: Attendance,
+			component: Profile,
 		},	
 		{
 			path: '/Attendance',

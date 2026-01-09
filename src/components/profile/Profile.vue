@@ -3,7 +3,7 @@
       <n-tab-pane name="user" tab="Anda">
         <UserProfile :employeeId="employeeId"/>
       </n-tab-pane>
-      <n-tab-pane name="unit kerja" tab="Unit kerja">
+      <n-tab-pane name="unit kerja" tab="Unit kerja" v-if="showUnitTab">
         <UnitProfile/>
       </n-tab-pane>
     </n-tabs>

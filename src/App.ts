@@ -16,6 +16,24 @@ import useConfig from '@/hooks/useConfig'
 import ProfileBar from '@/components/ProfileBar.vue'
 import Login from '@/components/Login.vue'
 
+type MenuItem = MenuOption & {
+  children?: MenuItem[]
+}
+
+function removeNodeByKey(
+  items: MenuItem[],
+  keyToRemove: string
+): MenuItem[] {
+  return items
+    .filter(item => item.key !== keyToRemove)
+    .map(item => ({
+      ...item,
+      children: item.children
+        ? removeNodeByKey(item.children as MenuItem[], keyToRemove)
+        : undefined
+    }))
+}
+
 export default defineComponent({
   name: 'App',
   components: {
@@ -25,18 +43,45 @@ export default defineComponent({
 
   setup() {
     const router = useRouter()
-    const layoutOptions = ref<MenuOption[]>(LAYOUT_ITEMS)
+    const layoutOptions = ref<MenuOption[]>([])
     const collapsed = ref(false)
     const activeName = ref('/')
     const isLoggedIn = ref(false)
 
     // Cek login status saat mounted
     onMounted(async () => {
+      let menu: MenuItem[] = JSON.parse(JSON.stringify(LAYOUT_ITEMS))
       let auth = getAuthData();
-      if(!auth?.token)
+      if(!auth?.token){
         isLoggedIn.value = false
-      else
+      }
+      else{
+        
+        let employeeId = auth?.employee?.[0].id
+        let tags = auth?.employee?.[0].tags
+        let employeeCategoryId = auth?.employee?.[0].employee_category_id
+        let employeeOrganizationId = auth?.employee?.[0].organization_id
+        if (!tags?.includes('OSDM')) {
+          menu = removeNodeByKey(
+            menu,
+            '/administrator'
+          )          
+        }
+        if (employeeId!=381) {
+          menu = removeNodeByKey(
+            menu,
+            '/selfservices'
+          )
+          if (employeeCategoryId!=17) {
+            menu = removeNodeByKey(
+              menu,
+              '/Attendance'
+            )          
+          }
+        }
+        layoutOptions.value = menu
         isLoggedIn.value = true
+      }
     
       // Collapse sidebar otomatis jika layar kecil
       const handleResize = () => {

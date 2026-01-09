@@ -1,25 +1,47 @@
-import { defineComponent, ref } from 'vue'
-import { Config } from '@/constant/config'
-import { getAuthData, saveAuthData, logout } from "@/services/authService"
+import { defineComponent, ref, computed, onMounted } from 'vue'
+import { getAuthData, logout } from '@/services/authService'
 import UserProfile from './UserProfile.vue'
 import UnitProfile from './UnitProfile.vue'
-
 
 export default defineComponent({
   components: {
     UserProfile,
     UnitProfile
-  },  
-  created() {
-    let auth = getAuthData()
-    if (!auth) {
-        logout();
-        return null;
+  },
+
+  setup() {
+    const activeTab = ref('user')
+    const showUnitTab = ref(false)
+
+    onMounted(() => {
+      const auth = getAuthData()
+
+      // ❌ Tidak login
+      if (!auth?.token) {
+        logout()
+        return
       }
-    let token = auth?.token
-    if (!token) {
-      console.error('No token found!');
-      return false;
+
+      const employee = auth.employee?.[0]
+      const tags = employee?.tags ?? []
+      const employeeId = employee?.id
+      const positionId = employee?.positionId
+
+      // ✅ RULE VISIBILITAS TAB
+      // contoh: hanya OSDM / ADMIN / pegawai tertentu
+      showUnitTab.value =
+        tags.includes('OSDM') ||
+        tags.includes('ADMIN') || positionId!= 0
+
+      // Jika tab aktif tidak boleh tampil
+      if (!showUnitTab.value && activeTab.value === 'unit-kerja') {
+        activeTab.value = 'user'
+      }
+    })
+
+    return {
+      activeTab,
+      showUnitTab
     }
   }
 })
