@@ -8,17 +8,12 @@
               :rules="rules"
               :size="size"
             >
-          <div style="flex:1"></div>
           <n-form-item>
             <n-button @click="handleEditData" type="primary">
-              Ubah
+              Ubah data
             </n-button>
           </n-form-item>
-          <n-form-item>  
-            <n-button type="warning" @click="confirmation" class="mb-4">
-                Konfirmasi
-              </n-button>   
-          </n-form-item>   
+          <div style="flex:1"></div>
     </n-form>
     <n-space vertical>
       <n-scrollbar x-scrollable style="max-width: 100%;">
@@ -26,103 +21,138 @@
           <n-gi>
             <n-card title="Personal" style="max-width: 300px; margin: 0 auto;" class="card yellow" hoverable>
                 <div>
-                  <p><strong>Nama</strong></p>{{ profile.name }}
-                  <p><strong>JKel / Tanggal Lahir</strong></p>{{ profile.gender }} / {{ profile.birth_date }}
-                  <p><strong>NIK</strong></p>{{ profile.national_id_number }}
-                  <p><strong>BPJS Kesehatan</strong></p>{{ profile.health_insurance_id_number }}
+                  <p><strong>Nama</strong></p>{{ profilePerson.name }}
+                  <p><strong>JKel / Tanggal Lahir</strong></p>{{ getGenderLabel(profilePerson.gender)}} / {{ profilePerson.birth_date }}
+                  <p><strong>Status Perkawinan</strong></p>{{ getMarriedLabel(profilePerson.is_married) }} 
+                  <p><strong>NIK</strong></p>{{ profilePerson.national_id_number }}
+                  <p><strong>BPJS Kesehatan</strong></p>{{ profilePerson.health_insurance_id_number }}
                 </div>
             </n-card>
           </n-gi>
           <n-gi>
             <n-card title="Kontak" style="max-width: 300px; margin: 0 auto;" class="card green" hoverable>
                 <div>
-                  <p><strong>Alamat</strong></p>{{ profile.address }}
-                  <p><strong>Hp</strong></p>{{ profile.phone_number }}
-                  <p><strong>Email</strong></p>{{ profile.email }}
+                  <p><strong>Alamat</strong></p>{{ profilePerson.address }}
+                  <p><strong>Hp</strong></p>{{ profilePerson.phone_number }}
+                  <p><strong>Email</strong></p>{{ profilePerson.email }}
+                </div>
+            </n-card>
+          </n-gi>
+          <n-gi>
+            <n-card title="Perpajakan" style="max-width: 300px; margin: 0 auto;" class="card green" hoverable>
+                <div>
+                  <p><strong>NPWP</strong></p>{{ profilePerson.tax_id_number }}
+                  <p><strong>Status Perpajakan Suami-Istri</strong></p>{{ getTaxCombinedLabel(profilePerson.is_tax_combined) }}
+                  <p><strong>NPWP Suami/Istri</strong></p>{{ profilePerson.common_tax_id_number }}
+                  <p><strong>Status Perkawinan (SPT)</strong></p>{{ getMarriedLabel(profilePerson.is_tax_as_married) }} 
                 </div>
             </n-card>
           </n-gi>
           <n-gi>
             <n-card title="Kepegawaian" style="max-width: 300px; margin: 0 auto;" class="card blue" hoverable>
                 <div>
-                  <p><strong>NIP</strong></p>{{ profile.national_employee_id_number }}
-                  <p><strong>Unit kerja</strong></p>{{ profile.organization_name }}
-                  <p><strong>Jabatan</strong></p>{{ profile.professional_name }}
-                  <p><strong>Lokasi</strong></p>{{ profile.location_name }}
+                  <p><strong>NIP</strong></p>{{ profileEmployee.national_employee_id_number }}
+                  <p><strong>Unit kerja</strong></p>{{ profileEmployee.organization_name }}
+                  <p><strong>Jabatan</strong></p>{{ profileEmployee.professional_name }}
+                  <p><strong>Lokasi</strong></p>{{ profileEmployee.location_name }}
                 </div>
             </n-card>
           </n-gi>
-          <n-gi>
-            <n-card title="Pelatihan" style="max-width: 300px; margin: 0 auto;" class="card purple" hoverable>
-                <div>
-                  <p><strong>Total Pelatihan</strong></p>
-                  <p><strong>Total SKP</strong></p>
-                  <p><strong>Total JPL</strong></p>
-                </div>
-            </n-card>
-          </n-gi>
-          <n-gi>
-            
-          </n-gi>
+          
         </n-grid>
       </n-scrollbar>
     </n-space>
     <n-space vertical>
-      <n-card title="Keluarga" style="max-width: 100%; margin: 0 auto;" hoverable>
+      <n-card title="" style="max-width: 100%; margin: 0 auto;" hoverable>
           <div>
             <Family :employeeId="empId" :personId="persId"/>
           </div>
         </n-card>
     </n-space>
-    <n-space vertical>
-      <n-card title="Riwayat Pendidikan" style="max-width: 100%; margin: 0 auto;" hoverable>
+    <!--<n-space vertical>
+
+      <n-card title="" style="max-width: 100%; margin: 0 auto;" hoverable>
           <div>
             <Education :employeeId="empId" :personId="persId"/>
           </div>
         </n-card>
-    </n-space>
+    </n-space>-->
   </div>
   <n-modal v-model:show="isModalOpen" title="Edit data" preset="dialog" :style="{ width: '500px' }">
-      <n-form :model="profile" label-width="100">
-        <n-form-item label="ID">
-          {{profile.id}}
-        </n-form-item>
+      <n-form :model="profilePerson" label-width="100">
+        <n-divider title-placement="left">
+          Personal
+        </n-divider>
         <n-form-item label="NIK">
-          <n-input v-model:value="profile.national_id_number" />
-        </n-form-item>
-        <n-form-item label="Title Depan">
-          <n-input v-model:value="profile.front_title" />
+          <n-input v-model:value="profilePerson.national_id_number" />
         </n-form-item>
         <n-form-item label="Name">
-          <n-input v-model:value="profile.name" />
-        </n-form-item>
-        <n-form-item label="Title Belakang">
-          <n-input v-model:value="profile.end_title" />
+          <n-input v-model:value="profilePerson.name" />
         </n-form-item>
         <n-form-item label="Tgl Lahir">
-          <n-input v-model:value="profile.birth_date" />
+          <n-input v-model:value="profilePerson.birth_date" />
         </n-form-item>
         <n-form-item label="JKel">
           <n-select
-            v-model:value="profile.gender"
+            v-model:value="profilePerson.gender"
             :options="genderOptions"
             placeholder="Pilih Jenis Kelamin"
             clearable
           />
         </n-form-item>
+        <n-form-item label="Status Perkawinan">
+          <n-select
+            v-model:value="profilePerson.is_married"
+            :options="marriedOptions"
+            placeholder="Pilih"
+            clearable
+          />
+        </n-form-item>
         <n-form-item label="Alamat" >
-          <n-input v-model:value="profile.address" 
+          <n-input v-model:value="profilePerson.address" 
           type="textarea"
           placeholder="Masukkan alamat lengkap"
           clearable/>
         </n-form-item>
         <n-form-item label="No HP">
-          <n-input v-model:value="profile.phone_number" />
+          <n-input v-model:value="profilePerson.phone_number" />
         </n-form-item>
         <n-form-item label="Email">
-          <n-input v-model:value="profile.email" />
+          <n-input v-model:value="profilePerson.email" />
+        </n-form-item>
+
+        <n-divider title-placement="left">
+          Perpajakan
+        </n-divider>
+        <n-form-item label="NPWP">
+          <n-input v-model:value="profilePerson.tax_id_number" />
+        </n-form-item>        
+        <n-form-item label="Status Perpajakan Suami-Istri">
+          <n-select
+            v-model:value="profilePerson.is_tax_combined"
+            :options="taxCombinedOptions"
+            placeholder="Pilih"
+            clearable
+          />
+        </n-form-item>
+        <n-form-item label="NPWP Suami/Istri">
+          <n-input v-model:value="profilePerson.common_tax_id_number" />
+        </n-form-item>
+        <n-form-item label="Status Perkawinan (SPT)">
+          <n-select
+            v-model:value="profilePerson.is_tax_as_married"
+            :options="marriedOptions"
+            placeholder="Pilih"
+            clearable
+          />
         </n-form-item>
       </n-form>
+      <n-space horizontal>
+        <n-button @click="closeModal">Batal</n-button>
+        <n-button type="primary" @click="submitForm">
+          Simpan
+        </n-button>
+      </n-space>
   </n-modal>
 
 </template>

@@ -22,7 +22,8 @@ export default defineComponent({
 
   setup(props) {
     const message = useMessage()
-    const profile = ref<any>({})
+    const profileEmployee = ref<any>({})
+    const profilePerson = ref<any>({})
     const tableData = ref<any[]>([])
     const current = ref(1)
     const pageSize = ref(50)
@@ -34,12 +35,33 @@ export default defineComponent({
       { label: 'Laki-Laki', value: 'L' },
       { label: 'Perempuan', value: 'P' }
     ]
+    const getGenderLabel = (value: string | null | undefined) => {
+      const option = genderOptions.find(o => o.value === value)
+      return option ? option.label : '-'
+    }
+
+    const marriedOptions = [
+      { label: 'Kawin', value: true },
+      { label: 'Tidak Kawin', value: false }
+    ]
+    const getMarriedLabel = (value: boolean | null | undefined) => {
+      const option = marriedOptions.find(o => o.value === value)
+      return option ? option.label : '-'
+    }
+
+    const taxCombinedOptions = [
+      { label: 'SPT Digabung', value: true },
+      { label: 'SPT Terpisah', value: false }
+    ]
+    const getTaxCombinedLabel = (value: boolean | null | undefined) => {
+      const option = taxCombinedOptions.find(o => o.value === value)
+      return option ? option.label : '-'
+    }
 
     let auth = getAuthData()
     if (!auth) {
-        logout();
-        return null;
-      }
+      logout()
+    }
     let token = auth?.token
     let session = auth?.session
 
@@ -55,17 +77,31 @@ export default defineComponent({
     })
     
 
-    const fetchData = async () => {      
+    const fetchDataPerson = async () => {      
       loading.value = true
-      const response = await apiFetch(`${Config.UrlBackend}/api/employee/${persId.value}`, {
-        method: "GET"
-      });
-      const result = await response.json()
-      profile.value = Array.isArray(result) ? result[0] : result
-      tableData.value = result.data
-      current.value = result.page
-      total.value = result.total
-      loading.value = false
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/person/${persId.value}`,
+          { method: "GET" }
+        )
+        const result = await response.json()
+        profilePerson.value = result[0]
+      } finally {
+        loading.value = false
+      }
+    }
+    const fetchDataEmployee = async () => {      
+      loading.value = true
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/employee/${persId.value}`,
+          { method: "GET" }
+        )
+        const result = await response.json()
+        profileEmployee.value = result[0]
+      } finally {
+        loading.value = false
+      }
     }
 
     const handleEditData = async () => {
@@ -75,23 +111,76 @@ export default defineComponent({
       isModalOpen.value = false
     }
 
-    onMounted(() => fetchData())
+    // form submit
+    const submitForm = async () => {
+      if (!token) {
+        console.error('No token found!')
+        return
+      }
+
+      loading.value = true
+      try {
+        const url = `${Config.UrlBackend}/api/person/update`
+        const response = await apiFetch(url, {
+          method: "POST",
+          body: JSON.stringify(profilePerson.value),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const data = await response.json()
+        message.success(data.message ||  'Data diperbarui')
+        await fetchDataPerson()
+        isModalOpen.value = false
+      } catch (error) {
+        console.error(error)
+        message.error('Terjadi kesalahan saat menyimpan data')
+      } finally {
+        loading.value = false
+      }
+    }
+
+    onMounted(async () => {
+      loading.value = true
+      try {
+        await Promise.all([
+          fetchDataPerson(),
+          fetchDataEmployee()
+        ])
+      } finally {
+        loading.value = false
+      }
+    })
+
 
     return {
       isModalOpen,
       handleEditData,
-
-      profile,
+      closeModal,
+      profilePerson,
+      profileEmployee,
       tableData,
       current,
       pageSize,
       total,
       loading,
+      submitForm,
 
       genderOptions,
+      getGenderLabel,
+      marriedOptions,
+      getMarriedLabel,
+      taxCombinedOptions,
+      getTaxCombinedLabel,
       empId,
       persId,
-      fetchData
+      fetchDataPerson,
+      fetchDataEmployee,
     }
   }
 })
