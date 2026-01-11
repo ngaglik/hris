@@ -13,6 +13,7 @@
         :rules="rules"
         ref="formRef"
         label-placement="top"
+        @keyup.enter="submit"
       >
         <n-form-item label="Username" path="username">
           <n-input v-model:value="form.username" placeholder="Masukkan username" />
