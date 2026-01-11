@@ -188,7 +188,7 @@ export default defineComponent({
         title: 'Aksi',
         key: 'actions',
         fixed: 'left',
-        width: 100,
+        width: 80,
         render(row: any) {
           return h(
             'div',
@@ -207,7 +207,7 @@ export default defineComponent({
           )
         }
       },
-      { title: 'Name', key: 'name', fixed: 'left' },
+      { title: 'Name', key: 'name'},
       { title: 'NIK', key: 'national_id_number' },
       { title: 'Tgl Lahir', key: 'birth_date' },
       { title: 'JKel', key: 'gender', render: (row: any) => getGenderLabel(row.gender)},
