@@ -22,6 +22,16 @@ export default defineComponent({
   emits: ['logout'],
   setup(_, { emit }) {
     const message = useMessage()
+    const auth = getAuthData()
+
+      // ❌ Tidak login
+      if (!auth?.token) {
+        logout()
+        return
+      }
+
+      const employee = auth.employee?.[0]
+      const welcomeName = employee?.personName 
 
     const handleSelect = (key: string) => {
       switch (key) {
@@ -58,7 +68,8 @@ export default defineComponent({
           icon: renderIcon(LogoutIcon)
         }
       ],
-      handleSelect
+      handleSelect,
+      welcomeName
     }
   }
 })

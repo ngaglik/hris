@@ -17,11 +17,11 @@
             </n-h4>
           </span>
           <div style="flex:1"></div>
-          <div class="right">
+          <n-space align="center" size="small">          
             <n-button text size="small" @click="changeTheme">{{ theme === null ? 'Dark' : 'Light' }}</n-button> 
-            <n-button text size="small" @click="changeLang">{{ showLang }}</n-button> 
-            <ProfileBar @logout="handleLogout"/>
-          </div>
+            <!--<n-button text size="small" @click="changeLang">{{ showLang }}</n-button> -->
+            <ProfileBar @logout="handleLogout"/>          
+          </n-space>
         </div>
 
         <!-- DESKTOP TOP BAR -->
@@ -33,11 +33,11 @@
               </n-h4>
             </span>
           </div>
-          <div class="right">
+          <n-space align="center" size="small">          
             <n-button text size="small" @click="changeTheme">{{ theme === null ? 'Dark' : 'Light' }}</n-button> 
-            <n-button text size="small" @click="changeLang">{{ showLang }}</n-button> 
-            <ProfileBar @logout="handleLogout"/>
-          </div>
+            <!--<n-button text size="small" @click="changeLang">{{ showLang }}</n-button> -->
+            <ProfileBar @logout="handleLogout"/>          
+          </n-space>
         </div>
 
         <!-- SIDEBAR -->

@@ -1,4 +1,5 @@
 <template>
+  <h4>Profile</h4>
     <n-tabs class="card-tabs" size="large" animated>
       <n-tab-pane name="user" tab="Anda">
         <UserProfile :employeeId="employeeId"/>

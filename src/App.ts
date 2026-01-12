@@ -1,6 +1,6 @@
 import { Config } from '@/constant/config'
 import { getAuthData, saveAuthData, logout } from "@/services/authService";
-
+import { NConfigProvider } from 'naive-ui'
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { idID, dateId } from './locales/idID'
 import {

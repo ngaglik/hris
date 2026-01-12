@@ -45,7 +45,15 @@
         <n-input
           type="hidden"
           v-model:value="formData.family_id"
-        />      
+        />
+        <n-form-item label="Hubungan keluarga">
+          <n-select
+            v-model:value="formData.family_relationship_id"
+            :options="familyRelationshipOptions"
+            placeholder="pilih"
+            clearable
+          />
+        </n-form-item> 
         <n-form-item label="NIK">
           <n-input v-model:value="formData.national_id_number" />
         </n-form-item>
@@ -55,6 +63,7 @@
         <n-form-item label="Tgl Lahir">
           <n-input v-model:value="formData.birth_date" placeholder="yyyy-mm-dd"/>
         </n-form-item>
+
         <n-form-item label="JKel">
           <n-select
             v-model:value="formData.gender"
@@ -77,7 +86,7 @@
         <n-form-item label="NPWP">
           <n-input v-model:value="formData.tax_id_number" />
         </n-form-item>        
-        <n-form-item label="Status Pelaporan">
+        <n-form-item label="Status Pelaporan Suami-Istri">
           <n-select
             v-model:value="formData.is_tax_combined"
             :options="taxCombinedOptions"

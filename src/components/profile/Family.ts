@@ -23,7 +23,6 @@ export default defineComponent({
 
     // state
     const inputSearch = ref('')
-    const selectedOrgId = ref<string | number | null>(null)
     const tableData = ref<any[]>([])
     const current = ref(1)
     const pageSize = ref(50)
@@ -39,7 +38,35 @@ export default defineComponent({
     const employee = auth.employee?.[0]
     const tags = employee?.tags ?? []
     const familyId = employee?.familyId
-   
+    
+    const familyRelationshipOptions = ref<any[]>([])
+    const fetchFamilyRelationshipOptions = async () => {
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/family_relationship`,
+          { method: 'GET' }
+        )
+
+        const result = await response.json()
+
+        // asumsi response:
+        // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
+        familyRelationshipOptions.value = (result.data || result).map((item: any) => ({
+          label: item.name,
+          value: item.id
+        }))
+      } catch (error) {
+        console.error(error)
+        message.error('Gagal memuat hubungan keluarga')
+      }
+    }
+    const getFamilyRelationshipLabel = (value: string | number | null | undefined) => {
+    if (value == null) return '-'
+    const option = familyRelationshipOptions.value.find(
+      o => String(o.value) === String(value)
+    )
+    return option?.label ?? '-'
+  }
     const genderOptions = [
       { label: 'Laki-Laki', value: 'L' },
       { label: 'Perempuan', value: 'P' }
@@ -91,6 +118,7 @@ export default defineComponent({
       birth_date: '',
       gender: '',
       family_id:'',
+      family_relationship_id :'',
     })
 
 
@@ -103,6 +131,7 @@ export default defineComponent({
         name: '',
         birth_date: '',
         gender: '',
+        family_relationship_id :'',
         family_id : familyId,
       }
       isModalOpen.value = true
@@ -207,19 +236,21 @@ export default defineComponent({
           )
         }
       },
+      { title: 'Hubungan Keluarga', key: 'family_relationship_id', render: (row: any) => getFamilyRelationshipLabel(row.family_relationship_id)},
       { title: 'Name', key: 'name'},
       { title: 'NIK', key: 'national_id_number' },
       { title: 'Tgl Lahir', key: 'birth_date' },
       { title: 'JKel', key: 'gender', render: (row: any) => getGenderLabel(row.gender)},
       { title: 'Status Perkawinan', key: 'is_married', render: (row: any) => getMarriedLabel(row.is_married) },
       { title: 'NPWP', key: 'tax_id_number' },
-      { title: 'Status Perpajakan Suami-Istri', key: 'is_tax_combined', render: (row: any) => getTaxCombinedLabel(row.is_tax_combined) },
+      { title: 'Status Pelaporan Suami-Istri', key: 'is_tax_combined', render: (row: any) => getTaxCombinedLabel(row.is_tax_combined) },
       { title: 'NPWP Suami/Istri', key: 'common_tax_id_number' },
       { title: 'Status Perkawinan (SPT)', key: 'is_tax_as_married', render: (row: any) => getMarriedLabel(row.is_tax_as_married) },
     ]
 
     // load pertama kali
     onMounted(() => {
+      fetchFamilyRelationshipOptions()
       fetchData(current.value)
     })
 
@@ -233,10 +264,6 @@ export default defineComponent({
       inputSearch,
       handleInputSearch,
       handlePageChange,
-      onOrgSelected: (orgId: string | number | null) => {
-        selectedOrgId.value = orgId
-        fetchData(current.value)
-      },
       isPreviewOpen,
       isModalOpen,
       isEditMode,
@@ -252,6 +279,8 @@ export default defineComponent({
       getMarriedLabel,
       taxCombinedOptions,
       getTaxCombinedLabel,
+      familyRelationshipOptions,
+      getFamilyRelationshipLabel,
       employee
     }
   }

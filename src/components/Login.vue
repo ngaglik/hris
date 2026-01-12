@@ -8,6 +8,8 @@
             Human Resource Information System</n-marquee>
   <div class="login-wrapper">
     <n-card title="Login" style="max-width: 400px; margin: 0 auto;">
+      <small>Silakan menggunakan akun SiJEMPOL</small>
+      <n-divider/>
       <n-form
         :model="form"
         :rules="rules"
@@ -38,6 +40,7 @@
           </n-button>
         </n-space>
       </n-form>
+
     </n-card>
   </div>
 </template>
@@ -114,7 +117,7 @@ const submit = () => {
 
 <style scoped>
 .login-wrapper {
-  height: 100vh;
+  height: 70vh;
   display: flex;
   justify-content: center;
   align-items: center;

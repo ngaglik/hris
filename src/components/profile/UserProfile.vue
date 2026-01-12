@@ -42,7 +42,7 @@
             <n-card title="Perpajakan" style="max-width: 300px; margin: 0 auto;" class="card green" hoverable>
                 <div>
                   <p><strong>NPWP</strong></p>{{ profilePerson.tax_id_number }}
-                  <p><strong>Status Perpajakan Suami-Istri</strong></p>{{ getTaxCombinedLabel(profilePerson.is_tax_combined) }}
+                  <p><strong>Status Pelaporan Suami-Istri</strong></p>{{ getTaxCombinedLabel(profilePerson.is_tax_combined) }}
                   <p><strong>NPWP Suami/Istri</strong></p>{{ profilePerson.common_tax_id_number }}
                   <p><strong>Status Perkawinan (SPT)</strong></p>{{ getMarriedLabel(profilePerson.is_tax_as_married) }} 
                 </div>
@@ -62,6 +62,7 @@
         </n-grid>
       </n-scrollbar>
     </n-space>
+    <n-divider/>
     <n-space vertical>
       <n-card title="" style="max-width: 100%; margin: 0 auto;" hoverable>
           <div>
@@ -70,7 +71,6 @@
         </n-card>
     </n-space>
     <!--<n-space vertical>
-
       <n-card title="" style="max-width: 100%; margin: 0 auto;" hoverable>
           <div>
             <Education :employeeId="empId" :personId="persId"/>
@@ -127,7 +127,7 @@
         <n-form-item label="NPWP">
           <n-input v-model:value="profilePerson.tax_id_number" />
         </n-form-item>        
-        <n-form-item label="Status Perpajakan Suami-Istri">
+        <n-form-item label="Status Pelaporan Suami-Istri">
           <n-select
             v-model:value="profilePerson.is_tax_combined"
             :options="taxCombinedOptions"
