@@ -3,23 +3,26 @@ import { useMessage, useDialog, NButton } from 'naive-ui'
 import { Config } from '@/constant/config'
 import { apiFetch } from "@/services/apiClient"
 import { getAuthData, saveAuthData, logout } from "@/services/authService"
-import selectTree from '@/container/selectTree/selectTree.vue'
-import UserProfile from '../profile/UserProfile.vue'
 
 export default defineComponent({
-  components: {
-    selectTree,
-    UserProfile
+  props: {
+    personId: {
+      type: String,
+      default: ''
+    }
   },
-  setup() {
+  data() {
+    return {
+      profile: {},
+      loading: false
+    }
+  },
+  setup(props) {
     const dialog = useDialog()
     const message = useMessage()
 
-    const showDropdown = ref(false)
-
     // state
     const inputSearch = ref('')
-    const selectedOrgId = ref<string | number | null>(null)
     const tableData = ref<any[]>([])
     const current = ref(1)
     const pageSize = ref(50)
@@ -32,16 +35,68 @@ export default defineComponent({
       }
     let token = auth?.token
     let session = auth?.session
-    let employee = auth?.employee
-   
+    const employee = auth.employee?.[0]
+    const tags = employee?.tags ?? []
+    
+    const maritalOptions = ref<any[]>([])
+    const fetchMaritalOptions = async () => {
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/marital`,
+          { method: 'GET' }
+        )
+
+        const result = await response.json()
+
+        // asumsi response:
+        // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
+        maritalOptions.value = (result.data || result).map((item: any) => ({
+          label: item.name,
+          value: item.id
+        }))
+      } catch (error) {
+        console.error(error)
+        message.error('Gagal memuat status perkawinan')
+      }
+    }
+  const getMaritalOptionsLabel = (value: string | number | null | undefined) => {
+    if (value == null) return '-'
+    const option = maritalOptions.value.find(
+      o => String(o.value) === String(value)
+    )
+    return option?.label ?? '-'
+  }
+
     const genderOptions = [
       { label: 'Laki-Laki', value: 'L' },
       { label: 'Perempuan', value: 'P' }
     ]
+    const getGenderLabel = (value: string | null | undefined) => {
+      const option = genderOptions.find(o => o.value === value)
+      return option ? option.label : '-'
+    }
+
+    const marriedOptions = [
+      { label: 'Kawin', value: true },
+      { label: 'Tidak Kawin', value: false }
+    ]
+    const getMarriedLabel = (value: boolean | null | undefined) => {
+      const option = marriedOptions.find(o => o.value === value)
+      return option ? option.label : '-'
+    }
+
+    const taxCombinedOptions = [
+      { label: 'SPT Digabung', value: true },
+      { label: 'SPT Terpisah', value: false }
+    ]
+    const getTaxCombinedLabel = (value: boolean | null | undefined) => {
+      const option = taxCombinedOptions.find(o => o.value === value)
+      return option ? option.label : '-'
+    }
 
     const fetchData = async (page = 1) => {
       loading.value = true
-      const response = await apiFetch(`${Config.UrlBackend}/api/employee?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}&selectedOrgId=${selectedOrgId.value}`, {
+      const response = await apiFetch(`${Config.UrlBackend}/api/person?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`, {
         method: "GET"
       });
       const result = await response.json()
@@ -58,40 +113,22 @@ export default defineComponent({
 
     const formData = ref({
       id: null,
-      person_id: '',
       national_id_number: '',
-      front_title: '',
       name: '',
-      end_title: '',
       birth_date: '',
       gender: '',
-      address: '',
-      phone_number: '',
-      email: '',
-      tags: '',
     })
 
-    const formDataFilter = ref({
-      professional_id: '',
-      professional_group_id: ''
-    })
 
     // modal methods
     const openAddModal = () => {
       isEditMode.value = false
       formData.value = {
         id: null,
-        person_id: '',
         national_id_number: '',
-        front_title: '',
         name: '',
-        end_title: '',
         birth_date: '',
         gender: '',
-        address: '',
-        phone_number: '',
-        email: '',
-        tags: '',
       }
       isModalOpen.value = true
     }
@@ -116,7 +153,6 @@ export default defineComponent({
     // table & pagination
     const handleInputSearch = () => {
       fetchData(current.value)
-      showDropdown.value = !showDropdown.value
     }
 
     const handlePageChange = (page: number) => {
@@ -124,17 +160,9 @@ export default defineComponent({
       fetchData(page)
     }
 
-    function handleSelect(key: string | number) {
-      message.info(String(key))
-    } 
-    // sampai di sini
-
     // form submit
     const submitForm = async () => {
-      if (!token) {
-        console.error('No token found!')
-        return
-      }
+      if (!token) return
 
       loading.value = true
       try {
@@ -142,13 +170,25 @@ export default defineComponent({
           ? `${Config.UrlBackend}/api/person/update`
           : `${Config.UrlBackend}/api/person/create`
 
+        // 🔥 BEDAKAN PAYLOAD
+        let payload: any
+
+        if (isEditMode.value) {
+          // EDIT → PAKAI ID
+          payload = { ...formData.value }
+        } else {
+          // CREATE → HAPUS ID
+          const { id, ...withoutId } = formData.value
+          payload = withoutId
+        }
+
         const response = await apiFetch(url, {
           method: "POST",
-          body: JSON.stringify(formData.value),
           headers: {
             "Content-Type": "application/json"
-          }
-        });
+          },
+          body: JSON.stringify(payload)
+        })
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
@@ -167,29 +207,24 @@ export default defineComponent({
     }
 
 
-
     // table columns
-    const columns = [            
-      { title: 'Name', key: 'name', fixed: 'left' },
-      { title: 'EmployeeId', key: 'id' },
-      { title: 'NIP', key: 'national_employee_id_number' },
-      { title: 'Status Pegawai', key: 'employee_category_name' },
-      { title: 'Jabatan profesi', key: 'professional_name' },
-      { title: 'Unit kerja', key: 'organization_name' },
-      { title: 'Jabatan manajerial', key: 'position_name' },
-      { title: 'PersonId', key: 'person_id' },
+    const columns = [
+      
+      { title: 'Name', key: 'name', fixed: 'left'},
       { title: 'NIK', key: 'national_id_number' },
       { title: 'Tgl Lahir', key: 'birth_date' },
-      { title: 'JKel', key: 'gender' },
+      { title: 'Kelamin', key: 'gender', render: (row: any) => getGenderLabel(row.gender)},      
       { title: 'Alamat', key: 'address' },
-      { title: 'Phone', key: 'phone_number' },
+      { title: 'Telepon', key: 'phone_number' },
       { title: 'Email', key: 'email' },
-      { title: 'Tags', key: 'tags' },
+      { title: 'Status Perkawinan', key: 'is_married', render: (row: any) => getMarriedLabel(row.is_married) },
+      { title: 'NPWP', key: 'tax_id_number' },
+      { title: 'BPJS', key: 'national_health_id_number' },
       {
         title: 'Aksi',
         key: 'actions',
         fixed: 'right',
-        width: 150,
+        width: 80,
         render(row: any) {
           return h(
             'div',
@@ -203,15 +238,6 @@ export default defineComponent({
                   onClick: () => openEditModal(row)
                 },
                 { default: () => 'Ubah' }
-              ),
-              h(
-                NButton,
-                {
-                  size: 'small',
-                  type: 'success',
-                  onClick: () => openProfile(row)
-                },
-                { default: () => 'Lihat Profil' }
               )
             ]
           )
@@ -219,27 +245,13 @@ export default defineComponent({
       },
     ]
 
-
     // load pertama kali
     onMounted(() => {
+      fetchMaritalOptions(),
       fetchData(current.value)
     })
 
     return {
-      options: [
-        {
-          label: 'Profile',
-        },
-        {
-          label: 'Edit Profile',
-        },
-        {
-          type: 'divider'
-        },
-        {
-          label: 'Logout',
-        }
-      ],
       columns,
       tableData,
       current,
@@ -249,10 +261,6 @@ export default defineComponent({
       inputSearch,
       handleInputSearch,
       handlePageChange,
-      onOrgSelected: (orgId: string | number | null) => {
-        selectedOrgId.value = orgId
-        fetchData(current.value)
-      },
       isPreviewOpen,
       isModalOpen,
       isEditMode,
@@ -263,9 +271,17 @@ export default defineComponent({
       closeModal,
       submitForm,
       genderOptions,
-      employee,
-      formDataFilter,
-      showDropdown
+      getGenderLabel,
+      marriedOptions,
+      getMarriedLabel,
+      taxCombinedOptions,
+      getTaxCombinedLabel,
+
+      maritalOptions,
+      fetchMaritalOptions,
+      getMaritalOptionsLabel,
+      
+      employee
     }
   }
 })

@@ -51,7 +51,11 @@ export const LAYOUT_ITEMS = [
 			{
 			  label: 'Kepegawaian',
 			  key: '/profilehumanresource',
-			  	children: [	  	
+			  	children: [	
+			  		{
+			        label: 'Data Personal',
+			        key: '/person',
+			      },  	
 			      {
 			        label: 'Data Pegawai',
 			        key: '/employee',

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/container/home/Home.vue'
 import Attendance from '@/components/attendance/Attendance.vue'
+import Person from '@/components/references/Person.vue'
 import Employee from '@/components/references/Employee.vue'
 import Location from '@/components/references/Location.vue'
 import Organization from '@/components/references/Organization.vue'
@@ -45,6 +46,10 @@ const router = createRouter({
 		{
 			path: '/ProfileBar',
 			component: ProfileBar,
+		},				
+		{
+			path: '/Person',
+			component: Person,
 		},		
 		{
 			path: '/Employee',

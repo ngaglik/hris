@@ -22,8 +22,8 @@
             <n-card title="Personal" style="max-width: 300px; margin: 0 auto;" class="card yellow" hoverable>
                 <div>
                   <p><strong>Nama</strong></p>{{ profilePerson.name }}
-                  <p><strong>JKel / Tanggal Lahir</strong></p>{{ getGenderLabel(profilePerson.gender)}} / {{ profilePerson.birth_date }}
-                  <p><strong>Status Perkawinan</strong></p>{{ getMarriedLabel(profilePerson.is_married) }} 
+                  <p><strong>Kelamin / Tanggal Lahir</strong></p>{{ getGenderLabel(profilePerson.gender)}} / {{ profilePerson.birth_date }}
+                  <p><strong>Status Perkawinan (KTP)</strong></p>{{ getMarriedLabel(profilePerson.is_married) }} 
                   <p><strong>NIK</strong></p>{{ profilePerson.national_id_number }}
                   <p><strong>BPJS Kesehatan</strong></p>{{ profilePerson.health_insurance_id_number }}
                 </div>
@@ -43,8 +43,7 @@
                 <div>
                   <p><strong>NPWP</strong></p>{{ profilePerson.tax_id_number }}
                   <p><strong>Status Pelaporan Suami-Istri</strong></p>{{ getTaxCombinedLabel(profilePerson.is_tax_combined) }}
-                  <p><strong>NPWP Suami/Istri</strong></p>{{ profilePerson.common_tax_id_number }}
-                  <p><strong>Status Perkawinan (SPT)</strong></p>{{ getMarriedLabel(profilePerson.is_tax_as_married) }} 
+                  <p><strong>Status Perkawinan (SPT)</strong></p>{{ getMaritalOptionsLabel(profilePerson.tax_marital_id) }} 
                 </div>
             </n-card>
           </n-gi>
@@ -92,7 +91,7 @@
         <n-form-item label="Tgl Lahir">
           <n-input v-model:value="profilePerson.birth_date" />
         </n-form-item>
-        <n-form-item label="JKel">
+        <n-form-item label="Jenis kelamin">
           <n-select
             v-model:value="profilePerson.gender"
             :options="genderOptions"
@@ -100,7 +99,7 @@
             clearable
           />
         </n-form-item>
-        <n-form-item label="Status Perkawinan">
+        <n-form-item label="Status Perkawinan  (KTP)">
           <n-select
             v-model:value="profilePerson.is_married"
             :options="marriedOptions"
@@ -135,17 +134,14 @@
             clearable
           />
         </n-form-item>
-        <n-form-item label="NPWP Suami/Istri">
-          <n-input v-model:value="profilePerson.common_tax_id_number" />
-        </n-form-item>
         <n-form-item label="Status Perkawinan (SPT)">
           <n-select
-            v-model:value="profilePerson.is_tax_as_married"
-            :options="marriedOptions"
+            v-model:value="profilePerson.tax_marital_id"
+            :options="maritalOptions"
             placeholder="Pilih"
             clearable
           />
-        </n-form-item>
+        </n-form-item> 
       </n-form>
       <n-space horizontal>
         <n-button @click="closeModal">Batal</n-button>

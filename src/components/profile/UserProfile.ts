@@ -30,6 +30,35 @@ export default defineComponent({
     const total = ref(0)
     const loading = ref(false)
 
+    const maritalOptions = ref<any[]>([])
+    const fetchMaritalOptions = async () => {
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/marital`,
+          { method: 'GET' }
+        )
+
+        const result = await response.json()
+
+        // asumsi response:
+        // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
+        maritalOptions.value = (result.data || result).map((item: any) => ({
+          label: item.name,
+          value: item.id
+        }))
+      } catch (error) {
+        console.error(error)
+        message.error('Gagal memuat status perkawinan')
+      }
+    }
+  const getMaritalOptionsLabel = (value: string | number | null | undefined) => {
+    if (value == null) return '-'
+    const option = maritalOptions.value.find(
+      o => String(o.value) === String(value)
+    )
+    return option?.label ?? '-'
+  }
+
     const isModalOpen = ref(false)
     const genderOptions = [
       { label: 'Laki-Laki', value: 'L' },
@@ -149,6 +178,7 @@ export default defineComponent({
       loading.value = true
       try {
         await Promise.all([
+          fetchMaritalOptions(),
           fetchDataPerson(),
           fetchDataEmployee()
         ])
@@ -175,8 +205,14 @@ export default defineComponent({
       getGenderLabel,
       marriedOptions,
       getMarriedLabel,
+      
       taxCombinedOptions,
       getTaxCombinedLabel,
+
+      maritalOptions,
+      fetchMaritalOptions,
+      getMaritalOptionsLabel,
+
       empId,
       persId,
       fetchDataPerson,

@@ -39,6 +39,36 @@ export default defineComponent({
     const tags = employee?.tags ?? []
     const familyId = employee?.familyId
     
+
+    const maritalOptions = ref<any[]>([])
+    const fetchMaritalOptions = async () => {
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/marital`,
+          { method: 'GET' }
+        )
+
+        const result = await response.json()
+
+        // asumsi response:
+        // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
+        maritalOptions.value = (result.data || result).map((item: any) => ({
+          label: item.name,
+          value: item.id
+        }))
+      } catch (error) {
+        console.error(error)
+        message.error('Gagal memuat status perkawinan')
+      }
+    }
+  const getMaritalOptionsLabel = (value: string | number | null | undefined) => {
+    if (value == null) return '-'
+    const option = maritalOptions.value.find(
+      o => String(o.value) === String(value)
+    )
+    return option?.label ?? '-'
+  }
+
     const familyRelationshipOptions = ref<any[]>([])
     const fetchFamilyRelationshipOptions = async () => {
       try {
@@ -164,6 +194,46 @@ export default defineComponent({
       fetchData(page)
     }
 
+    const deleteData = async (row: any) => {
+      dialog.warning({
+        title: 'Konfirmasi Hapus',
+        content: `Apakah yakin ingin menghapus data "${row.name}"?`,
+        positiveText: 'Hapus',
+        negativeText: 'Batal',
+        onPositiveClick: async () => {
+          loading.value = true
+          try {
+            const response = await apiFetch(
+              `${Config.UrlBackend}/api/person/family/${row.id}`,
+              {
+                method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              }
+            )
+
+            if (!response.ok) {
+              const err = await response.json()
+              throw new Error(err.message || 'Gagal menghapus data')
+            }
+
+            const result = await response.json()
+            message.success(result.message || 'Data berhasil dihapus')
+
+            // reload data
+            await fetchData(current.value)
+          } catch (error) {
+            console.error(error)
+            message.error('Gagal menghapus data')
+          } finally {
+            loading.value = false
+          }
+        }
+      })
+    }
+
+
     // form submit
     const submitForm = async () => {
       if (!token) return
@@ -171,8 +241,8 @@ export default defineComponent({
       loading.value = true
       try {
         const url = isEditMode.value
-          ? `${Config.UrlBackend}/api/person/update`
-          : `${Config.UrlBackend}/api/person/create`
+          ? `${Config.UrlBackend}/api/person/family_update`
+          : `${Config.UrlBackend}/api/person/family_add`
 
         // 🔥 BEDAKAN PAYLOAD
         let payload: any
@@ -212,11 +282,20 @@ export default defineComponent({
 
 
     // table columns
-    const columns = [
+    const columns = [      
+      { title: 'Name', key: 'name', fixed: 'left'},
+      { title: 'Hubungan Keluarga', key: 'family_relationship_id', render: (row: any) => getFamilyRelationshipLabel(row.family_relationship_id)},
+      { title: 'NIK', key: 'national_id_number' },
+      { title: 'Tgl Lahir', key: 'birth_date' },
+      { title: 'Kelamin', key: 'gender', render: (row: any) => getGenderLabel(row.gender)},
+      { title: 'Status Perkawinan', key: 'is_married', render: (row: any) => getMarriedLabel(row.is_married) },
+      { title: 'NPWP', key: 'tax_id_number' },
+      { title: 'Status Pelaporan Suami-Istri', key: 'is_tax_combined', render: (row: any) => getTaxCombinedLabel(row.is_tax_combined) },
+      { title: 'Status Perkawinan (SPT)', key: 'tax_marital_id', render: (row: any) => getMaritalOptionsLabel(row.tax_marital_id) },
       {
         title: 'Aksi',
         key: 'actions',
-        fixed: 'left',
+        //fixed: 'right',
         width: 80,
         render(row: any) {
           return h(
@@ -231,26 +310,26 @@ export default defineComponent({
                   onClick: () => openEditModal(row)
                 },
                 { default: () => 'Ubah' }
+              ),
+              h(
+                NButton,
+                {
+                  size: 'small',
+                  type: 'error',
+                  onClick: () => deleteData(row)
+                },
+                { default: () => 'Hapus' }
               )
             ]
           )
         }
       },
-      { title: 'Hubungan Keluarga', key: 'family_relationship_id', render: (row: any) => getFamilyRelationshipLabel(row.family_relationship_id)},
-      { title: 'Name', key: 'name'},
-      { title: 'NIK', key: 'national_id_number' },
-      { title: 'Tgl Lahir', key: 'birth_date' },
-      { title: 'JKel', key: 'gender', render: (row: any) => getGenderLabel(row.gender)},
-      { title: 'Status Perkawinan', key: 'is_married', render: (row: any) => getMarriedLabel(row.is_married) },
-      { title: 'NPWP', key: 'tax_id_number' },
-      { title: 'Status Pelaporan Suami-Istri', key: 'is_tax_combined', render: (row: any) => getTaxCombinedLabel(row.is_tax_combined) },
-      { title: 'NPWP Suami/Istri', key: 'common_tax_id_number' },
-      { title: 'Status Perkawinan (SPT)', key: 'is_tax_as_married', render: (row: any) => getMarriedLabel(row.is_tax_as_married) },
     ]
 
     // load pertama kali
     onMounted(() => {
       fetchFamilyRelationshipOptions()
+      fetchMaritalOptions()
       fetchData(current.value)
     })
 
@@ -281,6 +360,12 @@ export default defineComponent({
       getTaxCombinedLabel,
       familyRelationshipOptions,
       getFamilyRelationshipLabel,
+
+      maritalOptions,
+      fetchMaritalOptions,
+      getMaritalOptionsLabel,
+
+      deleteData,
       employee
     }
   }

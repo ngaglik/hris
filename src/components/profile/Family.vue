@@ -64,7 +64,7 @@
           <n-input v-model:value="formData.birth_date" placeholder="yyyy-mm-dd"/>
         </n-form-item>
 
-        <n-form-item label="JKel">
+        <n-form-item label="Jenis kelamin">
           <n-select
             v-model:value="formData.gender"
             :options="genderOptions"
@@ -93,14 +93,11 @@
             placeholder="Pilih"
             clearable
           />
-        </n-form-item>
-        <n-form-item label="NPWP Penanggungjawab">
-          <n-input v-model:value="formData.common_tax_id_number" />
-        </n-form-item>
+        </n-form-item>       
         <n-form-item label="Status Perkawinan (SPT)">
           <n-select
-            v-model:value="formData.is_tax_as_married"
-            :options="marriedOptions"
+            v-model:value="formData.tax_marital_id"
+            :options="maritalOptions"
             placeholder="Pilih"
             clearable
           />
