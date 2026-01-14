@@ -15,8 +15,6 @@ export default defineComponent({
     const dialog = useDialog()
     const message = useMessage()
 
-    const showDropdown = ref(false)
-
     // state
     const inputSearch = ref('')
     const selectedOrgId = ref<string | number | null>(null)
@@ -119,14 +117,7 @@ export default defineComponent({
       showDropdown.value = !showDropdown.value
     }
 
-    const handlePageChange = (page: number) => {
-      current.value = page
-      fetchData(page)
-    }
-
-    function handleSelect(key: string | number) {
-      message.info(String(key))
-    } 
+    
     // sampai di sini
 
     // form submit
@@ -248,7 +239,6 @@ export default defineComponent({
       loading,
       inputSearch,
       handleInputSearch,
-      handlePageChange,
       onOrgSelected: (orgId: string | number | null) => {
         selectedOrgId.value = orgId
         fetchData(current.value)
@@ -264,8 +254,7 @@ export default defineComponent({
       submitForm,
       genderOptions,
       employee,
-      formDataFilter,
-      showDropdown
+      formDataFilter
     }
   }
 })

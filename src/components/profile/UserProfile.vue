@@ -65,7 +65,7 @@
     <n-space vertical>
       <n-card title="" style="max-width: 100%; margin: 0 auto;" hoverable>
           <div>
-            <Family :employeeId="empId" :personId="persId"/>
+            <Family :familyId="famId"/>
           </div>
         </n-card>
     </n-space>

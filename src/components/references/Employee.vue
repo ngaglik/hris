@@ -43,13 +43,12 @@
   </div>
   <n-modal v-model:show="isPreviewOpen" :title="formData.name" :style="{width:'90%'}" preset="dialog">
     <n-card title="Profile" style="margin-bottom: 16px">
-    <UserProfile :employeeId="formData.id"/>
+    <UserProfile :personId="formData.person_id" :familyId="formData.family_id"/>
     </n-card>
   </n-modal>
   <n-modal v-model:show="isModalOpen" :title="isEditMode ? 'Edit Data' : 'Tambah Data'" preset="dialog" :style="{ width: '600px' }">
       <n-form :model="formData" label-width="100">
         <n-form-item label="Person">
-        <n-dropdown :options="options" :show="showDropdown">
           <n-input-group>
               <n-button type="primary">
                 Search
@@ -59,7 +58,6 @@
                 Search
               </n-button>
             </n-input-group> 
-          </n-dropdown>
         </n-form-item>
         <n-form-item label="NIK">
           <n-input v-model:value="formData.national_id_number" />

@@ -72,7 +72,7 @@
             clearable
           />
         </n-form-item>   
-        <n-form-item label="Status Perkawinan">
+        <n-form-item label="Status Perkawinan (KTP)">
           <n-select
             v-model:value="formData.is_married"
             :options="marriedOptions"

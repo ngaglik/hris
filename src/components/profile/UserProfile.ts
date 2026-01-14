@@ -17,6 +17,10 @@ export default defineComponent({
     personId: {
       type: String,
       default: ''
+    },
+    familyId: {
+      type: String,
+      default: ''
     }
   },
 
@@ -93,19 +97,24 @@ export default defineComponent({
     }
     let token = auth?.token
     let session = auth?.session
-
-    const persId = computed(() => {
+    
+    let persId = computed(() => {
       const employee = auth?.employee?.[0]
-      return props.personId || props.employeeId || employee?.personId || ''
+      return props.personId ||  employee?.personId || ''
     })
 
-    const empId = computed(() => {
+    let empId = computed(() => {
       const employee = auth?.employee?.[0]
 
       return props.employeeId || employee?.id || ''
     })
-    
 
+    let famId = computed(() => {
+      const employee = auth?.employee?.[0]
+
+      return props.familyId || employee?.familyId || ''
+    })
+    
     const fetchDataPerson = async () => {      
       loading.value = true
       try {
@@ -215,6 +224,7 @@ export default defineComponent({
 
       empId,
       persId,
+      famId,
       fetchDataPerson,
       fetchDataEmployee,
     }

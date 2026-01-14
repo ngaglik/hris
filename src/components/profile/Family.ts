@@ -1,4 +1,4 @@
-import { onMounted, defineComponent, ref, h } from 'vue'
+import { onMounted, defineComponent, ref, h , computed} from 'vue'
 import { useMessage, useDialog, NButton } from 'naive-ui'
 import { Config } from '@/constant/config'
 import { apiFetch } from "@/services/apiClient"
@@ -7,6 +7,10 @@ import { getAuthData, saveAuthData, logout } from "@/services/authService"
 export default defineComponent({
   props: {
     personId: {
+      type: String,
+      default: ''
+    },
+    familyId: {
       type: String,
       default: ''
     }
@@ -28,6 +32,8 @@ export default defineComponent({
     const pageSize = ref(50)
     const total = ref(0)
     const loading = ref(false)
+
+
     let auth = getAuthData()
     if (!auth) {
         logout();
@@ -37,7 +43,11 @@ export default defineComponent({
     let session = auth?.session
     const employee = auth.employee?.[0]
     const tags = employee?.tags ?? []
-    const familyId = employee?.familyId
+
+    const famId = computed(() => {
+      const employee = auth?.employee?.[0]
+      return props.familyId || employee?.familyId || ''
+    })
     
 
     const maritalOptions = ref<any[]>([])
@@ -126,7 +136,7 @@ export default defineComponent({
 
     const fetchData = async (page = 1) => {
       loading.value = true
-      const response = await apiFetch(`${Config.UrlBackend}/api/person/family?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}&familyId=${familyId}`, {
+      const response = await apiFetch(`${Config.UrlBackend}/api/person/family?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}&familyId=${famId.value}`, {
         method: "GET"
       });
       const result = await response.json()
@@ -162,7 +172,7 @@ export default defineComponent({
         birth_date: '',
         gender: '',
         family_relationship_id :'',
-        family_id : familyId,
+        family_id : famId,
       }
       isModalOpen.value = true
     }
@@ -366,7 +376,8 @@ export default defineComponent({
       getMaritalOptionsLabel,
 
       deleteData,
-      employee
+      employee,
+      famId
     }
   }
 })
