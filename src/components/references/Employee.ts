@@ -31,7 +31,30 @@ export default defineComponent({
     let token = auth?.token
     let session = auth?.session
     let employee = auth?.employee
-   
+    
+    const employeeCategoryOptions = ref<any[]>([])
+    const fetchEmployeeCategoryOptions = async () => {
+        try {
+          const response = await apiFetch(
+            `${Config.UrlBackend}/api/option/employee_category`,
+            { method: 'GET' }
+          )
+
+          const result = await response.json()
+
+          // asumsi response:
+          // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
+          employeeCategoryOptions.value = (result.data || result).map((item: any) => ({
+            label: item.name,
+            value: item.id
+          }))
+        } catch (error) {
+          console.error(error)
+          message.error('Gagal memuat employee_category')
+        }
+      }
+    
+
     const genderOptions = [
       { label: 'Laki-Laki', value: 'L' },
       { label: 'Perempuan', value: 'P' }
@@ -213,24 +236,12 @@ export default defineComponent({
 
     // load pertama kali
     onMounted(() => {
+      fetchEmployeeCategoryOptions()
       fetchData(current.value)
     })
 
     return {
-      options: [
-        {
-          label: 'Profile',
-        },
-        {
-          label: 'Edit Profile',
-        },
-        {
-          type: 'divider'
-        },
-        {
-          label: 'Logout',
-        }
-      ],
+      
       columns,
       tableData,
       current,
@@ -254,7 +265,11 @@ export default defineComponent({
       submitForm,
       genderOptions,
       employee,
-      formDataFilter
+      formDataFilter,
+
+      employeeCategoryOptions,
+      fetchEmployeeCategoryOptions
+
     }
   }
 })

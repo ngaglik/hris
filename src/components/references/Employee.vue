@@ -59,26 +59,15 @@
               </n-button>
             </n-input-group> 
         </n-form-item>
-        <n-form-item label="NIK">
-          <n-input v-model:value="formData.national_id_number" />
+        <n-form-item label="NIP">
+          <n-input v-model:value="formData.national_employee_id_number" />
         </n-form-item>
-        <n-form-item label="Title Depan">
-          <n-input v-model:value="formData.front_title" />
-        </n-form-item>
-        <n-form-item label="Name">
-          <n-input v-model:value="formData.name" />
-        </n-form-item>
-        <n-form-item label="Title Belakang">
-          <n-input v-model:value="formData.end_title" />
-        </n-form-item>
-        <n-form-item label="Tgl Lahir">
-          <n-input v-model:value="formData.birth_date" />
-        </n-form-item>
-        <n-form-item label="JKel">
+       
+        <n-form-item label="Kategori Pegawai">
           <n-select
-            v-model:value="formData.gender"
-            :options="genderOptions"
-            placeholder="Pilih Jenis Kelamin"
+            v-model:value="formData.employee_category_id"
+            :options="employeeCategoryOptions"
+            placeholder=""
             clearable
           />
         </n-form-item>

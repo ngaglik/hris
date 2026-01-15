@@ -55,11 +55,6 @@ export default defineComponent({
           icon: renderIcon(UserIcon)
         },
         {
-          label: 'Edit Profile',
-          key: 'editProfile',
-          icon: renderIcon(EditIcon)
-        },
-        {
           type: 'divider'
         },
         {

@@ -34,34 +34,63 @@ export default defineComponent({
     const total = ref(0)
     const loading = ref(false)
 
-    const maritalOptions = ref<any[]>([])
-    const fetchMaritalOptions = async () => {
-      try {
-        const response = await apiFetch(
-          `${Config.UrlBackend}/api/option/marital`,
-          { method: 'GET' }
-        )
+    const maritalTaxOptions = ref<any[]>([])
+    const fetchMaritalTaxOptions = async () => {
+        try {
+          const response = await apiFetch(
+            `${Config.UrlBackend}/api/option/marital_tax`,
+            { method: 'GET' }
+          )
 
-        const result = await response.json()
+          const result = await response.json()
 
-        // asumsi response:
-        // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
-        maritalOptions.value = (result.data || result).map((item: any) => ({
-          label: item.name,
-          value: item.id
-        }))
-      } catch (error) {
-        console.error(error)
-        message.error('Gagal memuat status perkawinan')
+          // asumsi response:
+          // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
+          maritalTaxOptions.value = (result.data || result).map((item: any) => ({
+            label: item.name,
+            value: item.id
+          }))
+        } catch (error) {
+          console.error(error)
+          message.error('Gagal memuat status perkawinan (SPT)')
+        }
       }
+    const getMaritalTaxOptionsLabel = (value: string | number | null | undefined) => {
+      if (value == null) return '-'
+      const option = maritalTaxOptions.value.find(
+        o => String(o.value) === String(value)
+      )
+      return option?.label ?? '-'
     }
-  const getMaritalOptionsLabel = (value: string | number | null | undefined) => {
-    if (value == null) return '-'
-    const option = maritalOptions.value.find(
-      o => String(o.value) === String(value)
-    )
-    return option?.label ?? '-'
-  }
+    
+    const maritalPaymentOptions = ref<any[]>([])
+      const fetchMaritalPaymentOptions = async () => {
+        try {
+          const response = await apiFetch(
+            `${Config.UrlBackend}/api/option/marital_payment`,
+            { method: 'GET' }
+          )
+
+          const result = await response.json()
+
+          // asumsi response:
+          // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
+          maritalPaymentOptions.value = (result.data || result).map((item: any) => ({
+            label: item.name,
+            value: item.id
+          }))
+        } catch (error) {
+          console.error(error)
+          message.error('Gagal memuat status perkawinan (Gaji)')
+        }
+      }
+    const getMaritalPaymentOptionsLabel = (value: string | number | null | undefined) => {
+      if (value == null) return '-'
+      const option = maritalPaymentOptions.value.find(
+        o => String(o.value) === String(value)
+      )
+      return option?.label ?? '-'
+    }
 
     const isModalOpen = ref(false)
     const genderOptions = [
@@ -187,7 +216,9 @@ export default defineComponent({
       loading.value = true
       try {
         await Promise.all([
-          fetchMaritalOptions(),
+          
+          fetchMaritalTaxOptions(),
+          fetchMaritalPaymentOptions(),
           fetchDataPerson(),
           fetchDataEmployee()
         ])
@@ -218,9 +249,12 @@ export default defineComponent({
       taxCombinedOptions,
       getTaxCombinedLabel,
 
-      maritalOptions,
-      fetchMaritalOptions,
-      getMaritalOptionsLabel,
+      maritalTaxOptions,
+      fetchMaritalTaxOptions,
+      getMaritalTaxOptionsLabel,
+      maritalPaymentOptions,
+      fetchMaritalPaymentOptions,
+      getMaritalPaymentOptionsLabel,
 
       empId,
       persId,

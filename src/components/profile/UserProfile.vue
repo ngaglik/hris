@@ -21,42 +21,46 @@
           <n-gi>
             <n-card title="Personal" style="max-width: 300px; margin: 0 auto;" class="card yellow" hoverable>
                 <div>
-                  <p><strong>Nama</strong></p>{{ profilePerson.name }}
-                  <p><strong>Kelamin / Tanggal Lahir</strong></p>{{ getGenderLabel(profilePerson.gender)}} / {{ profilePerson.birth_date }}
-                  <p><strong>Status Perkawinan (KTP)</strong></p>{{ getMarriedLabel(profilePerson.is_married) }} 
-                  <p><strong>NIK</strong></p>{{ profilePerson.national_id_number }}
-                  <p><strong>BPJS Kesehatan</strong></p>{{ profilePerson.health_insurance_id_number }}
-                </div>
-            </n-card>
-          </n-gi>
-          <n-gi>
-            <n-card title="Kontak" style="max-width: 300px; margin: 0 auto;" class="card green" hoverable>
-                <div>
-                  <p><strong>Alamat</strong></p>{{ profilePerson.address }}
-                  <p><strong>Hp</strong></p>{{ profilePerson.phone_number }}
-                  <p><strong>Email</strong></p>{{ profilePerson.email }}
-                </div>
-            </n-card>
-          </n-gi>
-          <n-gi>
-            <n-card title="Perpajakan" style="max-width: 300px; margin: 0 auto;" class="card green" hoverable>
-                <div>
-                  <p><strong>NPWP</strong></p>{{ profilePerson.tax_id_number }}
-                  <p><strong>Status Pelaporan Suami-Istri</strong></p>{{ getTaxCombinedLabel(profilePerson.is_tax_combined) }}
-                  <p><strong>Status Perkawinan (SPT)</strong></p>{{ getMaritalOptionsLabel(profilePerson.tax_marital_id) }} 
+                  <p><small><strong>NIK: </strong></small></p>{{ profilePerson.national_id_number }}
+                  <p><small><strong>Nama: </strong></small></p>{{ profilePerson.name }}
+                  <p><small><strong>Kelamin / Tanggal Lahir: </strong></small></p>{{ getGenderLabel(profilePerson.gender)}} / {{ profilePerson.birth_date }}
+                  <p><small><strong>Status Perkawinan (KTP): </strong></small></p>{{ getMarriedLabel(profilePerson.is_married) }} 
+                  <p><small><strong>BPJS Kesehatan: </strong></small></p>{{ profilePerson.health_insurance_id_number }}
+                  <p><small><strong>Alamat: </strong></small></p>{{ profilePerson.address }}
+                  <p><small><strong>Hp: </strong></small></p>{{ profilePerson.phone_number }}
+                  <p><small><strong>Email: </strong></small></p>{{ profilePerson.email }}
                 </div>
             </n-card>
           </n-gi>
           <n-gi>
             <n-card title="Kepegawaian" style="max-width: 300px; margin: 0 auto;" class="card blue" hoverable>
                 <div>
-                  <p><strong>NIP</strong></p>{{ profileEmployee.national_employee_id_number }}
-                  <p><strong>Unit kerja</strong></p>{{ profileEmployee.organization_name }}
-                  <p><strong>Jabatan</strong></p>{{ profileEmployee.professional_name }}
-                  <p><strong>Lokasi</strong></p>{{ profileEmployee.location_name }}
+                  <p><small><strong>ID: </strong></small></p>{{ profileEmployee.id }}
+                  <p><small><strong>NIP: </strong></small></p>{{ profileEmployee.national_employee_id_number }}
+                  <p><small><strong>Unit kerja: </strong></small></p>{{ profileEmployee.organization_name }}
+                  <p><small><strong>Jabatan: </strong></small></p>{{ profileEmployee.professional_name }}
+                  <p><small><strong>Lokasi: </strong></small></p>{{ profileEmployee.location_name }}
                 </div>
             </n-card>
           </n-gi>
+          <n-gi>
+            <n-card title="Penggajian" style="max-width: 300px; margin: 0 auto;" class="card green" hoverable>
+                <div>
+                  <p><small><strong>NIP: </strong></small></p>{{ profileEmployee.national_employee_id_number }}
+                  <p><small><strong>Status Perkawinan (Gaji): </strong></small></p>{{ getMaritalPaymentOptionsLabel(profilePerson.payment_marital_id) }} 
+                </div>
+            </n-card>
+          </n-gi>
+          <n-gi>
+            <n-card title="Perpajakan" style="max-width: 300px; margin: 0 auto;" class="card green" hoverable>
+                <div>
+                  <p><small><strong>NPWP: </strong></small></p>{{ profilePerson.tax_id_number }}
+                  <p><small><strong>Status Pelaporan Suami-Istri: </strong></small></p>{{ getTaxCombinedLabel(profilePerson.is_tax_combined) }}
+                  <p><small><strong>Status Perkawinan (SPT): </strong></small></p>{{ getMaritalTaxOptionsLabel(profilePerson.tax_marital_id) }} 
+                </div>
+            </n-card>
+          </n-gi>
+         
           
         </n-grid>
       </n-scrollbar>
@@ -121,6 +125,36 @@
         </n-form-item>
 
         <n-divider title-placement="left">
+          Penggajian
+        </n-divider>
+        <n-form-item label="NIP">
+          <n-input v-model:value="profilePerson.national_employee_id_number" />
+        </n-form-item>
+        <n-form-item label="Status Perkawinan (Gaji)">
+          <n-select
+            v-model:value="profilePerson.payment_marital_id"
+            :options="maritalPaymentOptions"
+            placeholder="Pilih"
+            clearable
+          />
+          <n-popover trigger="hover" raw :show-arrow="false">
+          <template #trigger>
+            <n-button>Jelaskan</n-button>
+          </template>
+          <div
+            style="
+              max-width: 300px;
+              height: auto;
+              background-color: orange;
+              transform-origin: inherit;
+            "
+          >
+            Ketentuan tanggungan anak : <br/>
+            Anak kandung/angkat yang belum menikah, belum memiliki penghasilan sendiri, berusia dibawah 21 tahun, atau bisa diperpanjang hingga 25 tahun jika masih sekolah/kuliah/kursus, dengan syarat nyata menjadi tanggunan PNS, diberikan maksimal 3 anak, dan besarnya 2% dari gaji pokok per anak
+          </div>
+        </n-popover>
+        </n-form-item>  
+        <n-divider title-placement="left">
           Perpajakan
         </n-divider>
         <n-form-item label="NPWP">
@@ -137,11 +171,28 @@
         <n-form-item label="Status Perkawinan (SPT)">
           <n-select
             v-model:value="profilePerson.tax_marital_id"
-            :options="maritalOptions"
+            :options="maritalTaxOptions"
             placeholder="Pilih"
             clearable
           />
+          <n-popover trigger="hover" raw :show-arrow="false">
+            <template #trigger>
+              <n-button>Jelaskan</n-button>
+            </template>
+            <div
+              style="
+                max-width: 300px;
+                height: auto;
+                background-color: orange;
+                transform-origin: inherit;
+              "
+            >
+              Ketentuan tanggungan anak : <br/>
+              Anak kandung atau anak angkat yang sepenuhnya berada dibawah tanggungan, dengan batasan maksimal 3 anak per keluarga. Status anak tersebut harus dalam kondisi belum menikah dan belum memiliki penghasilan sendiri.
+            </div>
+          </n-popover>
         </n-form-item> 
+
       </n-form>
       <n-space horizontal>
         <n-button @click="closeModal">Batal</n-button>

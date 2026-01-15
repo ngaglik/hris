@@ -60,7 +60,7 @@
             clearable
           />
         </n-form-item>   
-        <n-form-item label="Status Perkawinan">
+        <n-form-item label="Status Perkawinan (KTP)">
           <n-select
             v-model:value="formData.is_married"
             :options="marriedOptions"
@@ -80,8 +80,37 @@
         <n-form-item label="Email">
           <n-input v-model:value="formData.email" />
         </n-form-item>
-
-
+        
+        <n-divider title-placement="left">
+          Penggajian
+        </n-divider>
+        <n-form-item label="NIP">
+          <n-input v-model:value="formData.national_employee_id_number" />
+        </n-form-item>
+        <n-form-item label="Status Perkawinan (Gaji)">
+          <n-select
+            v-model:value="formData.payment_marital_id"
+            :options="maritalPaymentOptions"
+            placeholder="Pilih"
+            clearable
+          />
+          <n-popover trigger="hover" raw :show-arrow="false">
+          <template #trigger>
+            <n-button>Jelaskan</n-button>
+          </template>
+          <div
+            style="
+              width: 480px;
+              height: auto;
+              background-color: orange;
+              transform-origin: inherit;
+            "
+          >
+            Ketentuan tanggungan anak : <br/>
+            Anak kandung/angkat yang belum menikah, belum memiliki penghasilan sendiri, berusia dibawah 21 tahun, atau bisa diperpanjang hingga 25 tahun jika masih sekolah/kuliah/kursus, dengan syarat nyata menjadi tanggunan PNS, diberikan maksimal 3 anak, dan besarnya 2% dari gaji pokok per anak
+          </div>
+        </n-popover>
+        </n-form-item>  
         <n-divider title-placement="left">
           Perpajakan
         </n-divider>
@@ -99,11 +128,28 @@
         <n-form-item label="Status Perkawinan (SPT)">
           <n-select
             v-model:value="formData.tax_marital_id"
-            :options="maritalOptions"
+            :options="maritalTaxOptions"
             placeholder="Pilih"
             clearable
           />
-        </n-form-item>   
+          <n-popover trigger="hover" raw :show-arrow="false">
+            <template #trigger>
+              <n-button>Jelaskan</n-button>
+            </template>
+            <div
+              style="
+                width: 480px;
+                height: auto;
+                background-color: orange;
+                transform-origin: inherit;
+              "
+            >
+              Ketentuan tanggungan anak : <br/>
+              Anak kandung atau anak angkat yang sepenuhnya berada dibawah tanggungan, dengan batasan maksimal 3 anak per keluarga. Status anak tersebut harus dalam kondisi belum menikah dan belum memiliki penghasilan sendiri.
+            </div>
+          </n-popover>
+        </n-form-item> 
+         
       </n-form>
       <n-space horizontal>
         <n-button @click="closeModal">Batal</n-button>
