@@ -34,6 +34,46 @@ export default defineComponent({
     const total = ref(0)
     const loading = ref(false)
 
+    let auth = getAuthData()
+    if (!auth) {
+      logout()
+    }
+    let token = auth?.token
+    let session = auth?.session
+    
+    let persId = computed(() => {
+      const employee = auth?.employee?.[0]
+      return props.personId ||  employee?.personId || ''
+    })
+
+    let empId = computed(() => {
+      const employee = auth?.employee?.[0]
+
+      return props.employeeId || employee?.id || ''
+    })
+
+    let famId = computed(() => {
+      const employee = auth?.employee?.[0]
+
+      return props.familyId || employee?.familyId || ''
+    })
+    
+    const displayPosition = computed(() => {
+      const position = profileEmployee.value?.position_name
+      const professional = profileEmployee.value?.professional_name
+
+      if (position && position.trim() !== '-') {
+        return position
+      }
+
+      if (professional && professional.trim() !== '') {
+        return professional
+      }
+
+      return '-'
+    })
+
+
     const maritalTaxOptions = ref<any[]>([])
     const fetchMaritalTaxOptions = async () => {
         try {
@@ -120,29 +160,7 @@ export default defineComponent({
       return option ? option.label : '-'
     }
 
-    let auth = getAuthData()
-    if (!auth) {
-      logout()
-    }
-    let token = auth?.token
-    let session = auth?.session
     
-    let persId = computed(() => {
-      const employee = auth?.employee?.[0]
-      return props.personId ||  employee?.personId || ''
-    })
-
-    let empId = computed(() => {
-      const employee = auth?.employee?.[0]
-
-      return props.employeeId || employee?.id || ''
-    })
-
-    let famId = computed(() => {
-      const employee = auth?.employee?.[0]
-
-      return props.familyId || employee?.familyId || ''
-    })
     
     const fetchDataPerson = async () => {      
       loading.value = true
@@ -255,6 +273,7 @@ export default defineComponent({
       maritalPaymentOptions,
       fetchMaritalPaymentOptions,
       getMaritalPaymentOptionsLabel,
+      displayPosition,
 
       empId,
       persId,

@@ -43,53 +43,29 @@ export default defineComponent({
 
   setup() {
     const router = useRouter()
-    const layoutOptions = ref<MenuOption[]>([])
     const collapsed = ref(false)
     const activeName = ref('/')
     const isLoggedIn = ref(false)
+    const layoutOptions = computed<MenuOption[]>(() => {
+    const auth = getAuthData()
+    if (!auth?.token) return []
 
-    // Cek login status saat mounted
-    onMounted(async () => {
-      let menu: MenuItem[] = JSON.parse(JSON.stringify(LAYOUT_ITEMS))
-      let auth = getAuthData();
-      if(!auth?.token){
-        isLoggedIn.value = false
+    let menu: MenuItem[] = JSON.parse(JSON.stringify(LAYOUT_ITEMS))
+    const emp = auth.employee?.[0]
+
+    if (!emp?.tags?.includes('OSDM')) {
+      menu = removeNodeByKey(menu, '/administrator')
+    }
+
+    if (emp?.id !== 381) {
+      menu = removeNodeByKey(menu, '/selfservices')
+      if (emp?.employee_category_id !== 17) {
+        menu = removeNodeByKey(menu, '/Attendance')
       }
-      else{
-        
-        let employeeId = auth?.employee?.[0].id
-        let tags = auth?.employee?.[0].tags
-        let employeeCategoryId = auth?.employee?.[0].employee_category_id
-        let employeeOrganizationId = auth?.employee?.[0].organization_id
-        if (!tags?.includes('OSDM')) {
-          menu = removeNodeByKey(
-            menu,
-            '/administrator'
-          )          
-        }
-        if (employeeId!=381) {
-          menu = removeNodeByKey(
-            menu,
-            '/selfservices'
-          )
-          if (employeeCategoryId!=17) {
-            menu = removeNodeByKey(
-              menu,
-              '/Attendance'
-            )          
-          }
-        }
-        layoutOptions.value = menu
-        isLoggedIn.value = true
-      }
-    
-      // Collapse sidebar otomatis jika layar kecil
-      const handleResize = () => {
-        collapsed.value = window.innerWidth < 768
-      }
-      handleResize()
-      window.addEventListener('resize', handleResize)
-    })
+    }
+
+    return menu
+  })
 
     // UI utilities
     window.$message = useMessage()
@@ -107,8 +83,38 @@ export default defineComponent({
       isLoggedIn.value = false
     }
 
+    
+
     const { theme, lang, changeTheme, changeLang } = useConfig()
     const showLang = computed(() => lang.value.name === 'id-ID' ? 'Bahasa' : 'English')
+    // Cek login status saat mounted
+    onMounted(async () => {
+      let auth = getAuthData();
+      if(!auth?.token){
+        layoutOptions.value = [] 
+        isLoggedIn.value = false
+      }
+      else{
+        
+        let employeeId = auth?.employee?.[0].id
+        let tags = auth?.employee?.[0].tags
+        let employeeCategoryId = auth?.employee?.[0].employee_category_id
+        let employeeOrganizationId = auth?.employee?.[0].organization_id
+
+        
+        layoutOptions.value = menu
+        isLoggedIn.value = true
+      }
+    
+      // Collapse sidebar otomatis jika layar kecil
+      const handleResize = () => {
+        collapsed.value = window.innerWidth < 768
+      }
+      handleResize()
+      window.addEventListener('resize', handleResize)
+    })
+
+    
 
     return {
       layoutOptions,

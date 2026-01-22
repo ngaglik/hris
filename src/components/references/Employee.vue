@@ -53,7 +53,18 @@
               <n-button type="primary">
                 Search
               </n-button>
-              <n-input :style="{ width: '50%' }" v-model:value="inputSearch" @keydown.enter="handleInputSearch" />
+              <n-select
+                  :style="{ width: '50%' }"
+                  v-model:value="formData.person_id"
+                  :options="personOptions"
+                  :loading="personLoading"
+                  filterable
+                  remote
+                  clearable
+                  placeholder="Cari person..."
+                  @search="handleInputSearchPerson"
+                  @update:value="handlePersonSelect"
+                />
               <n-button type="primary" ghost>
                 Search
               </n-button>
@@ -71,18 +82,25 @@
             clearable
           />
         </n-form-item>
-        <n-form-item label="Alamat" >
-          <n-input v-model:value="formData.address" 
-          type="textarea"
-          placeholder="Masukkan alamat lengkap"
-          clearable/>
+
+        <n-form-item label="Unit kerja">
+          <n-select
+            v-model:value="formData.organization_id"
+            :options="organizationOptions"
+            placeholder=""
+            clearable
+          />
         </n-form-item>
-        <n-form-item label="No HP">
-          <n-input v-model:value="formData.phone_number" />
+
+        <n-form-item label="Jabatan">
+          <n-select
+            v-model:value="formData.position_id"
+            :options="positionOptions"
+            placeholder=""
+            clearable
+          />
         </n-form-item>
-        <n-form-item label="Email">
-          <n-input v-model:value="formData.email" />
-        </n-form-item>
+        
       </n-form>
       <n-space horizontal>
         <n-button @click="closeModal">Batal</n-button>

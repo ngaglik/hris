@@ -189,6 +189,9 @@ export default defineComponent({
 
       loading.value = true
       try {
+        
+        formData.value.UserLogin = employee
+
         const url = isEditMode.value
           ? `${Config.UrlBackend}/api/person/update`
           : `${Config.UrlBackend}/api/person/create`

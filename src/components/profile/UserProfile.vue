@@ -38,7 +38,7 @@
                   <p><small><strong>ID: </strong></small></p>{{ profileEmployee.id }}
                   <p><small><strong>NIP: </strong></small></p>{{ profileEmployee.national_employee_id_number }}
                   <p><small><strong>Unit kerja: </strong></small></p>{{ profileEmployee.organization_name }}
-                  <p><small><strong>Jabatan: </strong></small></p>{{ profileEmployee.professional_name }}
+                  <p><small><strong>Jabatan: </strong></small></p>{{ displayPosition }}
                   <p><small><strong>Lokasi: </strong></small></p>{{ profileEmployee.location_name }}
                 </div>
             </n-card>
@@ -55,7 +55,6 @@
             <n-card title="Perpajakan" style="max-width: 300px; margin: 0 auto;" class="card green" hoverable>
                 <div>
                   <p><small><strong>NPWP: </strong></small></p>{{ profilePerson.tax_id_number }}
-                  <p><small><strong>Status Pelaporan Suami-Istri: </strong></small></p>{{ getTaxCombinedLabel(profilePerson.is_tax_combined) }}
                   <p><small><strong>Status Perkawinan (SPT): </strong></small></p>{{ getMaritalTaxOptionsLabel(profilePerson.tax_marital_id) }} 
                 </div>
             </n-card>
@@ -120,8 +119,13 @@
         <n-form-item label="No HP">
           <n-input v-model:value="profilePerson.phone_number" />
         </n-form-item>
-        <n-form-item label="Email">
-          <n-input v-model:value="profilePerson.email" />
+        <n-form-item label="Email">   
+            <n-tooltip :show="showPopover" placement="bottom">
+              <template #trigger>
+                <n-input v-model:value="profilePerson.email" @click="showPopover = !showPopover"/>                 
+              </template>
+              <span>Wajib mencantumkan email pribadi yang aktif untuk pengiriman slip gaji, remunerasi dan korespondensi lainnya. Wajib menjaga kerahasiaan password email masing-masing.</span>
+            </n-tooltip>
         </n-form-item>
 
         <n-divider title-placement="left">
@@ -131,28 +135,19 @@
           <n-input v-model:value="profilePerson.national_employee_id_number" />
         </n-form-item>
         <n-form-item label="Status Perkawinan (Gaji)">
-          <n-select
-            v-model:value="profilePerson.payment_marital_id"
-            :options="maritalPaymentOptions"
-            placeholder="Pilih"
-            clearable
-          />
-          <n-popover trigger="hover" raw :show-arrow="false">
-          <template #trigger>
-            <n-button>Jelaskan</n-button>
-          </template>
-          <div
-            style="
-              max-width: 300px;
-              height: auto;
-              background-color: orange;
-              transform-origin: inherit;
-            "
-          >
-            Ketentuan tanggungan anak : <br/>
-            Anak kandung/angkat yang belum menikah, belum memiliki penghasilan sendiri, berusia dibawah 21 tahun, atau bisa diperpanjang hingga 25 tahun jika masih sekolah/kuliah/kursus, dengan syarat nyata menjadi tanggunan PNS, diberikan maksimal 3 anak, dan besarnya 2% dari gaji pokok per anak
-          </div>
-        </n-popover>
+          <n-tooltip :show="showPopover2" placement="bottom">
+              <template #trigger>
+                <n-select
+                  v-model:value="profilePerson.payment_marital_id"
+                  :options="maritalPaymentOptions"
+                  placeholder="Pilih"
+                  clearable 
+                  @click="showPopover2 = !showPopover2"
+                />                
+              </template>
+              <span>Ketentuan tanggungan anak : <br/>
+              Anak kandung/angkat yang belum menikah, belum memiliki penghasilan sendiri, berusia dibawah 21 tahun, atau bisa diperpanjang hingga 25 tahun jika masih sekolah/kuliah/kursus, dengan syarat nyata menjadi tanggunan PNS, diberikan maksimal 3 anak, dan besarnya 2% dari gaji pokok per anak</span>
+            </n-tooltip>
         </n-form-item>  
         <n-divider title-placement="left">
           Perpajakan
@@ -160,37 +155,22 @@
         <n-form-item label="NPWP">
           <n-input v-model:value="profilePerson.tax_id_number" />
         </n-form-item>        
-        <n-form-item label="Status Pelaporan Suami-Istri">
-          <n-select
-            v-model:value="profilePerson.is_tax_combined"
-            :options="taxCombinedOptions"
-            placeholder="Pilih"
-            clearable
-          />
-        </n-form-item>
+        
         <n-form-item label="Status Perkawinan (SPT)">
-          <n-select
-            v-model:value="profilePerson.tax_marital_id"
-            :options="maritalTaxOptions"
-            placeholder="Pilih"
-            clearable
-          />
-          <n-popover trigger="hover" raw :show-arrow="false">
-            <template #trigger>
-              <n-button>Jelaskan</n-button>
-            </template>
-            <div
-              style="
-                max-width: 300px;
-                height: auto;
-                background-color: orange;
-                transform-origin: inherit;
-              "
-            >
-              Ketentuan tanggungan anak : <br/>
-              Anak kandung atau anak angkat yang sepenuhnya berada dibawah tanggungan, dengan batasan maksimal 3 anak per keluarga. Status anak tersebut harus dalam kondisi belum menikah dan belum memiliki penghasilan sendiri.
-            </div>
-          </n-popover>
+          <n-tooltip :show="showPopover3" placement="bottom">
+              <template #trigger>
+                <n-select
+                  v-model:value="profilePerson.tax_marital_id"
+                  :options="maritalTaxOptions"
+                  placeholder="Pilih"
+                  clearable
+                  @click="showPopover3 = !showPopover3"
+                />             
+              </template>
+              <span>Ketentuan tanggungan anak : <br/>
+              Anak kandung atau anak angkat yang sepenuhnya berada dibawah tanggungan, dengan batasan maksimal 3 anak per keluarga. Status anak tersebut harus dalam kondisi belum menikah dan belum memiliki penghasilan sendiri.</span>
+            </n-tooltip>
+          
         </n-form-item> 
 
       </n-form>

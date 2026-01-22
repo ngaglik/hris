@@ -30,29 +30,110 @@ export default defineComponent({
       }
     let token = auth?.token
     let session = auth?.session
-    let employee = auth?.employee
+
+    const employee = auth.employee?.[0]
+    const tags = employee?.tags ?? []
+    const employeeId = employee?.id
+    const positionId = employee?.positionId
+    const organizationId = employee?.organizationId
+
+    const personOptions = ref<any[]>([])
+    const personLoading = ref(false)
     
+    const handleInputSearchPerson = async (keyword?: string) => {
+
+      // reset list setiap karakter diketik
+      personOptions.value = []
+
+      // validasi minimal 2 karakter
+      if (!keyword || keyword.length < 2) {
+        return
+      }
+      personLoading.value = true
+      try {
+        const response = await apiFetch(`${Config.UrlBackend}/api/person?page=1&pageSize=100&inputSearch=${keyword}`, {
+          method: "GET"
+        });
+
+        const result = await response.json()
+
+        personOptions.value = (result.data || []).map((item: any) => ({
+          label: `${item.name} - ${item.national_id_number}`,
+          value: item.id
+        }))
+      } catch (error) {
+        console.error(error)
+        message.error('Gagal memuat data person')
+      } finally {
+        personLoading.value = false
+      }
+    }
+
+    const handlePersonSelect = (value: any, option: any) => {
+      formData.value.person_id = value
+    }
+
     const employeeCategoryOptions = ref<any[]>([])
     const fetchEmployeeCategoryOptions = async () => {
-        try {
-          const response = await apiFetch(
-            `${Config.UrlBackend}/api/option/employee_category`,
-            { method: 'GET' }
-          )
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/employee_category`,
+          { method: 'GET' }
+        )
 
-          const result = await response.json()
+        const result = await response.json()
 
-          // asumsi response:
-          // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
-          employeeCategoryOptions.value = (result.data || result).map((item: any) => ({
-            label: item.name,
-            value: item.id
-          }))
-        } catch (error) {
-          console.error(error)
-          message.error('Gagal memuat employee_category')
-        }
+        // asumsi response:
+        // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
+        employeeCategoryOptions.value = (result.data || result).map((item: any) => ({
+          label: item.name,
+          value: item.id
+        }))
+      } catch (error) {
+        console.error(error)
+        message.error('Gagal memuat employee_category')
       }
+    }
+
+    const organizationOptions = ref<any[]>([])
+    const fetchOrganizationOptions = async () => {
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/organization`,
+          { method: 'GET' }
+        )
+
+        const result = await response.json()
+
+        organizationOptions.value = (result.data || result).map((item: any) => ({
+          label: item.name,
+          value: item.id
+        }))
+
+        
+      } catch (error) {
+        console.error(error)
+        message.error('Gagal memuat organizationOptions')
+      }
+    }
+
+    const positionOptions = ref<any[]>([])
+    const fetchPositionOptions = async (orgId) => {
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/position/${orgId}`,
+          { method: 'GET' }
+        )
+        const result = await response.json()
+        positionOptions.value = (result.data || result).map((item: any) => ({
+          label: item.position_name,
+          value: item.id
+        }))
+      } catch (error) {
+        console.error(error)
+        message.error('Gagal memuat positionOptions')
+      }
+    }
     
 
     const genderOptions = [
@@ -80,16 +161,11 @@ export default defineComponent({
     const formData = ref({
       id: null,
       person_id: '',
-      national_id_number: '',
-      front_title: '',
-      name: '',
-      end_title: '',
-      birth_date: '',
-      gender: '',
-      address: '',
-      phone_number: '',
-      email: '',
-      tags: '',
+      national_employee_id_number: '',
+      employee_category_id: '',
+      organization_id: '',
+      position_id: '',
+      address:'',
     })
 
     const formDataFilter = ref({
@@ -100,19 +176,15 @@ export default defineComponent({
     // modal methods
     const openAddModal = () => {
       isEditMode.value = false
+      fetchPositionOptions("0")
       formData.value = {
         id: null,
         person_id: '',
-        national_id_number: '',
-        front_title: '',
-        name: '',
-        end_title: '',
-        birth_date: '',
-        gender: '',
-        address: '',
-        phone_number: '',
-        email: '',
-        tags: '',
+        national_employee_id_number: '',
+        employee_category_id: '',
+        organization_id: '',
+        position_id: null,
+        address:'',
       }
       isModalOpen.value = true
     }
@@ -120,6 +192,7 @@ export default defineComponent({
     const openEditModal = (row: any) => {
       isPreviewOpen.value = false
       isEditMode.value = true
+      fetchPositionOptions(row.organization_id)
       formData.value = { ...row }
       isModalOpen.value = true
     }
@@ -153,12 +226,24 @@ export default defineComponent({
       loading.value = true
       try {
         const url = isEditMode.value
-          ? `${Config.UrlBackend}/api/person/update`
-          : `${Config.UrlBackend}/api/person/create`
+          ? `${Config.UrlBackend}/api/employee/update`
+          : `${Config.UrlBackend}/api/employee/create`
+          
+        // 🔥 BEDAKAN PAYLOAD
+        let payload: any
 
+        if (isEditMode.value) {
+          // EDIT → PAKAI ID
+          payload = { ...formData.value }
+        } else {
+          // CREATE → HAPUS ID
+          const { id, ...withoutId } = formData.value
+          payload = withoutId
+        }
+        formData.value.UserLogin = employee
         const response = await apiFetch(url, {
           method: "POST",
-          body: JSON.stringify(formData.value),
+          body: JSON.stringify(payload),
           headers: {
             "Content-Type": "application/json"
           }
@@ -237,6 +322,8 @@ export default defineComponent({
     // load pertama kali
     onMounted(() => {
       fetchEmployeeCategoryOptions()
+      fetchOrganizationOptions()
+      fetchPositionOptions(organizationId)
       fetchData(current.value)
     })
 
@@ -250,6 +337,11 @@ export default defineComponent({
       loading,
       inputSearch,
       handleInputSearch,
+
+      handleInputSearchPerson,
+      personOptions,
+      personLoading,
+
       onOrgSelected: (orgId: string | number | null) => {
         selectedOrgId.value = orgId
         fetchData(current.value)
@@ -268,7 +360,12 @@ export default defineComponent({
       formDataFilter,
 
       employeeCategoryOptions,
-      fetchEmployeeCategoryOptions
+      fetchEmployeeCategoryOptions,
+      organizationOptions,
+      fetchOrganizationOptions,
+      positionOptions,
+      fetchPositionOptions
+
 
     }
   }
