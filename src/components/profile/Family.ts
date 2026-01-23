@@ -1,4 +1,4 @@
-import { onMounted, defineComponent, ref, h , computed} from 'vue'
+import { onMounted, defineComponent, ref, h , computed, watch} from 'vue'
 import { useMessage, useDialog, NButton } from 'naive-ui'
 import { Config } from '@/constant/config'
 import { apiFetch } from "@/services/apiClient"
@@ -13,14 +13,21 @@ export default defineComponent({
     familyId: {
       type: String,
       default: ''
+    },
+    reloadTrigger: {
+      type: Number,
+      default: 0
     }
   },
+  
   data() {
     return {
       profile: {},
       loading: false
     }
   },
+
+  
   setup(props) {
     const dialog = useDialog()
     const message = useMessage()
@@ -32,6 +39,7 @@ export default defineComponent({
     const pageSize = ref(50)
     const total = ref(0)
     const loading = ref(false)
+
 
 
     let auth = getAuthData()
@@ -145,6 +153,13 @@ export default defineComponent({
       total.value = result.total || 0
       loading.value = false
     }
+    watch(
+      () => props.reloadTrigger,
+      () => {
+        current.value = 1        // optional: reset ke halaman 1
+        fetchData(1)             // reload data family
+      }
+    )
 
     // modal state
     const isModalOpen = ref(false)

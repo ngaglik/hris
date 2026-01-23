@@ -58,6 +58,8 @@ export default defineComponent({
       return props.familyId || employee?.familyId || ''
     })
     
+    const familyReloadTrigger = ref(0)
+
     const displayPosition = computed(() => {
       const position = profileEmployee.value?.position_name
       const professional = profileEmployee.value?.professional_name
@@ -220,7 +222,10 @@ export default defineComponent({
 
         const data = await response.json()
         message.success(data.message ||  'Data diperbarui')
+
+        familyReloadTrigger.value++
         await fetchDataPerson()
+
         isModalOpen.value = false
       } catch (error) {
         console.error(error)
@@ -280,6 +285,7 @@ export default defineComponent({
       famId,
       fetchDataPerson,
       fetchDataEmployee,
+      familyReloadTrigger,
     }
   }
 })
