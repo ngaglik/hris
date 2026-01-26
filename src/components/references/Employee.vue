@@ -83,6 +83,15 @@
           />
         </n-form-item>
 
+        <n-form-item label="Profesi">
+          <n-select
+            v-model:value="formData.professional_id"
+            :options="professionalOptions"
+            placeholder=""
+            clearable
+          />
+        </n-form-item>
+
         <n-form-item label="Unit kerja">
           <n-select
             v-model:value="formData.organization_id"

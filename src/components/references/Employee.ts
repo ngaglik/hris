@@ -135,6 +135,23 @@ export default defineComponent({
       }
     }
     
+    const professionalOptions = ref<any[]>([])
+    const fetchProfessionalOptions = async (orgId) => {
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/professional`,
+          { method: 'GET' }
+        )
+        const result = await response.json()
+        professionalOptions.value = (result.data || result).map((item: any) => ({
+          label: item.name,
+          value: item.id
+        }))
+      } catch (error) {
+        console.error(error)
+        message.error('Gagal memuat professionalOptions')
+      }
+    }
 
     const genderOptions = [
       { label: 'Laki-Laki', value: 'L' },
@@ -162,6 +179,7 @@ export default defineComponent({
       id: null,
       person_id: '',
       national_employee_id_number: '',
+      professional_id: '',
       employee_category_id: '',
       organization_id: '',
       position_id: '',
@@ -182,6 +200,7 @@ export default defineComponent({
         person_id: '',
         national_employee_id_number: '',
         employee_category_id: '',
+        professional_id: '',
         organization_id: '',
         position_id: null,
         address:'',
@@ -323,6 +342,7 @@ export default defineComponent({
     onMounted(() => {
       fetchEmployeeCategoryOptions()
       fetchOrganizationOptions()
+      fetchProfessionalOptions()
       fetchPositionOptions(organizationId)
       fetchData(current.value)
     })
@@ -364,9 +384,9 @@ export default defineComponent({
       organizationOptions,
       fetchOrganizationOptions,
       positionOptions,
-      fetchPositionOptions
-
-
+      fetchPositionOptions,
+      professionalOptions,
+      fetchProfessionalOptions
     }
   }
 })
