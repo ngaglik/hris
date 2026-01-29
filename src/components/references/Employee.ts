@@ -134,6 +134,13 @@ export default defineComponent({
         message.error('Gagal memuat positionOptions')
       }
     }
+    const getPositionLabel = (value: string | number | null | undefined) => {
+      if (value == null) return '-'
+      const option = maritalPaymentOptions.value.find(
+        o => String(o.value) === String(value)
+      )
+      return option?.label ?? '-'
+    }
     
     const professionalOptions = ref<any[]>([])
     const fetchProfessionalOptions = async (orgId) => {
@@ -144,7 +151,7 @@ export default defineComponent({
         )
         const result = await response.json()
         professionalOptions.value = (result.data || result).map((item: any) => ({
-          label: item.name,
+          label: item.professional_name,
           value: item.id
         }))
       } catch (error) {
@@ -184,6 +191,7 @@ export default defineComponent({
       organization_id: '',
       position_id: '',
       address:'',
+      is_active:false,
     })
 
     const formDataFilter = ref({
@@ -204,6 +212,7 @@ export default defineComponent({
         organization_id: '',
         position_id: null,
         address:'',
+        is_active:true,
       }
       isModalOpen.value = true
     }
