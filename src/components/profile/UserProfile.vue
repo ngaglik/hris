@@ -38,7 +38,7 @@
                   <p><small><strong>ID: </strong></small></p>{{ profileEmployee.id }}
                   <p><small><strong>NIP: </strong></small></p>{{ profileEmployee.national_employee_id_number }}
                   <p><small><strong>Unit kerja: </strong></small></p>{{ profileEmployee.organization_name }}
-                  <p><small><strong>Jabatan: </strong></small></p>{{ displayPosition }}
+                  <p><small><strong>Jabatan: </strong></small></p>{{position_id }}
                   <p><small><strong>Lokasi: </strong></small></p>{{ profileEmployee.location_name }}
                 </div>
             </n-card>
@@ -130,8 +130,7 @@
         <n-form-item label="NIP">
           <n-input v-model:value="profilePerson.national_employee_id_number" />
         </n-form-item>
-        <n-form-item label="Status Perkawinan (Gaji)">
-         
+        <n-form-item label="Status Perkawinan (Gaji)">         
                 <n-select
                   v-model:value="profilePerson.payment_marital_id"
                   :options="maritalPaymentOptions"

@@ -94,6 +94,13 @@ export default defineComponent({
         message.error('Gagal memuat employee_category')
       }
     }
+    const getEmployeeCategoryLabel = (value: string | number | null | undefined) => {
+      if (value == null) return '-'
+      const option = employeeCategoryOptions.value.find(
+        o => String(o.value) === String(value)
+      )
+      return option?.label ?? '-'
+    }
 
     const organizationOptions = ref<any[]>([])
     const fetchOrganizationOptions = async () => {
@@ -116,6 +123,23 @@ export default defineComponent({
         message.error('Gagal memuat organizationOptions')
       }
     }
+    const getOrganizationLabel = (value: string | number | null | undefined) => {
+      if (value == null) return '-'
+      const option = organizationOptions.value.find(
+        o => String(o.value) === String(value)
+      )
+      return option?.label ?? '-'
+    }
+
+    const onOrganizationChange = (orgId: number | null) => {
+      formData.position_id = null; // reset jabatan saat unit berubah
+
+      if (orgId) {
+        fetchPositionOptions(orgId)
+      } else {
+        positionOptions.value = [] // kosongkan kalau tidak ada unit
+      }
+    }
 
     const positionOptions = ref<any[]>([])
     const fetchPositionOptions = async (orgId) => {
@@ -136,7 +160,7 @@ export default defineComponent({
     }
     const getPositionLabel = (value: string | number | null | undefined) => {
       if (value == null) return '-'
-      const option = maritalPaymentOptions.value.find(
+      const option = positionOptions.value.find(
         o => String(o.value) === String(value)
       )
       return option?.label ?? '-'
@@ -158,6 +182,13 @@ export default defineComponent({
         console.error(error)
         message.error('Gagal memuat professionalOptions')
       }
+    }
+    const getProfessionalLabel = (value: string | number | null | undefined) => {
+      if (value == null) return '-'
+      const option = professionalOptions.value.find(
+        o => String(o.value) === String(value)
+      )
+      return option?.label ?? '-'
     }
 
     const genderOptions = [
@@ -300,10 +331,10 @@ export default defineComponent({
       { title: 'Name', key: 'name', fixed: 'left' },
       { title: 'EmployeeId', key: 'id' },
       { title: 'NIP', key: 'national_employee_id_number' },
-      { title: 'Status Pegawai', key: 'employee_category_name' },
-      { title: 'Jabatan profesi', key: 'professional_name' },
-      { title: 'Unit kerja', key: 'organization_name' },
-      { title: 'Jabatan manajerial', key: 'position_name' },
+      { title: 'Status Pegawai', key: 'employee_category_name' ,  render: (row: any) => getEmployeeCategoryLabel(row.employee_category_id)},
+      { title: 'Jabatan profesi', key: 'professional_name',  render: (row: any) => getProfessionalLabel(row.professional_id)},
+      { title: 'Unit kerja', key: 'organization_name',  render: (row: any) => getOrganizationLabel(row.organization_id)},
+      { title: 'Jabatan manajerial', key: 'position_name' , render: (row: any) => getPositionLabel(row.position_id)},
       { title: 'PersonId', key: 'person_id' },
       { title: 'NIK', key: 'national_id_number' },
       { title: 'Tgl Lahir', key: 'birth_date' },
@@ -395,7 +426,8 @@ export default defineComponent({
       positionOptions,
       fetchPositionOptions,
       professionalOptions,
-      fetchProfessionalOptions
+      fetchProfessionalOptions,
+      onOrganizationChange
     }
   }
 })

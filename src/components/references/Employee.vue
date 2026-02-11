@@ -96,6 +96,7 @@
           <n-select
             v-model:value="formData.organization_id"
             :options="organizationOptions"
+            @update:value="onOrganizationChange"
             placeholder=""
             clearable
           />

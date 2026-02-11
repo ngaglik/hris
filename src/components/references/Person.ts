@@ -235,7 +235,7 @@ export default defineComponent({
 
     // table columns
     const columns = [
-      
+      { title: 'ID', key: 'id', fixed: 'left'},
       { title: 'Name', key: 'name', fixed: 'left'},
       { title: 'NIK', key: 'national_id_number' },
       { title: 'Tgl Lahir', key: 'birth_date' },

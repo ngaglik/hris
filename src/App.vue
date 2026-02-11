@@ -1,8 +1,19 @@
 <template>
   <n-config-provider :locale="idID" :date-locale="dateId">
-    <Login v-if="!isLoggedIn" @login-success="isLoggedIn = true" />
 
-    <template v-else>
+    <!-- LOADING STATE -->
+    <div v-if="!isAuthChecked" class="auth-loading">
+      <n-spin size="large" />
+    </div>
+
+    <!-- UNAUTH STATE -->
+    <Login
+      v-else-if="authState === AuthState.UNAUTH"
+      @login-success="onLoginSuccess"
+    />
+
+    <!-- AUTH STATE -->
+    <template v-else-if="authState === AuthState.AUTH">
       <n-layout class="app-layout">
 
         <!-- MOBILE TOP BAR -->
@@ -18,8 +29,9 @@
           </span>
           <div style="flex:1"></div>
           <n-space align="center" size="small">          
-            <n-button text size="small" @click="changeTheme">{{ theme === null ? 'Dark' : 'Light' }}</n-button> 
-            <!--<n-button text size="small" @click="changeLang">{{ showLang }}</n-button> -->
+            <n-button text size="small" @click="changeTheme">
+              {{ theme === null ? 'Dark' : 'Light' }}
+            </n-button> 
             <ProfileBar @logout="handleLogout"/>          
           </n-space>
         </div>
@@ -34,8 +46,9 @@
             </span>
           </div>
           <n-space align="center" size="small">          
-            <n-button text size="small" @click="changeTheme">{{ theme === null ? 'Dark' : 'Light' }}</n-button> 
-            <!--<n-button text size="small" @click="changeLang">{{ showLang }}</n-button> -->
+            <n-button text size="small" @click="changeTheme">
+              {{ theme === null ? 'Dark' : 'Light' }}
+            </n-button> 
             <ProfileBar @logout="handleLogout"/>          
           </n-space>
         </div>
@@ -75,11 +88,12 @@
 
       </n-layout>
     </template>
+
   </n-config-provider>
 </template>
 
-
 <script src="./App.ts"/>
+
 <style scoped>
 .app-layout {
   height: 100vh;
