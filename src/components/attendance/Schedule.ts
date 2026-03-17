@@ -23,6 +23,39 @@ export default defineComponent({
     const scheduleTypeOptions = ref<any[]>([])
     const scheduleGroupOptions = ref<any[]>([])
 
+    const handleSaveSchedule = async () => {
+    try {
+      loading.value = true
+
+      for (const row of tableData.value) {
+        await apiFetch(
+          `${Config.UrlBackend}/api/attendance/schedule/${row.id_seq}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              schedule_type_id: row.schedule_type_id,
+              schedule_group_id: row.schedule_group_id,
+              schedule_date: row.schedule_date
+            })
+          }
+        )
+      }
+
+      message.success("Jadwal berhasil diperbarui")
+      isModalOpen.value = false
+      fetchData(current.value)
+
+    } catch (err) {
+      console.error(err)
+      message.error("Gagal menyimpan perubahan")
+    } finally {
+      loading.value = false
+    }
+  }
+
     const fetchScheduleType = async () => {
       try {
         const res = await apiFetch(`${Config.UrlBackend}/api/option/schedule_type`)
@@ -40,21 +73,28 @@ export default defineComponent({
       try {
         let auth = getAuthData()
         if (!auth) {
-          logout();
-          return null;
+          logout()
+          return null
         }
-        let token = auth?.token
-        let session = auth?.session
-        let employeeId = auth?.employee?.[0].id
+
         let tags = auth?.employee?.[0].tags
 
-        const res = await apiFetch(`${Config.UrlBackend}/api/option/schedule_group/${tags}/true`)
+        const res = await apiFetch(
+          `${Config.UrlBackend}/api/option/schedule_group/${tags}/true`
+        )
         const result = await res.json()
 
-        scheduleGroupOptions.value = result.data.map((x: any) => ({
-          label: x.name,
-          value: x.id
-        }))
+        scheduleGroupOptions.value = [
+          {
+            label: "Libur",
+            value: 5
+          },
+          ...result.data.map((x: any) => ({
+            label: x.name,
+            value: x.id
+          }))
+        ]
+
       } catch (error) {
         console.error("Error loading schedule group", error)
       }
@@ -104,6 +144,42 @@ export default defineComponent({
       current.value = page
       fetchData(page)
     }
+
+    const updateScheduleField = async (row: any, field: string, value: any) => {
+    try {
+      row._updating = true
+
+      const response = await apiFetch(
+        `${Config.UrlBackend}/api/attendance/schedule/${row.id_seq}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            [field]: value
+          })
+        }
+      )
+
+      // ✅ cek status code
+      if (!response.ok) {
+          const errorData = await response.json().catch(() => null)
+          throw new Error(
+            errorData?.message || 
+            `Server error (${response.status})`
+          )
+      }
+
+      message.success("Berhasil diupdate")
+
+    } catch (err: any) {
+      console.error(err)
+      message.error(err.message || "Gagal update")
+    } finally {
+      row._updating = false
+    }
+  }
 
     const columns = [      
       {
@@ -217,20 +293,22 @@ export default defineComponent({
         key: 'schedule_type_name',
         render(row) {
           return h(NSelect, {
-          value: row.schedule_type_id,
-          options: scheduleTypeOptions.value,
-          onUpdateValue(v) {
-            row.schedule_type_id = v
-          },
-          style: "width: 120px"
-        })
+            value: row.schedule_type_id,
+            options: scheduleTypeOptions.value,
+            disabled: row._updating,
+            async onUpdateValue(v) {
+              row.schedule_type_id = v
+              await updateScheduleField(row, "schedule_type_id", v)
+            },
+            style: "width: 120px"
+          })
         },
         headerCellProps: {
           style: { fontWeight: 'bold' }
         },
         cellProps: () => ({
           style: {
-            width: '90px',  
+            width: '90px',
             verticalAlign: 'top'
           }
         })
@@ -240,20 +318,22 @@ export default defineComponent({
         key: 'schedule_group_name',
         render(row) {
           return h(NSelect, {
-          value: row.schedule_group_id,
-          options: scheduleGroupOptions.value,
-          onUpdateValue(v) {
-            row.schedule_group_id = v
-          },
-          style: "width: 140px"
-        })
+            value: row.schedule_group_id,
+            options: scheduleGroupOptions.value,
+            disabled: row._updating,
+            async onUpdateValue(v) {
+              row.schedule_group_id = v
+              await updateScheduleField(row, "schedule_group_id", v)
+            },
+            style: "width: 140px"
+          })
         },
         headerCellProps: {
           style: { fontWeight: 'bold' }
         },
         cellProps: () => ({
           style: {
-            width: '100px',  
+            width: '100px',
             verticalAlign: 'top'
           }
         })

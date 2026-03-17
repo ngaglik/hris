@@ -1,194 +1,225 @@
-import { Config } from '@/constant/config'
+import { Config } from "@/constant/config";
 import { getAuthData, saveAuthData, logout } from "@/services/authService";
-import { NConfigProvider } from 'naive-ui'
-import { defineComponent, ref, computed, onMounted, watch } from 'vue'
-import { idID, dateId } from './locales/idID'
+import { NConfigProvider } from "naive-ui";
+import { defineComponent, ref, computed, onMounted, watch } from "vue";
+import { idID, dateId } from "./locales/idID";
 import {
   useMessage,
   useDialog,
   useNotification,
   useLoadingBar,
-  MenuOption
-} from 'naive-ui'
-import { LAYOUT_ITEMS } from '@/constant/constant'
-import { useRouter } from 'vue-router'
-import useConfig from '@/hooks/useConfig'
-import ProfileBar from '@/components/ProfileBar.vue'
-import Login from '@/components/Login.vue'
+  MenuOption,
+} from "naive-ui";
+import { LAYOUT_ITEMS } from "@/constant/constant";
+import { useRouter, useRoute } from "vue-router";
+import useConfig from "@/hooks/useConfig";
+import ProfileBar from "@/components/ProfileBar.vue";
+import Login from "@/components/Login.vue";
 
 // =====================
 // Types
 // =====================
 type MenuItem = MenuOption & {
-  children?: MenuItem[]
-}
+  children?: MenuItem[];
+};
 
 // =====================
 // Auth State Machine
 // =====================
 enum AuthState {
-  INIT = 'INIT',
-  CHECKING = 'CHECKING',
-  AUTH = 'AUTH',
-  UNAUTH = 'UNAUTH',
-  LOGOUT = 'LOGOUT',
-  ERROR = 'ERROR'
+  INIT = "INIT",
+  CHECKING = "CHECKING",
+  AUTH = "AUTH",
+  UNAUTH = "UNAUTH",
+  LOGOUT = "LOGOUT",
+  ERROR = "ERROR",
 }
 
 // =====================
 // Utils
 // =====================
-function removeNodeByKey(
-  items: MenuItem[],
-  keyToRemove: string
-): MenuItem[] {
+function removeNodeByKey(items: MenuItem[], keyToRemove: string): MenuItem[] {
   return items
-    .filter(item => item.key !== keyToRemove)
-    .map(item => ({
+    .filter((item) => item.key !== keyToRemove)
+    .map((item) => ({
       ...item,
       children: item.children
         ? removeNodeByKey(item.children as MenuItem[], keyToRemove)
-        : undefined
-    }))
+        : undefined,
+    }));
+}
+
+// Kumpulkan semua key yang merupakan leaf (punya route nyata)
+function collectLeafKeys(items: MenuItem[]): Set<string> {
+  const keys = new Set<string>();
+  const walk = (list: MenuItem[]) => {
+    for (const item of list) {
+      if (item.children && item.children.length > 0) {
+        walk(item.children as MenuItem[]);
+      } else if (item.key) {
+        keys.add(item.key as string);
+      }
+    }
+  };
+  walk(items);
+  return keys;
 }
 
 export default defineComponent({
-  name: 'App',
+  name: "App",
   components: {
     ProfileBar,
     Login,
   },
 
   setup() {
-    const router = useRouter()
+    const router = useRouter();
+    const route = useRoute();
 
     // =====================
     // UI State
     // =====================
-    const collapsed = ref(false)
-    const activeName = ref('/')
-    const layoutOptions = ref<MenuOption[]>([])
+    const collapsed = ref(false);
+    const activeName = ref("/");
+    const layoutOptions = ref<MenuOption[]>([]);
 
     // =====================
     // Auth State Machine
     // =====================
-    const authState = ref<AuthState>(AuthState.INIT)
+    const authState = ref<AuthState>(AuthState.INIT);
 
-    const isLoggedIn = computed(() => authState.value === AuthState.AUTH)
-    const isAuthChecked = computed(() =>
-      ![AuthState.INIT, AuthState.CHECKING].includes(authState.value)
-    )
+    const isLoggedIn = computed(() => authState.value === AuthState.AUTH);
+    const isAuthChecked = computed(
+      () => ![AuthState.INIT, AuthState.CHECKING].includes(authState.value),
+    );
 
     // =====================
     // UI Utilities
     // =====================
-    window.$message = useMessage()
-    window.$dialog = useDialog()
-    window.$notification = useNotification()
-    window.$loadingBar = useLoadingBar()
+    window.$message = useMessage();
+    window.$dialog = useDialog();
+    window.$notification = useNotification();
+    window.$loadingBar = useLoadingBar();
 
     // =====================
     // Config
     // =====================
-    const { theme, lang, changeTheme, changeLang } = useConfig()
-    const showLang = computed(() => lang.value.name === 'id-ID' ? 'Bahasa' : 'English')
+    const { theme, lang, changeTheme, changeLang } = useConfig();
+    const showLang = computed(() =>
+      lang.value.name === "id-ID" ? "Bahasa" : "English",
+    );
 
     // =====================
     // Auth Actions
     // =====================
     const checkAuth = async () => {
-      authState.value = AuthState.CHECKING
+      authState.value = AuthState.CHECKING;
       try {
-        const auth = getAuthData()
+        const auth = getAuthData();
         if (auth?.token) {
-          authState.value = AuthState.AUTH
+          authState.value = AuthState.AUTH;
         } else {
-          authState.value = AuthState.UNAUTH
+          authState.value = AuthState.UNAUTH;
         }
       } catch (e) {
-        console.error('Auth check error', e)
-        authState.value = AuthState.ERROR
+        console.error("Auth check error", e);
+        authState.value = AuthState.ERROR;
       }
-    }
-
-
+    };
 
     const onLoginSuccess = async () => {
-      await checkAuth()   // ⬅ masuk ulang ke state machine
-    }
+      await checkAuth(); // ⬅ masuk ulang ke state machine
+    };
 
     const doLogout = async () => {
-      authState.value = AuthState.LOGOUT
-      logout()
-      authState.value = AuthState.UNAUTH
-    }
+      authState.value = AuthState.LOGOUT;
+      logout();
+      authState.value = AuthState.UNAUTH;
+    };
 
     // =====================
     // Menu Builder
     // =====================
     const buildMenu = () => {
-      const auth = getAuthData()
-      if (!auth?.token) return []
+      const auth = getAuthData();
+      if (!auth?.token) return [];
 
-      let menu: MenuItem[] = JSON.parse(JSON.stringify(LAYOUT_ITEMS))
-      const emp = auth.employee?.[0]
+      let menu: MenuItem[] = JSON.parse(JSON.stringify(LAYOUT_ITEMS));
+      const emp = auth.employee?.[0];
 
-      if (!emp?.tags?.includes('OSDM')) {
-        menu = removeNodeByKey(menu, '/administrator')
+      if (!emp?.tags?.includes("OSDM")) {
+        menu = removeNodeByKey(menu, "/administrator");
       }
 
       if (emp?.id !== 381) {
-        menu = removeNodeByKey(menu, '/selfservices')
+        menu = removeNodeByKey(menu, "/selfservices");
         if (emp?.employee_category_id !== 17) {
-          menu = removeNodeByKey(menu, '/Attendance')
+          menu = removeNodeByKey(menu, "/Attendance");
         }
       }
 
-      return menu
-    }
+      return menu;
+    };
 
     // =====================
     // Watch Auth State
     // =====================
     watch(authState, (state) => {
       if (state === AuthState.AUTH) {
-        layoutOptions.value = buildMenu()
+        layoutOptions.value = buildMenu();
       }
 
       if (state === AuthState.UNAUTH) {
-        layoutOptions.value = []
+        layoutOptions.value = [];
       }
 
       if (state === AuthState.ERROR) {
-        layoutOptions.value = []
+        layoutOptions.value = [];
       }
-    })
+    });
 
     // =====================
     // Handlers
     // =====================
     const handleMenuSelect = (value: string) => {
-      activeName.value = value
-      router.push({ path: value })
-    }
+      activeName.value = value;
+      // Hanya push jika key adalah leaf (bukan parent menu tanpa route)
+      const leafKeys = collectLeafKeys(layoutOptions.value as MenuItem[]);
+      if (leafKeys.has(value)) {
+        router.push({ path: value }).catch(() => {
+          /* route tidak ditemukan */
+        });
+      }
+    };
 
     const handleLogout = async () => {
-      await doLogout()
-    }
+      await doLogout();
+    };
 
     // =====================
     // Lifecycle
     // =====================
     onMounted(async () => {
-      await checkAuth()
+      await checkAuth();
 
-      // responsive sidebar
+      // Sync activeName dengan route yang sedang aktif
+      activeName.value = route.path;
+
+      // Responsive sidebar
       const handleResize = () => {
-        collapsed.value = window.innerWidth < 768
-      }
-      handleResize()
-      window.addEventListener('resize', handleResize)
-    })
+        collapsed.value = window.innerWidth < 768;
+      };
+      handleResize();
+      window.addEventListener("resize", handleResize);
+    });
+
+    // Sync activeName setiap kali route berubah (misal back/forward browser)
+    watch(
+      () => route.path,
+      (path) => {
+        activeName.value = path;
+      },
+    );
 
     return {
       // ui
@@ -218,7 +249,7 @@ export default defineComponent({
       dateId,
 
       // enum
-      AuthState
-    }
+      AuthState,
+    };
   },
-})
+});

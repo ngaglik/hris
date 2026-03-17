@@ -28,7 +28,12 @@
                   @update:value="handleShowData"
                 />
               </n-form-item>
-
+              <n-form-item>
+                <n-button @click="handleShowData">
+                  Tampilkan
+                </n-button>
+              </n-form-item>
+              
               <div style="flex:1"></div>
 
               <n-form-item>

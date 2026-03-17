@@ -10,6 +10,7 @@ export const apiFetch = async (url: string, options: any = {}) => {
 
   options.headers["Authorization"] = `Bearer ${token}`;
   if (auth?.session) options.headers["uSession"] = auth.session;
+  if (Config.AppId) options.headers["AppId"] = Config.AppId;
 
   let response = await fetch(url, options);
 
@@ -25,6 +26,7 @@ export const apiFetch = async (url: string, options: any = {}) => {
     // Retry request dengan token baru
     auth = getAuthData();
     options.headers["Authorization"] = `Bearer ${auth.token}`;
+    if (Config.AppId) options.headers["AppId"] = Config.AppId;
 
     response = await fetch(url, options);
   }
@@ -43,7 +45,7 @@ export const refreshToken = async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         refreshToken: auth.refreshToken,
-        appId: Config.AppId
+        appId: Config.AppId,
       }),
     });
 
@@ -54,12 +56,11 @@ export const refreshToken = async () => {
     saveAuthData({
       token: data.accessToken,
       refreshToken: data.refreshToken,
-      session: auth.session
+      session: auth.session,
     });
 
     console.log("Token refreshed!");
     return true;
-
   } catch (error) {
     console.error("Refresh error:", error);
     return false;

@@ -16,7 +16,7 @@
         >
           <n-button
             type="primary"
-            :loading="loading"
+            :loading="loadingCheckIn"
             block
             @click="CheckIn"
           >
@@ -25,7 +25,7 @@
 
           <n-button
             type="warning"
-            :loading="loading"
+            :loading="loadingCheckout"
             block
             @click="CheckOut"
           >
