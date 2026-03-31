@@ -1,370 +1,318 @@
-import { defineComponent, ref, h } from 'vue'
-import { useMessage,useDialog, NButton, NDatePicker, NSelect } from 'naive-ui'
-import { Config, generalOptions, dictHari } from '@/constant/config'
-import { apiFetch } from "@/services/apiClient"
-import { getAuthData, saveAuthData, logout } from "@/services/authService"
+import { defineComponent, ref, h } from "vue";
+import { useMessage, NSelect } from "naive-ui";
+import {
+  Config,
+  generalOptions,
+  dictHari,
+  scheduleTypeStyle,
+} from "@/constant/config";
+import { apiFetch } from "@/services/apiClient";
+import { getAuthData, logout } from "@/services/authService";
 
 export default defineComponent({
   setup() {
-    const message = useMessage()
-    const inputSearch = ref('')
-    
-    const tableData = ref([])
-    const current = ref(1)
-    const pageSize = ref(100)
-    const total = ref(0)
-    const loading = ref(false)
+    const message = useMessage();
+
+    const tableData = ref<any[]>([]);
+    const current = ref(1);
+    const pageSize = ref(100);
+    const total = ref(0);
+    const loading = ref(false);
     const formFilter = ref({
-      id: null,
       year: new Date().getFullYear(),
       month: new Date().getMonth() + 1,
-    })
-    const isModalOpen = ref(false)
-    const scheduleTypeOptions = ref<any[]>([])
-    const scheduleGroupOptions = ref<any[]>([])
+    });
 
-    const handleSaveSchedule = async () => {
-    try {
-      loading.value = true
+    const scheduleTypeOptions = ref<any[]>([]);
+    const scheduleGroupOptions = ref<any[]>([]);
 
-      for (const row of tableData.value) {
-        await apiFetch(
-          `${Config.UrlBackend}/api/attendance/schedule/${row.id_seq}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              schedule_type_id: row.schedule_type_id,
-              schedule_group_id: row.schedule_group_id,
-              schedule_date: row.schedule_date
-            })
-          }
-        )
-      }
-
-      message.success("Jadwal berhasil diperbarui")
-      isModalOpen.value = false
-      fetchData(current.value)
-
-    } catch (err) {
-      console.error(err)
-      message.error("Gagal menyimpan perubahan")
-    } finally {
-      loading.value = false
-    }
-  }
+    // ─── Fetch Options ────────────────────────────────────────────────────────
 
     const fetchScheduleType = async () => {
       try {
-        const res = await apiFetch(`${Config.UrlBackend}/api/option/schedule_type`)
-        const result = await res.json()
-
-        scheduleTypeOptions.value = result.data.map((x: any) => ({
-          label: x.name,
-          value: x.id
-        }))
-      } catch (error) {
-        console.error("Error loading schedule type", error)
+        const res = await apiFetch(
+          `${Config.UrlBackend}/api/option/schedule_type`,
+        );
+        if (!res || !res.ok) return;
+        const result = await res.json();
+        scheduleTypeOptions.value = (result.data ?? result.Data ?? []).map(
+          (x: any) => ({
+            label: x.name,
+            value: x.id,
+          }),
+        );
+      } catch (err) {
+        console.error("Error loading schedule type", err);
       }
-    }
+    };
+
     const fetchScheduleGroup = async () => {
       try {
-        let auth = getAuthData()
+        const auth = getAuthData();
         if (!auth) {
-          logout()
-          return null
+          logout();
+          return;
         }
-
-        let tags = auth?.employee?.[0].tags
-
+        const tags = auth?.employee?.[0]?.tags;
         const res = await apiFetch(
-          `${Config.UrlBackend}/api/option/schedule_group/${tags}/true`
-        )
-        const result = await res.json()
-
+          `${Config.UrlBackend}/api/option/schedule_group/${tags}/true`,
+        );
+        if (!res || !res.ok) return;
+        const result = await res.json();
         scheduleGroupOptions.value = [
-          {
-            label: "Libur",
-            value: 5
-          },
-          ...result.data.map((x: any) => ({
+          //{ label: "Libur", value: 0 },
+          ...(result.data ?? result.Data ?? []).map((x: any) => ({
             label: x.name,
-            value: x.id
-          }))
-        ]
-
-      } catch (error) {
-        console.error("Error loading schedule group", error)
+            value: x.id,
+          })),
+        ];
+      } catch (err) {
+        console.error("Error loading schedule group", err);
       }
-    }
+    };
+
+    // ─── Fetch Data ───────────────────────────────────────────────────────────
 
     const fetchData = async (page = 1) => {
-      let auth = getAuthData()
+      const auth = getAuthData();
       if (!auth) {
         logout();
-        return null;
+        return;
       }
-      let token = auth?.token
-      let session = auth?.session
-      let employeeId = auth?.employee?.[0].id
+      const employeeId = auth?.employee?.[0]?.id;
 
-      loading.value = true      
-      const response = await apiFetch(`${Config.UrlBackend}/api/attendance/getschedule?employeeId=${employeeId}&year=${formFilter.value.year}&month=${formFilter.value.month}&page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`, {
-        method: "GET"
-      });
-      if (!response.ok) return false;
-      const result = await response.json()
-      tableData.value = result.data
-      current.value = result.page
-      total.value = result.total
-      loading.value = false
-    }
+      loading.value = true;
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/attendance/getschedule` +
+            `?employeeId=${employeeId}` +
+            `&year=${formFilter.value.year}` +
+            `&month=${formFilter.value.month}` +
+            `&page=${page}` +
+            `&pageSize=${pageSize.value}`,
+          { method: "GET" },
+        );
 
-    const handleEditData = () => {
-      fetchScheduleType()
-      fetchScheduleGroup()
-      isModalOpen.value = true
-    }
+        if (!response || !response.ok) {
+          message.error(
+            `Gagal memuat data jadwal (${response?.status ?? "error"})`,
+          );
+          return;
+        }
 
-    const closeModal = () => {
-      isModalOpen.value = false
-    }
-     
+        const result = await response.json();
+        tableData.value = result.data ?? result.Data ?? [];
+        current.value = result.page ?? result.Page ?? page;
+        total.value = result.total ?? result.Total ?? 0;
+      } catch (err: any) {
+        message.error(`Gagal memuat data jadwal: ${err?.message ?? err}`);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    // ─── Handlers ─────────────────────────────────────────────────────────────
+
+    /** Tampilkan — selalu mulai dari halaman 1 agar filter langsung berlaku */
     const handleShowData = () => {
-      fetchData(current.value)
-    }
+      current.value = 1;
+      fetchData(1);
+    };
 
-    const onUpdateValue = (row: any) => {
-      formData.value = { ...row }
-    }
-
-    const handlePageChange = (page) => {
-      current.value = page
-      fetchData(page)
-    }
+    const handlePageChange = (page: number) => {
+      current.value = page;
+      fetchData(page);
+    };
 
     const updateScheduleField = async (row: any, field: string, value: any) => {
-    try {
-      row._updating = true
+      try {
+        row._updating = true;
 
-      const response = await apiFetch(
-        `${Config.UrlBackend}/api/attendance/schedule/${row.id_seq}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            [field]: value
-          })
+        // ✅ auto mapping
+        if (field === "schedule_group_id" && value === 0) {
+          row.schedule_type_id = 5;
         }
-      )
 
-      // ✅ cek status code
-      if (!response.ok) {
-          const errorData = await response.json().catch(() => null)
-          throw new Error(
-            errorData?.message || 
-            `Server error (${response.status})`
-          )
-      }
+        if (field === "schedule_type_id" && value === 5) {
+          row.schedule_group_id = 0;
+        }
 
-      message.success("Berhasil diupdate")
-
-    } catch (err: any) {
-      console.error(err)
-      message.error(err.message || "Gagal update")
-    } finally {
-      row._updating = false
-    }
-  }
-
-    const columns = [      
-      {
-        title: 'Tanggal',
-        key: 'schedule_date',
-        render(row) {
-          return row.schedule_date
-        },
-        cellProps: () => ({
-          style: {
-            backgroundColor: '#d9fdd3'   // hijau muda
+        if (field === "schedule_type_id" && value === 1) {
+          const firstGroup = scheduleGroupOptions.value?.[0];
+          if (firstGroup) {
+            row.schedule_group_id = firstGroup.value; // pilihan pertama
           }
-        })
+        }
+        // update value utama
+        row[field] = value;
+
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/attendance/schedule/${row.id_seq}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              [field]: value,
+              schedule_group_id: row.schedule_group_id,
+              schedule_type_id: row.schedule_type_id,
+            }),
+          },
+        );
+
+        if (!response || !response.ok) {
+          const errData = await response?.json().catch(() => null);
+          throw new Error(
+            errData?.message || `Server error (${response?.status})`,
+          );
+        }
+
+        message.success("Berhasil diupdate");
+      } catch (err: any) {
+        console.error(err);
+        message.error(err?.message || "Gagal update");
+      } finally {
+        row._updating = false;
+      }
+    };
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+
+    /** Kembalikan nama hari dalam Bahasa Indonesia dengan null-safe trim */
+    const getDayLabel = (dayName: string | null | undefined): string => {
+      const raw = dayName?.trim() ?? "";
+      return dictHari.get(raw) ?? raw;
+    };
+
+    const isWeekend = (dayName: string | null | undefined): boolean => {
+      const raw = dayName?.trim() ?? "";
+      return raw === "Saturday" || raw === "Sunday";
+    };
+
+    // ─── Kolom tampilan normal ────────────────────────────────────────────────
+
+    const columns = [
+      {
+        title: "Tanggal",
+        key: "schedule_date",
+        render: (row: any) => row.schedule_date ?? "-",
+        cellProps: () => ({ style: { backgroundColor: "#d9fdd3" } }),
       },
       {
-        title: 'Hari',
-        key: 'day_name',
-        render(row) {
-          const dayName = dictHari.get(row.day_name.trim()) ?? row.day_name
-          const isWeekend = row.day_name.trim() === 'Sunday'
-
-          return h(
-            'span',
+        title: "Hari",
+        key: "day_name",
+        render: (row: any) =>
+          h(
+            "span",
             {
               style: {
-                color: isWeekend ? 'red' : 'inherit',
-                fontWeight: isWeekend ? 'bold' : 'normal'
-              }
+                color: isWeekend(row.day_name) ? "red" : "inherit",
+                fontWeight: isWeekend(row.day_name) ? "bold" : "normal",
+              },
             },
-            dayName
-          )
-        }
+            getDayLabel(row.day_name) || "-",
+          ),
       },
       {
-        title: 'Masuk',
-        key: 'schedule_time_start',
-        render(row) {
-          if (!row.schedule_time_start) return '-'
-          const timeValue = new Date(row.schedule_time_start)
-          if (isNaN(timeValue.valueOf())) return row.schedule_time_start
-
-          return timeValue.toTimeString().slice(0, 5) // HH:MM
-        }
-      },
-      {
-        title: 'Pulang',
-        key: 'schedule_time_end',
-        render(row) {
-          if (!row.schedule_time_end) return '-'
-          const timeValue = new Date(row.schedule_time_end)
-          if (isNaN(timeValue.valueOf())) return row.schedule_time_end
-
-          return timeValue.toTimeString().slice(0, 5) // HH:MM
-        }
-      },
-      {
-        title: 'Ket',
-        key: 'schedule_type_name'
-      }
-    ]
-
-    const columnsEdit = [      
-      {
-        title: 'Tanggal / Hari',
-        key: 'tanggal_hari',
-        render(row) {
-          const hari = dictHari.get(row.day_name.trim()) ?? row.day_name
-          const merah = hari === 'Sabtu' || hari === 'Minggu'
-
-          return h(
-            'div',
-            {
-              style: 'display:flex; flex-direction:column; gap:0px;'
-            },
-            [
-              // Input tanggal editable
-              h('input', {
-                type: 'text',
-                value: row.schedule_date || '',
-                style:
-                  'width: 80px; padding: 4px; border: 1px solid #ccc; border-radius: 4px;',
-                onInput: (e) => {
-                  row.schedule_date = e.target.value
-                }
-              }),
-
-              // Nama hari
-              h(
-                'span',
-                {
-                  style: {
-                    fontSize: '10px',
-                    color: merah ? 'red' : 'inherit',
-                    fontWeight: merah ? 'bold' : 'normal'
-                  }
-                },
-                hari
-              )
-            ]
-          )
+        title: "Masuk",
+        key: "schedule_time_start",
+        render: (row: any) => {
+          if (!row.schedule_time_start) return "-";
+          const t = new Date(row.schedule_time_start);
+          return isNaN(t.valueOf())
+            ? row.schedule_time_start
+            : t.toTimeString().slice(0, 5);
         },
-        cellProps: () => ({
-          style: {
-            width: '80px',   // hijau muda
-            backgroundColor: '#d9fdd3'   // hijau muda
-          }
-        })
-      },      
+      },
       {
-        title: 'Ket',
-        key: 'schedule_type_name',
-        render(row) {
-          return h(NSelect, {
+        title: "Pulang",
+        key: "schedule_time_end",
+        render: (row: any) => {
+          if (!row.schedule_time_end) return "-";
+          const t = new Date(row.schedule_time_end);
+          return isNaN(t.valueOf())
+            ? row.schedule_time_end
+            : t.toTimeString().slice(0, 5);
+        },
+      },
+
+      {
+        title: "Ket",
+        key: "schedule_type_name",
+        render: (row: any) =>
+          h(NSelect, {
             value: row.schedule_type_id,
             options: scheduleTypeOptions.value,
-            disabled: row._updating,
-            async onUpdateValue(v) {
-              row.schedule_type_id = v
-              await updateScheduleField(row, "schedule_type_id", v)
+            disabled: !!row._updating,
+            renderLabel: (option: any) => {
+              const st = scheduleTypeStyle[option.value as number];
+              return h(
+                "div",
+                { style: "display:flex;align-items:center;gap:6px" },
+                [
+                  h("span", {
+                    style: `width:8px;height:8px;border-radius:50%;background:${st?.dot ?? "#d9d9d9"};display:inline-block;flex-shrink:0`,
+                  }),
+                  h("span", option.label as string),
+                ],
+              );
             },
-            style: "width: 120px"
-          })
-        },
-        headerCellProps: {
-          style: { fontWeight: 'bold' }
-        },
-        cellProps: () => ({
+            async onUpdateValue(v: any) {
+              row.schedule_type_id = v;
+              row.schedule_type_name =
+                scheduleTypeOptions.value.find((o) => o.value === v)?.label ??
+                "-";
+              await updateScheduleField(row, "schedule_type_id", v);
+            },
+            style: "width:130px",
+          }),
+        cellProps: (row: any) => ({
           style: {
-            width: '90px',
-            verticalAlign: 'top'
-          }
-        })
+            verticalAlign: "top",
+            backgroundColor:
+              scheduleTypeStyle[row.schedule_type_id]?.bg ?? "transparent",
+          },
+        }),
       },
       {
-        title: 'Jadwal',
-        key: 'schedule_group_name',
-        render(row) {
-          return h(NSelect, {
+        title: "Jadwal",
+        key: "schedule_group_name",
+        render: (row: any) =>
+          h(NSelect, {
             value: row.schedule_group_id,
             options: scheduleGroupOptions.value,
-            disabled: row._updating,
-            async onUpdateValue(v) {
-              row.schedule_group_id = v
-              await updateScheduleField(row, "schedule_group_id", v)
+            disabled: !!row._updating,
+            async onUpdateValue(v: any) {
+              row.schedule_group_id = v;
+              row.schedule_group_name =
+                scheduleGroupOptions.value.find((o) => o.value === v)?.label ??
+                "-";
+              await updateScheduleField(row, "schedule_group_id", v);
             },
-            style: "width: 140px"
-          })
-        },
-        headerCellProps: {
-          style: { fontWeight: 'bold' }
-        },
-        cellProps: () => ({
-          style: {
-            width: '100px',
-            verticalAlign: 'top'
-          }
-        })
-      }
-    ]
+            style: "width:140px",
+          }),
+        cellProps: () => ({ style: { verticalAlign: "top" } }),
+      },
+    ];
 
-    // Fetch data once created
-    fetchData(current.value)
-    
+    // ─── Init ─────────────────────────────────────────────────────────────────
+
+    fetchData(current.value);
+    fetchScheduleType();
+    fetchScheduleGroup();
 
     return {
       columns,
-      columnsEdit,
       tableData,
       current,
       pageSize,
       total,
       loading,
-      inputSearch,
       handleShowData,
-      handleEditData,
       handlePageChange,
       scheduleTypeOptions,
       scheduleGroupOptions,
-
-      isModalOpen,
-      onUpdateValue,
       generalOptions,
-      dictHari,
       formFilter,
-      
-    }
-  }
-})
+    };
+  },
+});

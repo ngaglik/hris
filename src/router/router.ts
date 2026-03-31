@@ -27,7 +27,7 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      component: Profile,
+      component: Attendance,
     },
     {
       path: "/Attendance",

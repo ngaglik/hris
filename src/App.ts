@@ -1,7 +1,14 @@
 import { Config } from "@/constant/config";
 import { getAuthData, saveAuthData, logout } from "@/services/authService";
 import { NConfigProvider } from "naive-ui";
-import { defineComponent, ref, computed, onMounted, watch } from "vue";
+import {
+  defineComponent,
+  ref,
+  computed,
+  onMounted,
+  onUnmounted,
+  watch,
+} from "vue";
 import { idID, dateId } from "./locales/idID";
 import {
   useMessage,
@@ -80,6 +87,7 @@ export default defineComponent({
     // UI State
     // =====================
     const collapsed = ref(false);
+    const isMobile = ref(window.innerWidth < 768);
     const activeName = ref("/");
     const layoutOptions = ref<MenuOption[]>([]);
 
@@ -149,11 +157,15 @@ export default defineComponent({
 
       if (!emp?.tags?.includes("OSDM")) {
         menu = removeNodeByKey(menu, "/administrator");
+        menu = removeNodeByKey(menu, "/performance");
       }
 
       if (emp?.id !== 381) {
         menu = removeNodeByKey(menu, "/selfservices");
-        if (emp?.employee_category_id !== 17) {
+        if (
+          emp?.employee_category_id == 17 ||
+          emp?.employee_category_id == 18
+        ) {
           menu = removeNodeByKey(menu, "/Attendance");
         }
       }
@@ -183,6 +195,10 @@ export default defineComponent({
     // =====================
     const handleMenuSelect = (value: string) => {
       activeName.value = value;
+      // Tutup sidebar otomatis di mobile setelah menu dipilih
+      if (isMobile.value) {
+        collapsed.value = true;
+      }
       // Hanya push jika key adalah leaf (bukan parent menu tanpa route)
       const leafKeys = collectLeafKeys(layoutOptions.value as MenuItem[]);
       if (leafKeys.has(value)) {
@@ -199,6 +215,8 @@ export default defineComponent({
     // =====================
     // Lifecycle
     // =====================
+    let resizeHandler: () => void;
+
     onMounted(async () => {
       await checkAuth();
 
@@ -206,11 +224,18 @@ export default defineComponent({
       activeName.value = route.path;
 
       // Responsive sidebar
-      const handleResize = () => {
-        collapsed.value = window.innerWidth < 768;
+      resizeHandler = () => {
+        const mobile = window.innerWidth < 768;
+        isMobile.value = mobile;
+        // Tutup sidebar otomatis saat layar mengecil ke mobile
+        if (mobile) collapsed.value = true;
       };
-      handleResize();
-      window.addEventListener("resize", handleResize);
+      resizeHandler();
+      window.addEventListener("resize", resizeHandler);
+    });
+
+    onUnmounted(() => {
+      if (resizeHandler) window.removeEventListener("resize", resizeHandler);
     });
 
     // Sync activeName setiap kali route berubah (misal back/forward browser)
@@ -225,6 +250,7 @@ export default defineComponent({
       // ui
       layoutOptions,
       collapsed,
+      isMobile,
       activeName,
 
       // auth

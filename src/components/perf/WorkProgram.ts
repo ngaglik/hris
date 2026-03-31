@@ -118,19 +118,6 @@ export default defineComponent({
     // Map programId -> TaskPanel component proxy
     const taskPanelRefs = new Map<number, any>();
 
-    const handleAddTask = (row: WorkProgram) => {
-      const id = Number(row.id);
-
-      if (!expandedRowKeys.value.includes(id)) {
-        expandedRowKeys.value = [...expandedRowKeys.value, id];
-        nextTick(() => {
-          taskPanelRefs.get(id)?.openAddModal();
-        });
-      } else {
-        taskPanelRefs.get(id)?.openAddModal();
-      }
-    };
-
     // ── Year options ─────────────────────────────────────────────────────────
     const yearOptions = computed(() => {
       const y = new Date().getFullYear();
@@ -297,8 +284,8 @@ export default defineComponent({
       {
         title: "Aksi",
         key: "actions",
-        width: 320,
-        fixed: "right" as const,
+        width: 350,
+        //fixed: "right" as const,
         render: (row: WorkProgram) => {
           const id = Number(row.id);
           const isExpanded = expandedRowKeys.value.includes(id);
@@ -312,8 +299,8 @@ export default defineComponent({
               h(
                 NButton,
                 {
-                  size: "medium",
-                  style: "min-width:44px; font-size:18px; padding: 0 10px;",
+                  size: "small",
+                  type: "primary",
                   title: isExpanded ? "Sembunyikan tugas" : "Tampilkan tugas",
                   onClick: () => {
                     if (isExpanded) {
@@ -325,16 +312,10 @@ export default defineComponent({
                     }
                   },
                 },
-                { default: () => (isExpanded ? "▲" : "▼") },
-              ),
-              h(
-                NButton,
                 {
-                  size: "small",
-                  type: "primary",
-                  onClick: () => handleAddTask(row),
+                  default: () =>
+                    isExpanded ? "▲ Sembunyikan tugas" : "▼ Tampilkan tugas",
                 },
-                { default: () => "+ Tugas" },
               ),
               h(
                 NButton,
