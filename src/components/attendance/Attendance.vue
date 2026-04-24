@@ -36,11 +36,18 @@
         <n-tab-pane name="user" tab="Jadwal">
             <Schedule :employeeId="employeeId" />
         </n-tab-pane>
-        <n-tab-pane name="unit kerja" tab="Checklog">
+        <n-tab-pane name="unit-kerja" tab="Checklog">
             <Checklog />
         </n-tab-pane>
-        <n-tab-pane name="daily" tab="Rincian Kehadiran">
+        <n-tab-pane name="daily" tab="Kehadiran Harian">
             <DailyAttendance />
+        </n-tab-pane>
+        <n-tab-pane
+            v-if="can('attendance.report.view')"
+            name="report"
+            tab="Report Kehadiran"
+        >
+            <AttendanceReport />
         </n-tab-pane>
     </n-tabs>
 </template>

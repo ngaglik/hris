@@ -7,6 +7,8 @@ import Checklog from "./Checklog.vue";
 import Schedule from "./Schedule.vue";
 import DailyAttendance from "./DailyAttendance.vue";
 import AttendanceSummary from "./AttendanceSummary.vue";
+import AttendanceReport from "./AttendanceReport.vue";
+import { can, setPermissions } from "@/services/authPermission";
 
 export default defineComponent({
   components: {
@@ -14,12 +16,14 @@ export default defineComponent({
     Schedule,
     DailyAttendance,
     AttendanceSummary,
+    AttendanceReport,
   },
 
   setup() {
     const message = useMessage();
     const loadingCheckIn = ref(false);
     const loadingCheckOut = ref(false);
+    const showReport = ref(false);
 
     let auth = getAuthData();
     if (!auth) {
@@ -27,7 +31,10 @@ export default defineComponent({
     }
     let token = auth?.token;
     let session = auth?.session;
-    let employeeId = auth?.employee?.[0].id;
+    let employeeId = auth?.employee.id;
+    const emp = auth.employee;
+
+    setPermissions(auth.employee?.privilege ?? []);
 
     const insertFingerlog = async (mode: number) => {
       try {
@@ -87,6 +94,7 @@ export default defineComponent({
       CheckIn,
       CheckOut,
       employeeId,
+      can,
     };
   },
 });

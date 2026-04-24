@@ -258,6 +258,7 @@ export default defineComponent({
         organization_id: "",
         position_id: null,
         address: "",
+        tags: "",
         is_active: true,
       };
       isModalOpen.value = true;
@@ -367,6 +368,7 @@ export default defineComponent({
         key: "position_name",
         render: (row: any) => getPositionLabel(row.position_id),
       },
+      { title: "Tag", key: "tags" },
       { title: "PersonId", key: "person_id" },
       { title: "NIK", key: "national_id_number" },
       { title: "Tgl Lahir", key: "birth_date" },
@@ -374,7 +376,6 @@ export default defineComponent({
       { title: "Alamat", key: "address" },
       { title: "Phone", key: "phone_number" },
       { title: "Email", key: "email" },
-      { title: "Tags", key: "tags" },
       {
         title: "Aksi",
         key: "actions",

@@ -153,7 +153,7 @@ export default defineComponent({
       if (!auth?.token) return [];
 
       let menu: MenuItem[] = JSON.parse(JSON.stringify(LAYOUT_ITEMS));
-      const emp = auth.employee?.[0];
+      const emp = auth.employee;
 
       if (!emp?.tags?.includes("OSDM")) {
         menu = removeNodeByKey(menu, "/administrator");

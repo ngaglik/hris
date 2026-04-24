@@ -61,7 +61,7 @@ export default defineComponent({
         logout();
         return;
       }
-      const employeeId = auth?.employee?.[0]?.id;
+      const employeeId = auth?.employee?.id;
       if (!employeeId) {
         message.error("Data pegawai tidak ditemukan");
         return;

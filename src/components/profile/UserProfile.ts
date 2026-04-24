@@ -1,255 +1,256 @@
-import { defineComponent, ref, computed, onMounted } from 'vue'
-import { useMessage,useDialog, NButton, NDatePicker, NSelect } from 'naive-ui'
-import { Config } from '@/constant/config'
-import { apiFetch } from "@/services/apiClient"
-import { getAuthData, saveAuthData, logout } from "@/services/authService"
-import Education from './Education.vue'
-import Family from './Family.vue'
+import { defineComponent, ref, computed, onMounted } from "vue";
+import { useMessage, useDialog, NButton, NDatePicker, NSelect } from "naive-ui";
+import { Config } from "@/constant/config";
+import { apiFetch } from "@/services/apiClient";
+import { getAuthData, saveAuthData, logout } from "@/services/authService";
+import Education from "./Education.vue";
+import Family from "./Family.vue";
 
 export default defineComponent({
-  components: { Education,Family },
+  components: { Education, Family },
 
   props: {
     employeeId: {
       type: String,
-      default: ''
+      default: "",
     },
     personId: {
       type: String,
-      default: ''
+      default: "",
     },
     familyId: {
       type: String,
-      default: ''
-    }
+      default: "",
+    },
   },
 
   setup(props) {
-    const message = useMessage()
-    const profileEmployee = ref<any>({})
-    const profilePerson = ref<any>({})
-    const tableData = ref<any[]>([])
-    const current = ref(1)
-    const pageSize = ref(50)
-    const total = ref(0)
-    const loading = ref(false)
+    const message = useMessage();
+    const profileEmployee = ref<any>({});
+    const profilePerson = ref<any>({});
+    const tableData = ref<any[]>([]);
+    const current = ref(1);
+    const pageSize = ref(50);
+    const total = ref(0);
+    const loading = ref(false);
 
-    let auth = getAuthData()
+    let auth = getAuthData();
     if (!auth) {
-      logout()
+      logout();
     }
-    let token = auth?.token
-    let session = auth?.session
-    
+    let token = auth?.token;
+    let session = auth?.session;
+
     let persId = computed(() => {
-      const employee = auth?.employee?.[0]
-      return props.personId ||  employee?.personId || ''
-    })
+      const employee = auth?.employee;
+      return props.personId || employee?.personId || "";
+    });
 
     let empId = computed(() => {
-      const employee = auth?.employee?.[0]
+      const employee = auth?.employee;
 
-      return props.employeeId || employee?.id || ''
-    })
+      return props.employeeId || employee?.id || "";
+    });
 
     let famId = computed(() => {
-      const employee = auth?.employee?.[0]
+      const employee = auth?.employee;
 
-      return props.familyId || employee?.familyId || ''
-    })
-    
-    const familyReloadTrigger = ref(0)
+      return props.familyId || employee?.familyId || "";
+    });
+
+    const familyReloadTrigger = ref(0);
 
     const displayPosition = computed(() => {
-      const position = profileEmployee.value?.position_name
-      const professional = profileEmployee.value?.professional_name
+      const position = profileEmployee.value?.position_name;
+      const professional = profileEmployee.value?.professional_name;
 
-      if (position && position.trim() !== '-') {
-        return position
+      if (position && position.trim() !== "-") {
+        return position;
       }
 
-      if (professional && professional.trim() !== '') {
-        return professional
+      if (professional && professional.trim() !== "") {
+        return professional;
       }
 
-      return '-'
-    })
+      return "-";
+    });
 
-
-    const maritalTaxOptions = ref<any[]>([])
+    const maritalTaxOptions = ref<any[]>([]);
     const fetchMaritalTaxOptions = async () => {
-        try {
-          const response = await apiFetch(
-            `${Config.UrlBackend}/api/option/marital_tax`,
-            { method: 'GET' }
-          )
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/marital_tax`,
+          { method: "GET" },
+        );
 
-          const result = await response.json()
+        const result = await response.json();
 
-          // asumsi response:
-          // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
-          maritalTaxOptions.value = (result.data || result).map((item: any) => ({
-            label: item.name,
-            value: item.id
-          }))
-        } catch (error) {
-          console.error(error)
-          message.error('Gagal memuat status perkawinan (SPT)')
-        }
+        // asumsi response:
+        // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
+        maritalTaxOptions.value = (result.data || result).map((item: any) => ({
+          label: item.name,
+          value: item.id,
+        }));
+      } catch (error) {
+        console.error(error);
+        message.error("Gagal memuat status perkawinan (SPT)");
       }
-    const getMaritalTaxOptionsLabel = (value: string | number | null | undefined) => {
-      if (value == null) return '-'
+    };
+    const getMaritalTaxOptionsLabel = (
+      value: string | number | null | undefined,
+    ) => {
+      if (value == null) return "-";
       const option = maritalTaxOptions.value.find(
-        o => String(o.value) === String(value)
-      )
-      return option?.label ?? '-'
-    }
-    
-    const maritalPaymentOptions = ref<any[]>([])
-      const fetchMaritalPaymentOptions = async () => {
-        try {
-          const response = await apiFetch(
-            `${Config.UrlBackend}/api/option/marital_payment`,
-            { method: 'GET' }
-          )
+        (o) => String(o.value) === String(value),
+      );
+      return option?.label ?? "-";
+    };
 
-          const result = await response.json()
+    const maritalPaymentOptions = ref<any[]>([]);
+    const fetchMaritalPaymentOptions = async () => {
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/marital_payment`,
+          { method: "GET" },
+        );
 
-          // asumsi response:
-          // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
-          maritalPaymentOptions.value = (result.data || result).map((item: any) => ({
+        const result = await response.json();
+
+        // asumsi response:
+        // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
+        maritalPaymentOptions.value = (result.data || result).map(
+          (item: any) => ({
             label: item.name,
-            value: item.id
-          }))
-        } catch (error) {
-          console.error(error)
-          message.error('Gagal memuat status perkawinan (Gaji)')
-        }
+            value: item.id,
+          }),
+        );
+      } catch (error) {
+        console.error(error);
+        message.error("Gagal memuat status perkawinan (Gaji)");
       }
-    const getMaritalPaymentOptionsLabel = (value: string | number | null | undefined) => {
-      if (value == null) return '-'
+    };
+    const getMaritalPaymentOptionsLabel = (
+      value: string | number | null | undefined,
+    ) => {
+      if (value == null) return "-";
       const option = maritalPaymentOptions.value.find(
-        o => String(o.value) === String(value)
-      )
-      return option?.label ?? '-'
-    }
+        (o) => String(o.value) === String(value),
+      );
+      return option?.label ?? "-";
+    };
 
-    const isModalOpen = ref(false)
+    const isModalOpen = ref(false);
     const genderOptions = [
-      { label: 'Laki-Laki', value: 'L' },
-      { label: 'Perempuan', value: 'P' }
-    ]
+      { label: "Laki-Laki", value: "L" },
+      { label: "Perempuan", value: "P" },
+    ];
     const getGenderLabel = (value: string | null | undefined) => {
-      const option = genderOptions.find(o => o.value === value)
-      return option ? option.label : '-'
-    }
+      const option = genderOptions.find((o) => o.value === value);
+      return option ? option.label : "-";
+    };
 
     const marriedOptions = [
-      { label: 'Kawin', value: true },
-      { label: 'Tidak Kawin', value: false }
-    ]
+      { label: "Kawin", value: true },
+      { label: "Tidak Kawin", value: false },
+    ];
     const getMarriedLabel = (value: boolean | null | undefined) => {
-      const option = marriedOptions.find(o => o.value === value)
-      return option ? option.label : '-'
-    }
+      const option = marriedOptions.find((o) => o.value === value);
+      return option ? option.label : "-";
+    };
 
     const taxCombinedOptions = [
-      { label: 'SPT Digabung', value: true },
-      { label: 'SPT Terpisah', value: false }
-    ]
+      { label: "SPT Digabung", value: true },
+      { label: "SPT Terpisah", value: false },
+    ];
     const getTaxCombinedLabel = (value: boolean | null | undefined) => {
-      const option = taxCombinedOptions.find(o => o.value === value)
-      return option ? option.label : '-'
-    }
+      const option = taxCombinedOptions.find((o) => o.value === value);
+      return option ? option.label : "-";
+    };
 
-    
-    
-    const fetchDataPerson = async () => {      
-      loading.value = true
+    const fetchDataPerson = async () => {
+      loading.value = true;
       try {
         const response = await apiFetch(
           `${Config.UrlBackend}/api/person/${persId.value}`,
-          { method: "GET" }
-        )
-        const result = await response.json()
-        profilePerson.value = result[0]
+          { method: "GET" },
+        );
+        const result = await response.json();
+        profilePerson.value = result[0];
       } finally {
-        loading.value = false
+        loading.value = false;
       }
-    }
-    const fetchDataEmployee = async () => {      
-      loading.value = true
+    };
+    const fetchDataEmployee = async () => {
+      loading.value = true;
       try {
         const response = await apiFetch(
           `${Config.UrlBackend}/api/employee/${persId.value}`,
-          { method: "GET" }
-        )
-        const result = await response.json()
-        profileEmployee.value = result[0]
+          { method: "GET" },
+        );
+        const result = await response.json();
+        profileEmployee.value = result[0];
       } finally {
-        loading.value = false
+        loading.value = false;
       }
-    }
+    };
 
     const handleEditData = async () => {
-      isModalOpen.value = true  
-    }
+      isModalOpen.value = true;
+    };
     const closeModal = () => {
-      isModalOpen.value = false
-    }
+      isModalOpen.value = false;
+    };
 
     // form submit
     const submitForm = async () => {
       if (!token) {
-        console.error('No token found!')
-        return
+        console.error("No token found!");
+        return;
       }
 
-      loading.value = true
+      loading.value = true;
       try {
-        const url = `${Config.UrlBackend}/api/person/update`
+        const url = `${Config.UrlBackend}/api/person/update`;
         const response = await apiFetch(url, {
           method: "POST",
           body: JSON.stringify(profilePerson.value),
           headers: {
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json()
-        message.success(data.message ||  'Data diperbarui')
+        const data = await response.json();
+        message.success(data.message || "Data diperbarui");
 
-        familyReloadTrigger.value++
-        await fetchDataPerson()
+        familyReloadTrigger.value++;
+        await fetchDataPerson();
 
-        isModalOpen.value = false
+        isModalOpen.value = false;
       } catch (error) {
-        console.error(error)
-        message.error('Terjadi kesalahan saat menyimpan data')
+        console.error(error);
+        message.error("Terjadi kesalahan saat menyimpan data");
       } finally {
-        loading.value = false
+        loading.value = false;
       }
-    }
+    };
 
     onMounted(async () => {
-      loading.value = true
+      loading.value = true;
       try {
         await Promise.all([
-          
           fetchMaritalTaxOptions(),
           fetchMaritalPaymentOptions(),
           fetchDataPerson(),
-          fetchDataEmployee()
-        ])
+          fetchDataEmployee(),
+        ]);
       } finally {
-        loading.value = false
+        loading.value = false;
       }
-    })
-
+    });
 
     return {
       isModalOpen,
@@ -268,7 +269,7 @@ export default defineComponent({
       getGenderLabel,
       marriedOptions,
       getMarriedLabel,
-      
+
       taxCombinedOptions,
       getTaxCombinedLabel,
 
@@ -286,6 +287,6 @@ export default defineComponent({
       fetchDataPerson,
       fetchDataEmployee,
       familyReloadTrigger,
-    }
-  }
-})
+    };
+  },
+});

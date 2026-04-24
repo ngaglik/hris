@@ -53,7 +53,7 @@ export default defineComponent({
           logout();
           return;
         }
-        const tags = auth?.employee?.[0]?.tags;
+        const tags = auth?.employee?.tags;
         const res = await apiFetch(
           `${Config.UrlBackend}/api/option/schedule_group/${tags}/true`,
         );
@@ -79,7 +79,7 @@ export default defineComponent({
         logout();
         return;
       }
-      const employeeId = auth?.employee?.[0]?.id;
+      const employeeId = auth?.employee?.id;
 
       loading.value = true;
       try {
@@ -125,6 +125,12 @@ export default defineComponent({
     };
 
     const updateScheduleField = async (row: any, field: string, value: any) => {
+      const auth = getAuthData();
+      if (!auth) {
+        logout();
+        return;
+      }
+      const employeeId = auth?.employee?.id;
       try {
         row._updating = true;
 
@@ -155,6 +161,7 @@ export default defineComponent({
               [field]: value,
               schedule_group_id: row.schedule_group_id,
               schedule_type_id: row.schedule_type_id,
+              employee_id: employeeId,
             }),
           },
         );
@@ -165,8 +172,8 @@ export default defineComponent({
             errData?.message || `Server error (${response?.status})`,
           );
         }
-
         message.success("Berhasil diupdate");
+        fetchData(1);
       } catch (err: any) {
         console.error(err);
         message.error(err?.message || "Gagal update");
@@ -194,12 +201,14 @@ export default defineComponent({
       {
         title: "Tanggal",
         key: "schedule_date",
+        width: 120,
         render: (row: any) => row.schedule_date ?? "-",
         cellProps: () => ({ style: { backgroundColor: "#d9fdd3" } }),
       },
       {
         title: "Hari",
         key: "day_name",
+        width: 120,
         render: (row: any) =>
           h(
             "span",
@@ -215,6 +224,7 @@ export default defineComponent({
       {
         title: "Masuk",
         key: "schedule_time_start",
+        width: 80,
         render: (row: any) => {
           if (!row.schedule_time_start) return "-";
           const t = new Date(row.schedule_time_start);
@@ -226,6 +236,7 @@ export default defineComponent({
       {
         title: "Pulang",
         key: "schedule_time_end",
+        width: 80,
         render: (row: any) => {
           if (!row.schedule_time_end) return "-";
           const t = new Date(row.schedule_time_end);
@@ -238,6 +249,7 @@ export default defineComponent({
       {
         title: "Ket",
         key: "schedule_type_name",
+        width: 140,
         render: (row: any) =>
           h(NSelect, {
             value: row.schedule_type_id,
@@ -276,6 +288,7 @@ export default defineComponent({
       {
         title: "Jadwal",
         key: "schedule_group_name",
+        width: 300,
         render: (row: any) =>
           h(NSelect, {
             value: row.schedule_group_id,
@@ -288,7 +301,7 @@ export default defineComponent({
                 "-";
               await updateScheduleField(row, "schedule_group_id", v);
             },
-            style: "width:140px",
+            style: "width:300px",
           }),
         cellProps: () => ({ style: { verticalAlign: "top" } }),
       },

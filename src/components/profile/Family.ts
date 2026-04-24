@@ -1,362 +1,384 @@
-import { onMounted, defineComponent, ref, h , computed, watch} from 'vue'
-import { useMessage, useDialog, NButton } from 'naive-ui'
-import { Config } from '@/constant/config'
-import { apiFetch } from "@/services/apiClient"
-import { getAuthData, saveAuthData, logout } from "@/services/authService"
+import { onMounted, defineComponent, ref, h, computed, watch } from "vue";
+import { useMessage, useDialog, NButton } from "naive-ui";
+import { Config } from "@/constant/config";
+import { apiFetch } from "@/services/apiClient";
+import { getAuthData, saveAuthData, logout } from "@/services/authService";
 
 export default defineComponent({
   props: {
     personId: {
       type: String,
-      default: ''
+      default: "",
     },
     familyId: {
       type: String,
-      default: ''
+      default: "",
     },
     reloadTrigger: {
       type: Number,
-      default: 0
-    }
+      default: 0,
+    },
   },
-  
+
   data() {
     return {
       profile: {},
-      loading: false
-    }
+      loading: false,
+    };
   },
 
-  
   setup(props) {
-    const dialog = useDialog()
-    const message = useMessage()
+    const dialog = useDialog();
+    const message = useMessage();
 
     // state
-    const inputSearch = ref('')
-    const tableData = ref<any[]>([])
-    const current = ref(1)
-    const pageSize = ref(50)
-    const total = ref(0)
-    const loading = ref(false)
+    const inputSearch = ref("");
+    const tableData = ref<any[]>([]);
+    const current = ref(1);
+    const pageSize = ref(50);
+    const total = ref(0);
+    const loading = ref(false);
 
-
-
-    let auth = getAuthData()
+    let auth = getAuthData();
     if (!auth) {
-        logout();
-        return null;
-      }
-    let token = auth?.token
-    let session = auth?.session
-    const employee = auth.employee?.[0]
-    const tags = employee?.tags ?? []
+      logout();
+      return null;
+    }
+    let token = auth?.token;
+    let session = auth?.session;
+    const employee = auth.employee;
+    const tags = employee?.tags ?? [];
 
     const famId = computed(() => {
-      const employee = auth?.employee?.[0]
-      return props.familyId || employee?.familyId || ''
-    })
-    
+      const employee = auth?.employee;
+      return props.familyId || employee?.familyId || "";
+    });
 
-    const maritalOptions = ref<any[]>([])
+    const maritalOptions = ref<any[]>([]);
     const fetchMaritalOptions = async () => {
       try {
         const response = await apiFetch(
           `${Config.UrlBackend}/api/option/marital`,
-          { method: 'GET' }
-        )
+          { method: "GET" },
+        );
 
-        const result = await response.json()
+        const result = await response.json();
 
         // asumsi response:
         // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
         maritalOptions.value = (result.data || result).map((item: any) => ({
           label: item.name,
-          value: item.id
-        }))
+          value: item.id,
+        }));
       } catch (error) {
-        console.error(error)
-        message.error('Gagal memuat status perkawinan')
+        console.error(error);
+        message.error("Gagal memuat status perkawinan");
       }
-    }
-  const getMaritalOptionsLabel = (value: string | number | null | undefined) => {
-    if (value == null) return '-'
-    const option = maritalOptions.value.find(
-      o => String(o.value) === String(value)
-    )
-    return option?.label ?? '-'
-  }
+    };
+    const getMaritalOptionsLabel = (
+      value: string | number | null | undefined,
+    ) => {
+      if (value == null) return "-";
+      const option = maritalOptions.value.find(
+        (o) => String(o.value) === String(value),
+      );
+      return option?.label ?? "-";
+    };
 
-    const familyRelationshipOptions = ref<any[]>([])
+    const familyRelationshipOptions = ref<any[]>([]);
     const fetchFamilyRelationshipOptions = async () => {
       try {
         const response = await apiFetch(
           `${Config.UrlBackend}/api/option/family_relationship`,
-          { method: 'GET' }
-        )
+          { method: "GET" },
+        );
 
-        const result = await response.json()
+        const result = await response.json();
 
         // asumsi response:
         // [{ id: 1, name: 'Suami' }, { id: 2, name: 'Istri' }]
-        familyRelationshipOptions.value = (result.data || result).map((item: any) => ({
-          label: item.name,
-          value: item.id
-        }))
+        familyRelationshipOptions.value = (result.data || result).map(
+          (item: any) => ({
+            label: item.name,
+            value: item.id,
+          }),
+        );
       } catch (error) {
-        console.error(error)
-        message.error('Gagal memuat hubungan keluarga')
+        console.error(error);
+        message.error("Gagal memuat hubungan keluarga");
       }
-    }
-    const getFamilyRelationshipLabel = (value: string | number | null | undefined) => {
-    if (value == null) return '-'
-    const option = familyRelationshipOptions.value.find(
-      o => String(o.value) === String(value)
-    )
-    return option?.label ?? '-'
-  }
+    };
+    const getFamilyRelationshipLabel = (
+      value: string | number | null | undefined,
+    ) => {
+      if (value == null) return "-";
+      const option = familyRelationshipOptions.value.find(
+        (o) => String(o.value) === String(value),
+      );
+      return option?.label ?? "-";
+    };
     const genderOptions = [
-      { label: 'Laki-Laki', value: 'L' },
-      { label: 'Perempuan', value: 'P' }
-    ]
+      { label: "Laki-Laki", value: "L" },
+      { label: "Perempuan", value: "P" },
+    ];
     const getGenderLabel = (value: string | null | undefined) => {
-      const option = genderOptions.find(o => o.value === value)
-      return option ? option.label : '-'
-    }
+      const option = genderOptions.find((o) => o.value === value);
+      return option ? option.label : "-";
+    };
 
     const marriedOptions = [
-      { label: 'Kawin', value: true },
-      { label: 'Tidak Kawin', value: false }
-    ]
+      { label: "Kawin", value: true },
+      { label: "Tidak Kawin", value: false },
+    ];
     const getMarriedLabel = (value: boolean | null | undefined) => {
-      const option = marriedOptions.find(o => o.value === value)
-      return option ? option.label : '-'
-    }
+      const option = marriedOptions.find((o) => o.value === value);
+      return option ? option.label : "-";
+    };
 
     const taxCombinedOptions = [
-      { label: 'SPT Digabung', value: true },
-      { label: 'SPT Terpisah', value: false }
-    ]
+      { label: "SPT Digabung", value: true },
+      { label: "SPT Terpisah", value: false },
+    ];
     const getTaxCombinedLabel = (value: boolean | null | undefined) => {
-      const option = taxCombinedOptions.find(o => o.value === value)
-      return option ? option.label : '-'
-    }
+      const option = taxCombinedOptions.find((o) => o.value === value);
+      return option ? option.label : "-";
+    };
 
     const fetchData = async (page = 1) => {
-      loading.value = true
-      const response = await apiFetch(`${Config.UrlBackend}/api/person/family?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}&familyId=${famId.value}`, {
-        method: "GET"
-      });
-      const result = await response.json()
-      tableData.value = result.data || []
-      current.value = result.page || 1
-      total.value = result.total || 0
-      loading.value = false
-    }
+      loading.value = true;
+      const response = await apiFetch(
+        `${Config.UrlBackend}/api/person/family?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}&familyId=${famId.value}`,
+        {
+          method: "GET",
+        },
+      );
+      const result = await response.json();
+      tableData.value = result.data || [];
+      current.value = result.page || 1;
+      total.value = result.total || 0;
+      loading.value = false;
+    };
     watch(
       () => props.reloadTrigger,
       () => {
-        current.value = 1        // optional: reset ke halaman 1
-        fetchData(1)             // reload data family
-      }
-    )
+        current.value = 1; // optional: reset ke halaman 1
+        fetchData(1); // reload data family
+      },
+    );
 
     // modal state
-    const isModalOpen = ref(false)
-    const isEditMode = ref(false)
-    const isPreviewOpen = ref(false)
+    const isModalOpen = ref(false);
+    const isEditMode = ref(false);
+    const isPreviewOpen = ref(false);
 
     const formData = ref({
       id: null,
-      national_id_number: '',
-      name: '',
-      birth_date: '',
-      gender: '',
-      family_id:'',
-      family_relationship_id :'',
-    })
-
+      national_id_number: "",
+      name: "",
+      birth_date: "",
+      gender: "",
+      family_id: "",
+      family_relationship_id: "",
+    });
 
     // modal methods
     const openAddModal = () => {
-      isEditMode.value = false
+      isEditMode.value = false;
       formData.value = {
         id: null,
-        national_id_number: '',
-        name: '',
-        birth_date: '',
-        gender: '',
-        family_relationship_id :'',
-        family_id : famId,
-      }
-      isModalOpen.value = true
-    }
+        national_id_number: "",
+        name: "",
+        birth_date: "",
+        gender: "",
+        family_relationship_id: "",
+        family_id: famId,
+      };
+      isModalOpen.value = true;
+    };
 
     const openEditModal = (row: any) => {
-      isPreviewOpen.value = false
-      isEditMode.value = true
-      formData.value = { ...row }
-      isModalOpen.value = true
-    }
+      isPreviewOpen.value = false;
+      isEditMode.value = true;
+      formData.value = { ...row };
+      isModalOpen.value = true;
+    };
 
     const openProfile = (row: any) => {
-      isModalOpen.value = false
-      formData.value = { ...row }
-      isPreviewOpen.value = true
-    }
+      isModalOpen.value = false;
+      formData.value = { ...row };
+      isPreviewOpen.value = true;
+    };
 
     const closeModal = () => {
-      isModalOpen.value = false
-    }
+      isModalOpen.value = false;
+    };
 
     // table & pagination
     const handleInputSearch = () => {
-      fetchData(current.value)
-    }
+      fetchData(current.value);
+    };
 
     const handlePageChange = (page: number) => {
-      current.value = page
-      fetchData(page)
-    }
+      current.value = page;
+      fetchData(page);
+    };
 
     const deleteData = async (row: any) => {
       dialog.warning({
-        title: 'Konfirmasi Hapus',
+        title: "Konfirmasi Hapus",
         content: `Apakah yakin ingin menghapus data "${row.name}"?`,
-        positiveText: 'Hapus',
-        negativeText: 'Batal',
+        positiveText: "Hapus",
+        negativeText: "Batal",
         onPositiveClick: async () => {
-          loading.value = true
+          loading.value = true;
           try {
             const response = await apiFetch(
               `${Config.UrlBackend}/api/person/family/${row.id}`,
               {
-                method: 'DELETE',
+                method: "DELETE",
                 headers: {
-                  'Content-Type': 'application/json'
-                }
-              }
-            )
+                  "Content-Type": "application/json",
+                },
+              },
+            );
 
             if (!response.ok) {
-              const err = await response.json()
-              throw new Error(err.message || 'Gagal menghapus data')
+              const err = await response.json();
+              throw new Error(err.message || "Gagal menghapus data");
             }
 
-            const result = await response.json()
-            message.success(result.message || 'Data berhasil dihapus')
+            const result = await response.json();
+            message.success(result.message || "Data berhasil dihapus");
 
             // reload data
-            await fetchData(current.value)
+            await fetchData(current.value);
           } catch (error) {
-            console.error(error)
-            message.error('Gagal menghapus data')
+            console.error(error);
+            message.error("Gagal menghapus data");
           } finally {
-            loading.value = false
+            loading.value = false;
           }
-        }
-      })
-    }
-
+        },
+      });
+    };
 
     // form submit
     const submitForm = async () => {
-      if (!token) return
+      if (!token) return;
 
-      loading.value = true
+      loading.value = true;
       try {
         const url = isEditMode.value
           ? `${Config.UrlBackend}/api/person/family_update`
-          : `${Config.UrlBackend}/api/person/family_add`
+          : `${Config.UrlBackend}/api/person/family_add`;
 
         // 🔥 BEDAKAN PAYLOAD
-        let payload: any
+        let payload: any;
 
         if (isEditMode.value) {
           // EDIT → PAKAI ID
-          payload = { ...formData.value }
+          payload = { ...formData.value };
         } else {
           // CREATE → HAPUS ID
-          const { id, ...withoutId } = formData.value
-          payload = withoutId
+          const { id, ...withoutId } = formData.value;
+          payload = withoutId;
         }
 
         const response = await apiFetch(url, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(payload)
-        })
+          body: JSON.stringify(payload),
+        });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json()
-        message.success(data.message || (isEditMode.value ? 'Data diperbarui' : 'Data ditambahkan'))
-        await fetchData(current.value)
-        isModalOpen.value = false
+        const data = await response.json();
+        message.success(
+          data.message ||
+            (isEditMode.value ? "Data diperbarui" : "Data ditambahkan"),
+        );
+        await fetchData(current.value);
+        isModalOpen.value = false;
       } catch (error) {
-        console.error(error)
-        message.error('Terjadi kesalahan saat menyimpan data')
+        console.error(error);
+        message.error("Terjadi kesalahan saat menyimpan data");
       } finally {
-        loading.value = false
+        loading.value = false;
       }
-    }
-
+    };
 
     // table columns
-    const columns = [      
-      { title: 'Name', key: 'name', fixed: 'left'},
-      { title: 'Hubungan Keluarga', key: 'family_relationship_id', render: (row: any) => getFamilyRelationshipLabel(row.family_relationship_id)},
-      { title: 'NIK', key: 'national_id_number' },
-      { title: 'Tgl Lahir', key: 'birth_date' },
-      { title: 'Kelamin', key: 'gender', render: (row: any) => getGenderLabel(row.gender)},
-      { title: 'Status Perkawinan', key: 'is_married', render: (row: any) => getMarriedLabel(row.is_married) },
-      { title: 'NPWP', key: 'tax_id_number' },
-      { title: 'Status Pelaporan Suami-Istri', key: 'is_tax_combined', render: (row: any) => getTaxCombinedLabel(row.is_tax_combined) },
-      { title: 'Status Perkawinan (SPT)', key: 'tax_marital_id', render: (row: any) => getMaritalOptionsLabel(row.tax_marital_id) },
+    const columns = [
+      { title: "Name", key: "name", fixed: "left" },
       {
-        title: 'Aksi',
-        key: 'actions',
+        title: "Hubungan Keluarga",
+        key: "family_relationship_id",
+        render: (row: any) =>
+          getFamilyRelationshipLabel(row.family_relationship_id),
+      },
+      { title: "NIK", key: "national_id_number" },
+      { title: "Tgl Lahir", key: "birth_date" },
+      {
+        title: "Kelamin",
+        key: "gender",
+        render: (row: any) => getGenderLabel(row.gender),
+      },
+      {
+        title: "Status Perkawinan",
+        key: "is_married",
+        render: (row: any) => getMarriedLabel(row.is_married),
+      },
+      { title: "NPWP", key: "tax_id_number" },
+      {
+        title: "Status Pelaporan Suami-Istri",
+        key: "is_tax_combined",
+        render: (row: any) => getTaxCombinedLabel(row.is_tax_combined),
+      },
+      {
+        title: "Status Perkawinan (SPT)",
+        key: "tax_marital_id",
+        render: (row: any) => getMaritalOptionsLabel(row.tax_marital_id),
+      },
+      {
+        title: "Aksi",
+        key: "actions",
         //fixed: 'right',
         width: 80,
         render(row: any) {
-          return h(
-            'div',
-            { class: 'flex gap-2' },
-            [
-              h(
-                NButton,
-                {
-                  size: 'small',
-                  type: 'primary',
-                  onClick: () => openEditModal(row)
-                },
-                { default: () => 'Ubah' }
-              ),
-              h(
-                NButton,
-                {
-                  size: 'small',
-                  type: 'error',
-                  onClick: () => deleteData(row)
-                },
-                { default: () => 'Hapus' }
-              )
-            ]
-          )
-        }
+          return h("div", { class: "flex gap-2" }, [
+            h(
+              NButton,
+              {
+                size: "small",
+                type: "primary",
+                onClick: () => openEditModal(row),
+              },
+              { default: () => "Ubah" },
+            ),
+            h(
+              NButton,
+              {
+                size: "small",
+                type: "error",
+                onClick: () => deleteData(row),
+              },
+              { default: () => "Hapus" },
+            ),
+          ]);
+        },
       },
-    ]
+    ];
 
     // load pertama kali
     onMounted(() => {
-      fetchFamilyRelationshipOptions()
-      fetchMaritalOptions()
-      fetchData(current.value)
-    })
+      fetchFamilyRelationshipOptions();
+      fetchMaritalOptions();
+      fetchData(current.value);
+    });
 
     return {
       columns,
@@ -392,7 +414,7 @@ export default defineComponent({
 
       deleteData,
       employee,
-      famId
-    }
-  }
-})
+      famId,
+    };
+  },
+});

@@ -49,7 +49,7 @@ export default defineComponent({
         loading.value = true;
 
         const apiUrl =
-          `${Config.UrlBackend}/api/attendance/getmonthlyattendance?` +
+          `${Config.UrlBackend}/api/attendance/getattendancereport?` +
           `employeeId=${employeeId}&` +
           `year=${formFilter.value.year}&` +
           `month=${formFilter.value.month}&` +
@@ -146,101 +146,16 @@ export default defineComponent({
 
     const columns = [
       {
-        title: "Tanggal",
-        key: "schedule_date",
+        title: "Nama",
+        key: "employee_name",
+        width: 200,
+        align: "center",
+      },
+      {
+        title: "Volume",
+        key: "total",
         width: 100,
         align: "center",
-      },
-      {
-        title: "Jam Masuk (Jadwal)",
-        key: "schedule_time_start",
-        width: 60,
-        align: "center",
-        render(row: any) {
-          if (!row.schedule_time_start) return "-";
-          // Backend mengembalikan format "HH:mm:ss", extract HH:mm
-          return row.schedule_time_start.substring(0, 5);
-        },
-      },
-      {
-        title: "Jam Masuk (Actual)",
-        key: "checkin_time",
-        width: 60,
-        align: "center",
-        render(row: any) {
-          if (!row.checkin_time) return "-";
-          // Backend mengembalikan format "yyyy-MM-dd HH:mm:ss"
-          // Extract hanya waktu (HH:mm)
-          const timePart = row.checkin_time.split(" ")[1];
-          if (!timePart) return row.checkin_time;
-          return timePart.substring(0, 5);
-        },
-      },
-      {
-        title: "Jam Pulang (Jadwal)",
-        key: "schedule_time_end",
-        width: 60,
-        align: "center",
-        render(row: any) {
-          if (!row.schedule_time_end) return "-";
-          // Backend mengembalikan format "HH:mm:ss", extract HH:mm
-          return row.schedule_time_end.substring(0, 5);
-        },
-      },
-      {
-        title: "Jam Pulang (Actual)",
-        key: "checkout_time",
-        width: 60,
-        align: "center",
-        render(row: any) {
-          if (!row.checkout_time) return "-";
-          // Backend mengembalikan format "yyyy-MM-dd HH:mm:ss"
-          // Extract hanya waktu (HH:mm)
-          const timePart = row.checkout_time.split(" ")[1];
-          if (!timePart) return row.checkout_time;
-          return timePart.substring(0, 5);
-        },
-      },
-      {
-        title: "Status",
-        key: "attendance_category_name",
-        width: 120,
-        align: "center",
-        render(row: any) {
-          // Pemetaan warna berdasarkan attendance_category_id sesuai master data:
-          // 1=Masuk, 2=Terlambat masuk, 3=Pulang awal,
-          // 4=Tidak Check In, 5=Tidak Check Out, 6=Alpha
-          const styleMap: Record<number, { bg: string; color: string }> = {
-            1: { bg: "#52c41a", color: "#fff" }, // Masuk          → hijau
-            2: { bg: "#fa8c16", color: "#fff" }, // Terlambat masuk → oranye
-            3: { bg: "#faad14", color: "#fff" }, // Pulang awal    → kuning
-            4: { bg: "#f5222d", color: "#fff" }, // Tidak Check In  → merah
-            5: { bg: "#f5222d", color: "#fff" }, // Tidak Check Out → merah
-            6: { bg: "#820014", color: "#fff" }, // Alpha           → merah gelap
-          };
-
-          const id: number | null = row.attendance_category_id ?? null;
-          const style =
-            id !== null
-              ? (styleMap[id] ?? { bg: "#d9d9d9", color: "#595959" })
-              : { bg: "#d9d9d9", color: "#595959" };
-
-          return h(
-            "div",
-            {
-              style: {
-                backgroundColor: style.bg,
-                color: style.color,
-                padding: "4px 8px",
-                borderRadius: "4px",
-                textAlign: "center",
-                fontWeight: "bold",
-                fontSize: "12px",
-              },
-            },
-            row.attendance_category_name || "-",
-          );
-        },
       },
     ];
 
