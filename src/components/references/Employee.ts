@@ -37,6 +37,18 @@ export default defineComponent({
     const positionId = employee?.positionId;
     const organizationId = employee?.organizationId;
 
+    const isActiveFilter = ref<boolean | null>(true);
+
+    const statusOptions = [
+      { label: "Aktif", value: true },
+      { label: "Nonaktif", value: false },
+    ];
+
+    const handleStatusFilter = () => {
+      current.value = 1;
+      fetchData();
+    };
+
     const personOptions = ref<any[]>([]);
     const personLoading = ref(false);
 
@@ -74,7 +86,7 @@ export default defineComponent({
     const handlePersonSelect = (value: any, option: any) => {
       formData.value.person_id = value;
     };
-
+    const employeeCategoryFilter = ref<number | null>(null);
     const employeeCategoryOptions = ref<any[]>([]);
     const fetchEmployeeCategoryOptions = async () => {
       try {
@@ -166,6 +178,25 @@ export default defineComponent({
         message.error("Gagal memuat positionOptions");
       }
     };
+
+    const tagOptions = ref<any[]>([]);
+    const fetchTagOptions = async () => {
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/permission`,
+          { method: "GET" },
+        );
+        const result = await response.json();
+        tagOptions.value = (result.data || result).map((item: any) => ({
+          label: item.tag,
+          value: item.tag,
+        }));
+      } catch (error) {
+        console.error(error);
+        message.error("Gagal memuat tagOptions");
+      }
+    };
+
     const getPositionLabel = (value: string | number | null | undefined) => {
       if (value == null) return "-";
       const option = positionOptions.value.find(
@@ -175,7 +206,7 @@ export default defineComponent({
     };
 
     const professionalOptions = ref<any[]>([]);
-    const fetchProfessionalOptions = async (orgId) => {
+    const fetchProfessionalOptions = async () => {
       try {
         const response = await apiFetch(
           `${Config.UrlBackend}/api/option/professional`,
@@ -210,17 +241,39 @@ export default defineComponent({
 
     const fetchData = async (page = 1) => {
       loading.value = true;
-      const response = await apiFetch(
-        `${Config.UrlBackend}/api/employee?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}&selectedOrgId=${selectedOrgId.value}`,
-        {
-          method: "GET",
-        },
-      );
-      const result = await response.json();
-      tableData.value = result.data || [];
-      current.value = result.page || 1;
-      total.value = result.total || 0;
+
+      let url =
+        `${Config.UrlBackend}/api/employee?` +
+        `page=${page}&pageSize=${pageSize.value}`;
+
+      if (isActiveFilter.value) {
+        url += `&isActive=${isActiveFilter.value.toString()}`;
+      }
+
+      if (employeeCategoryFilter.value) {
+        url += `&employeeCategoryId=${employeeCategoryFilter.value}`;
+      }
+
+      if (selectedOrgId.value) {
+        url += `&selectedOrgId=${selectedOrgId.value}`;
+      }
+
+      if (inputSearch.value) {
+        url += `&inputSearch=${inputSearch.value}`;
+      }
+
+      const res = await apiFetch(url);
+      const result = await res.json();
+
+      tableData.value = result.data;
+      total.value = result.total;
+
       loading.value = false;
+    };
+
+    const handleCategoryFilter = async () => {
+      current.value = 1;
+      await fetchData(1);
     };
 
     // modal state
@@ -238,6 +291,8 @@ export default defineComponent({
       position_id: "",
       address: "",
       is_active: false,
+      tags: "",
+      is_active: true, // default aktif
     });
 
     const formDataFilter = ref({
@@ -259,7 +314,7 @@ export default defineComponent({
         position_id: null,
         address: "",
         tags: "",
-        is_active: true,
+        is_active: true, // default aktif
       };
       isModalOpen.value = true;
     };
@@ -267,8 +322,17 @@ export default defineComponent({
     const openEditModal = (row: any) => {
       isPreviewOpen.value = false;
       isEditMode.value = true;
+
       fetchPositionOptions(row.organization_id);
-      formData.value = { ...row };
+
+      formData.value = {
+        ...row,
+
+        // ✅ STRING → ARRAY
+        tags: row.tags ? String(row.tags).split(",") : [],
+        is_active: !!row.is_active,
+      };
+
       isModalOpen.value = true;
     };
 
@@ -298,23 +362,39 @@ export default defineComponent({
       }
 
       loading.value = true;
+
       try {
         const url = isEditMode.value
           ? `${Config.UrlBackend}/api/employee/update`
           : `${Config.UrlBackend}/api/employee/create`;
 
-        // 🔥 BEDAKAN PAYLOAD
+        //--------------------------------------------------
+        // BUILD PAYLOAD
+        //--------------------------------------------------
         let payload: any;
 
         if (isEditMode.value) {
-          // EDIT → PAKAI ID
           payload = { ...formData.value };
         } else {
-          // CREATE → HAPUS ID
           const { id, ...withoutId } = formData.value;
           payload = withoutId;
         }
-        formData.value.UserLogin = employee;
+
+        //--------------------------------------------------
+        // ✅ CONVERT TAGS ARRAY → STRING
+        //--------------------------------------------------
+        payload.tags = Array.isArray(formData.value.tags)
+          ? formData.value.tags.join(",")
+          : null;
+
+        //--------------------------------------------------
+        // OPTIONAL USERLOGIN
+        //--------------------------------------------------
+        payload.UserLogin = employee;
+
+        //--------------------------------------------------
+        // API CALL
+        //--------------------------------------------------
         const response = await apiFetch(url, {
           method: "POST",
           body: JSON.stringify(payload),
@@ -328,10 +408,12 @@ export default defineComponent({
         }
 
         const data = await response.json();
+
         message.success(
           data.message ||
             (isEditMode.value ? "Data diperbarui" : "Data ditambahkan"),
         );
+
         await fetchData(current.value);
         isModalOpen.value = false;
       } catch (error) {
@@ -377,6 +459,14 @@ export default defineComponent({
       { title: "Phone", key: "phone_number" },
       { title: "Email", key: "email" },
       {
+        title: "Status",
+        key: "is_active",
+        width: 120,
+        render(row: any) {
+          return row.is_active ? "✅ Aktif" : "❌ Nonaktif";
+        },
+      },
+      {
         title: "Aksi",
         key: "actions",
         fixed: "right",
@@ -411,6 +501,7 @@ export default defineComponent({
       fetchEmployeeCategoryOptions();
       fetchOrganizationOptions();
       fetchProfessionalOptions();
+      fetchTagOptions();
       fetchPositionOptions(organizationId);
       fetchData(current.value);
     });
@@ -424,11 +515,11 @@ export default defineComponent({
       loading,
       inputSearch,
       handleInputSearch,
-
+      employeeCategoryFilter,
+      handleCategoryFilter,
       handleInputSearchPerson,
       personOptions,
       personLoading,
-
       onOrgSelected: (orgId: string | number | null) => {
         selectedOrgId.value = orgId;
         fetchData(current.value);
@@ -445,7 +536,9 @@ export default defineComponent({
       genderOptions,
       employee,
       formDataFilter,
-
+      statusOptions,
+      handleStatusFilter,
+      isActiveFilter,
       employeeCategoryOptions,
       fetchEmployeeCategoryOptions,
       organizationOptions,
@@ -455,6 +548,8 @@ export default defineComponent({
       professionalOptions,
       fetchProfessionalOptions,
       onOrganizationChange,
+      tagOptions,
+      fetchTagOptions,
     };
   },
 });

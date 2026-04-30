@@ -22,6 +22,30 @@
                     />
                     <n-button type="primary" ghost> Search </n-button>
                 </n-input-group>
+                <!-- ✅ FILTER KATEGORI -->
+                <n-input-group>
+                    <n-button type="primary"> Pilih </n-button>
+                    <n-select
+                        v-model:value="employeeCategoryFilter"
+                        :options="employeeCategoryOptions"
+                        placeholder="Filter kategori pegawai"
+                        clearable
+                        style="width: 220px"
+                        @update:value="handleCategoryFilter"
+                    />
+                </n-input-group>
+                <n-input-group>
+                    <n-button type="primary">Status</n-button>
+
+                    <n-select
+                        v-model:value="isActiveFilter"
+                        :options="statusOptions"
+                        placeholder="Filter status"
+                        clearable
+                        style="width: 180px"
+                        @update:value="handleStatusFilter"
+                    />
+                </n-input-group>
             </n-space>
             <n-space horizontal> </n-space>
             <n-data-table
@@ -75,10 +99,18 @@
                     <n-button type="primary" ghost> Search </n-button>
                 </n-input-group>
             </n-form-item>
-            <n-form-item label="NIP">
-                <n-input v-model:value="formData.national_employee_id_number" />
+            <n-form-item label="Nama">
+                {{ formData.name }}
             </n-form-item>
-
+            <n-form-item label="NIP">
+                {{ formData.national_employee_id_number }}
+            </n-form-item>
+            <n-form-item label="Status">
+                <n-switch v-model:value="formData.is_active">
+                    <template #checked>Aktif</template>
+                    <template #unchecked>Nonaktif</template>
+                </n-switch>
+            </n-form-item>
             <n-form-item label="Kategori Pegawai">
                 <n-select
                     v-model:value="formData.employee_category_id"
@@ -113,6 +145,17 @@
                     :options="positionOptions"
                     placeholder=""
                     clearable
+                />
+            </n-form-item>
+            <n-form-item label="Tags">
+                <n-select
+                    v-model:value="formData.tags"
+                    :options="tagOptions"
+                    multiple
+                    filterable
+                    clearable
+                    tag
+                    placeholder="Pilih atau ketik tags..."
                 />
             </n-form-item>
         </n-form>

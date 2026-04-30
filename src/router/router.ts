@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "@/container/home/Home.vue";
 import Attendance from "@/components/attendance/Attendance.vue";
+import AttendanceReport from "@/components/administrator/AttendanceReport.vue";
 import Person from "@/components/references/Person.vue";
 import Employee from "@/components/references/Employee.vue";
 import Location from "@/components/references/Location.vue";
@@ -32,6 +33,10 @@ const router = createRouter({
     {
       path: "/Attendance",
       component: Attendance,
+    },
+    {
+      path: "/AttendanceReport",
+      component: AttendanceReport,
     },
     {
       path: "/Profile",

@@ -47,20 +47,6 @@ export const LAYOUT_ITEMS = [
       {
         label: "Diklat",
         key: "/profiledevelopment",
-        children: [
-          {
-            label: "Pelatihan",
-            key: "/reporttraining",
-          },
-          {
-            label: "Validasi Sertifikat",
-            key: "/validatecertificate",
-          },
-          {
-            label: "Report Pelatihan Pegawai",
-            key: "/reporttrainingemployee",
-          },
-        ],
       },
       {
         label: "Kepegawaian",
@@ -75,12 +61,8 @@ export const LAYOUT_ITEMS = [
             key: "/employee",
           },
           {
-            label: "Validasi perubahan",
-            key: "/validateemployee",
-          },
-          {
-            label: "Report STR Pegawai",
-            key: "reportlegalregistration",
+            label: "Report Presensi",
+            key: "/AttendanceReport",
           },
         ],
       },

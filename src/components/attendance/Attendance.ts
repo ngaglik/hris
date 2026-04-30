@@ -5,18 +5,16 @@ import { apiFetch } from "@/services/apiClient";
 import { Config, generalOptions } from "@/constant/config";
 import Checklog from "./Checklog.vue";
 import Schedule from "./Schedule.vue";
-import DailyAttendance from "./DailyAttendance.vue";
 import AttendanceSummary from "./AttendanceSummary.vue";
-import AttendanceReport from "./AttendanceReport.vue";
+import PersonalAttendanceReport from "./PersonalAttendanceReport.vue";
 import { can, setPermissions } from "@/services/authPermission";
 
 export default defineComponent({
   components: {
     Checklog,
     Schedule,
-    DailyAttendance,
     AttendanceSummary,
-    AttendanceReport,
+    PersonalAttendanceReport,
   },
 
   setup() {

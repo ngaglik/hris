@@ -26,7 +26,24 @@
                     :options="generalOptions.month"
                 />
             </n-form-item>
-
+            <n-form-item label="Pegawai" v-if="can('attendance.report.find')">
+                <n-input-group>
+                    <n-button type="primary"> Search </n-button>
+                    <n-select
+                        :style="{ width: '100%' }"
+                        v-model:value="formFilter.employee_id"
+                        :options="employeeOptions"
+                        :loading="employeeLoading"
+                        filterable
+                        remote
+                        clearable
+                        placeholder="Cari nama..."
+                        @search="handleInputSearchEmployee"
+                        @update:value="handleEmployeeSelect"
+                    />
+                    <!-- <n-button type="primary" ghost> Search </n-button> -->
+                </n-input-group>
+            </n-form-item>
             <n-form-item>
                 <n-button
                     type="primary"
@@ -49,12 +66,12 @@
 
         <n-data-table
             v-if="tableData.length > 0"
+            :row-props="rowProps"
             :columns="columns"
             :data="tableData"
             :scroll-x="1400"
             :loading="loading"
             :max-height="450"
-            striped
             :single-line="false"
         />
 
@@ -71,6 +88,21 @@
     </div>
 </template>
 
-<script src="./AttendanceReport.ts" />
-``` Sekarang saya perlu update backend endpoint untuk menampilkan data satu
-bulan penuh:
+<script src="./PersonalAttendanceReport.ts" />
+<style scoped>
+:deep(.row-not-workday td) {
+    color: #ff0000 !important;
+}
+
+:deep(.row-alpha td) {
+    font-weight: bold;
+}
+
+:deep(.row-late td) {
+    font-weight: bold;
+}
+
+:deep(.row-early td) {
+    font-weight: bold;
+}
+</style>

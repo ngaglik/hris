@@ -39,15 +39,11 @@
         <n-tab-pane name="unit-kerja" tab="Checklog">
             <Checklog />
         </n-tab-pane>
-        <n-tab-pane name="daily" tab="Kehadiran Harian">
+        <!-- <n-tab-pane name="daily" tab="Kehadiran Harian">
             <DailyAttendance />
-        </n-tab-pane>
-        <n-tab-pane
-            v-if="can('attendance.report.view')"
-            name="report"
-            tab="Report Kehadiran"
-        >
-            <AttendanceReport />
+        </n-tab-pane> -->
+        <n-tab-pane name="report" tab="Report Kehadiran">
+            <PersonalAttendanceReport />
         </n-tab-pane>
     </n-tabs>
 </template>
