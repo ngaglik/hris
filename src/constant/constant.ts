@@ -4,7 +4,7 @@ export const LAYOUT_ITEMS = [
     key: "/Attendance",
   },
   {
-    label: "Kinerja",
+    label: "eKERTAS",
     key: "/performance",
     children: [
       {
@@ -14,6 +14,10 @@ export const LAYOUT_ITEMS = [
       {
         label: "Program Kerja",
         key: "/WorkProgram",
+      },
+      {
+        label: "Uraian Tugas",
+        key: "/JobDesc",
       },
     ],
   },

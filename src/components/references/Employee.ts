@@ -74,6 +74,8 @@ export default defineComponent({
         personOptions.value = (result.data || []).map((item: any) => ({
           label: `${item.name} - ${item.national_id_number}`,
           value: item.id,
+          name: item.name,
+          national_employee_id_number: item.national_employee_id_number,
         }));
       } catch (error) {
         console.error(error);
@@ -83,8 +85,16 @@ export default defineComponent({
       }
     };
 
-    const handlePersonSelect = (value: any, option: any) => {
-      formData.value.person_id = value;
+    const handlePersonSelect = (value: any) => {
+      const selected = personOptions.value.find((p) => p.value === value);
+
+      if (!selected) return;
+      message.info("aaaaaaaaaaaaaa");
+      message.info(selected.national_employee_id_number);
+      formData.value.person_id = selected.value;
+      formData.value.name = selected.name;
+      formData.value.national_employee_id_number =
+        selected.national_employee_id_number;
     };
     const employeeCategoryFilter = ref<number | null>(null);
     const employeeCategoryOptions = ref<any[]>([]);
@@ -288,11 +298,11 @@ export default defineComponent({
       professional_id: "",
       employee_category_id: "",
       organization_id: "",
-      position_id: "",
+      position_id: null,
       address: "",
-      is_active: false,
       tags: "",
       is_active: true, // default aktif
+      is_shift: false,
     });
 
     const formDataFilter = ref({
@@ -315,6 +325,7 @@ export default defineComponent({
         address: "",
         tags: "",
         is_active: true, // default aktif
+        is_shift: false,
       };
       isModalOpen.value = true;
     };

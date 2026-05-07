@@ -5,8 +5,8 @@
             <div class="dashboard-title">
                 <span class="dashboard-icon">📊</span>
                 <div>
-                    <h2>Dashboard Program Kerja</h2>
-                    <p>Ringkasan capaian dan progres program kerja</p>
+                    <h2>eKERTAS</h2>
+                    <p>Kerja Terpantau Sistem</p>
                 </div>
             </div>
             <div class="dashboard-controls">
@@ -70,7 +70,7 @@
                         <div class="stat-card__value">
                             {{ dashboard.totalTasks }}
                         </div>
-                        <div class="stat-card__label">Total Kegiatan</div>
+                        <div class="stat-card__label">Total Tugas</div>
                     </div>
                     <div class="stat-card__bg">✅</div>
                 </div>
@@ -119,7 +119,7 @@
             <!-- ── Charts Row ──────────────────────────────────────────────── -->
             <div class="charts-grid">
                 <!-- Donut Chart -->
-                <n-card class="chart-card" title="Distribusi Status Kegiatan">
+                <n-card class="chart-card" title="Distribusi Status Tugas">
                     <div class="donut-wrapper">
                         <svg viewBox="0 0 180 180" class="donut-svg">
                             <!-- Background ring -->
@@ -165,7 +165,7 @@
                                 text-anchor="middle"
                                 class="donut-center-label"
                             >
-                                Kegiatan
+                                Tugas
                             </text>
                         </svg>
 
@@ -293,7 +293,7 @@
                 <template #header>
                     <div class="card-header-custom">
                         <span class="card-header-icon">⏰</span>
-                        <span>Kegiatan Mendekati / Melewati Deadline</span>
+                        <span>Tugas Mendekati / Melewati Deadline</span>
                         <n-badge
                             :value="dashboard.upcomingTasks.length"
                             type="error"
@@ -314,7 +314,7 @@
                         dashboard.upcomingTasks.filter((t) => t.daysLeft < 0)
                             .length
                     }}</strong>
-                    kegiatan yang telah melewati batas waktu!
+                    tugas yang telah melewati batas waktu!
                 </n-alert>
 
                 <n-data-table
@@ -341,8 +341,8 @@
                 :bordered="false"
                 class="section-card"
             >
-                🎉 Tidak ada kegiatan yang mendekati atau melewati deadline
-                dalam 30 hari ke depan.
+                🎉 Tidak ada tugas yang mendekati atau melewati deadline dalam
+                30 hari ke depan.
             </n-alert>
 
             <!-- ── Program Status Summary ──────────────────────────────────── -->
@@ -355,7 +355,7 @@
                 </template>
 
                 <div v-if="dashboard.programStatusSummary.length === 0">
-                    <n-empty description="Belum ada data kegiatan" />
+                    <n-empty description="Belum ada data tugas" />
                 </div>
                 <div v-else>
                     <!-- Visual summary cards -->
@@ -370,13 +370,17 @@
                             </div>
                             <div class="prog-summary-bar-group">
                                 <template v-if="prog.done > 0">
-                                    <n-tooltip content="Selesai" placement="top">
+                                    <n-tooltip
+                                        content="Selesai"
+                                        placement="top"
+                                    >
                                         <template #trigger>
                                             <div
                                                 class="prog-seg"
                                                 :style="{
                                                     flex: prog.done || 0,
-                                                    background: STATUS_COLOR.done,
+                                                    background:
+                                                        STATUS_COLOR.done,
                                                 }"
                                             >
                                                 {{ prog.done }}
@@ -386,13 +390,17 @@
                                     </n-tooltip>
                                 </template>
                                 <template v-if="prog.onProgress > 0">
-                                    <n-tooltip content="Berjalan" placement="top">
+                                    <n-tooltip
+                                        content="Berjalan"
+                                        placement="top"
+                                    >
                                         <template #trigger>
                                             <div
                                                 class="prog-seg"
                                                 :style="{
                                                     flex: prog.onProgress || 0,
-                                                    background: STATUS_COLOR.on_progress,
+                                                    background:
+                                                        STATUS_COLOR.on_progress,
                                                 }"
                                             >
                                                 {{ prog.onProgress }}
@@ -402,13 +410,17 @@
                                     </n-tooltip>
                                 </template>
                                 <template v-if="prog.planned > 0">
-                                    <n-tooltip content="Direncanakan" placement="top">
+                                    <n-tooltip
+                                        content="Direncanakan"
+                                        placement="top"
+                                    >
                                         <template #trigger>
                                             <div
                                                 class="prog-seg"
                                                 :style="{
                                                     flex: prog.planned || 0,
-                                                    background: STATUS_COLOR.planned,
+                                                    background:
+                                                        STATUS_COLOR.planned,
                                                 }"
                                             >
                                                 {{ prog.planned }}
@@ -418,13 +430,17 @@
                                     </n-tooltip>
                                 </template>
                                 <template v-if="prog.postponed > 0">
-                                    <n-tooltip content="Ditunda" placement="top">
+                                    <n-tooltip
+                                        content="Ditunda"
+                                        placement="top"
+                                    >
                                         <template #trigger>
                                             <div
                                                 class="prog-seg"
                                                 :style="{
                                                     flex: prog.postponed || 0,
-                                                    background: STATUS_COLOR.postponed,
+                                                    background:
+                                                        STATUS_COLOR.postponed,
                                                 }"
                                             >
                                                 {{ prog.postponed }}
@@ -435,7 +451,7 @@
                                 </template>
                             </div>
                             <div class="prog-summary-footer">
-                                <span>{{ prog.total }} kegiatan</span>
+                                <span>{{ prog.total }} tugas</span>
                                 <n-tag
                                     size="tiny"
                                     :type="

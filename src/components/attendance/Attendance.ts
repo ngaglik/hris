@@ -22,6 +22,7 @@ export default defineComponent({
     const loadingCheckIn = ref(false);
     const loadingCheckOut = ref(false);
     const showReport = ref(false);
+    const attendanceSummaryKey = ref(0);
 
     let auth = getAuthData();
     if (!auth) {
@@ -69,9 +70,15 @@ export default defineComponent({
           );
         }
 
-        message.success(
-          mode === 1 ? "Check In berhasil" : "Check Out berhasil",
-        );
+        const result = await response.json();
+
+        message.create(`${result.message} — ${result.last_time_text}`, {
+          type: "success",
+          duration: 0,
+          closable: true,
+        });
+
+        attendanceSummaryKey.value++;
       } catch (err: any) {
         message.error(err?.message || "Gagal mengirim absensi");
       } finally {

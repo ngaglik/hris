@@ -225,7 +225,7 @@ export default defineComponent({
 
     const deleteRow = async (row: WorkProgram) => {
       try {
-        const confirmText = `Hapus program "${row.name ?? "-"}"?\nKegiatan di dalamnya juga akan terhapus.`;
+        const confirmText = `Hapus program "${row.name ?? "-"}"?\Tugas di dalamnya juga akan terhapus.`;
         if (!confirm(confirmText)) return;
 
         const res = (await apiFetch(

@@ -1,15 +1,16 @@
 <template>
     <n-card :bordered="true" size="small" style="margin-bottom: 16px">
-        <!-- ── Header + Filter ──────────────────────────────────────── -->
+        <!-- HEADER -->
         <n-space
             align="center"
             justify="space-between"
             style="margin-bottom: 14px; flex-wrap: wrap; gap: 8px"
         >
-            <span style="font-weight: 700; font-size: 15px; color: #333"
-                >📊 Ringkasan Kehadiran</span
-            >
-            <n-space align="center" :size="8">
+            <span style="font-weight: 700; font-size: 15px">
+                📊 Ringkasan Kehadiran
+            </span>
+
+            <n-space :size="8">
                 <n-select
                     v-model:value="filter.year"
                     :options="generalOptions.year"
@@ -17,6 +18,7 @@
                     size="small"
                     @update:value="handleFilterChange"
                 />
+
                 <n-select
                     v-model:value="filter.month"
                     :options="generalOptions.month"
@@ -24,6 +26,7 @@
                     size="small"
                     @update:value="handleFilterChange"
                 />
+
                 <n-button
                     size="small"
                     :loading="loading"
@@ -34,64 +37,66 @@
             </n-space>
         </n-space>
 
-        <!-- ── Skeleton saat loading ────────────────────────────────── -->
+        <!-- LOADING -->
         <template v-if="loading">
-            <n-skeleton height="70px" :repeat="1" style="margin-bottom: 12px" />
-            <n-skeleton height="120px" :repeat="1" />
+            <n-skeleton height="70px" />
+            <n-skeleton height="120px" />
         </template>
 
-        <template v-else>
-            <!-- ── Pengelompokan Tipe Jadwal ─────────────────────────── -->
+        <!-- DATA -->
+        <template v-else-if="summary">
+            <!-- KPI CARD -->
             <div style="margin-bottom: 16px">
-                <div
-                    style="
-                        font-size: 12px;
-                        font-weight: 600;
-                        color: #888;
-                        letter-spacing: 0.5px;
-                        margin-bottom: 8px;
-                        text-transform: uppercase;
-                    "
-                ></div>
                 <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                    <!-- Hari Kerja -->
                     <div
-                        v-for="st in scheduleTypeSummary"
-                        :key="st.schedule_type_id"
                         :style="{
                             flex: '1 1 90px',
                             minWidth: '80px',
-                            background:
-                                scheduleTypeStyle[st.schedule_type_id]?.bg ??
-                                '#fafafa',
-                            borderLeft: `4px solid ${scheduleTypeStyle[st.schedule_type_id]?.border ?? '#d9d9d9'}`,
+                            background: '#f6ffed',
+                            borderLeft: '4px solid #52c41a',
                             borderRadius: '6px',
                             padding: '8px 12px',
                             textAlign: 'center',
-                            opacity: st.count === 0 ? 0.45 : 1,
                         }"
                     >
                         <div
-                            :style="{
-                                fontSize: '24px',
-                                fontWeight: 800,
-                                lineHeight: 1,
-                                color:
-                                    scheduleTypeStyle[st.schedule_type_id]
-                                        ?.color ?? '#595959',
-                            }"
-                        >
-                            {{ st.count }}
-                        </div>
-                        <div
                             style="
-                                font-size: 11px;
-                                color: #555;
-                                margin-top: 4px;
-                                line-height: 1.3;
-                                word-break: break-word;
+                                font-size: 24px;
+                                font-weight: 800;
+                                color: #389e0d;
                             "
                         >
-                            {{ st.schedule_type_name }}
+                            {{ summary?.total_workday ?? 0 }}
+                        </div>
+                        <div style="font-size: 11px; margin-top: 4px">
+                            Hari Kerja
+                        </div>
+                    </div>
+
+                    <!-- Hadir -->
+                    <div
+                        :style="{
+                            flex: '1 1 90px',
+                            minWidth: '80px',
+                            background: '#e6f7ff',
+                            borderLeft: '4px solid #1890ff',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            textAlign: 'center',
+                        }"
+                    >
+                        <div
+                            style="
+                                font-size: 24px;
+                                font-weight: 800;
+                                color: #096dd9;
+                            "
+                        >
+                            {{ summary?.total_present ?? 0 }}
+                        </div>
+                        <div style="font-size: 11px; margin-top: 4px">
+                            Hadir
                         </div>
                     </div>
                 </div>
@@ -111,249 +116,117 @@
                 >
                     ⚠️ Pelanggaran Kehadiran
                 </div>
+
                 <div style="display: flex; gap: 10px; flex-wrap: wrap">
                     <!-- Tidak Check-in -->
-                    <div
-                        :style="{
-                            flex: '1 1 120px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            background:
-                                totalNoCheckin > 0 ? '#fff1f0' : '#fafafa',
-                            border: `1.5px solid ${totalNoCheckin > 0 ? '#f5222d' : '#e8e8e8'}`,
-                            borderRadius: '8px',
-                            padding: '10px 16px',
-                        }"
-                    >
-                        <div
-                            :style="{
-                                fontSize: '26px',
-                                fontWeight: 800,
-                                color: totalNoCheckin > 0 ? '#cf1322' : '#bbb',
-                                minWidth: '36px',
-                                textAlign: 'center',
-                                lineHeight: 1,
-                            }"
-                        >
-                            {{ totalNoCheckin }}
+                    <div :style="cardStyle(summary?.total_no_checkin)">
+                        <div :style="numberStyle(summary?.total_no_checkin)">
+                            {{ summary?.total_no_checkin ?? 0 }}
                         </div>
                         <div>
-                            <div
-                                style="
-                                    font-size: 12px;
-                                    font-weight: 600;
-                                    color: #333;
-                                "
-                            >
+                            <div style="font-size: 11px; margin-top: 4px">
                                 Tidak Check-in
-                            </div>
-                            <div
-                                style="
-                                    font-size: 11px;
-                                    color: #888;
-                                    margin-top: 2px;
-                                "
-                            >
-                                hari tanpa absen masuk
                             </div>
                         </div>
                     </div>
 
                     <!-- Tidak Check-out -->
-                    <div
-                        :style="{
-                            flex: '1 1 120px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            background:
-                                totalNoCheckout > 0 ? '#fff1f0' : '#fafafa',
-                            border: `1.5px solid ${totalNoCheckout > 0 ? '#f5222d' : '#e8e8e8'}`,
-                            borderRadius: '8px',
-                            padding: '10px 16px',
-                        }"
-                    >
-                        <div
-                            :style="{
-                                fontSize: '26px',
-                                fontWeight: 800,
-                                color: totalNoCheckout > 0 ? '#cf1322' : '#bbb',
-                                minWidth: '36px',
-                                textAlign: 'center',
-                                lineHeight: 1,
-                            }"
-                        >
-                            {{ totalNoCheckout }}
+                    <div :style="cardStyle(summary?.total_no_checkout)">
+                        <div :style="numberStyle(summary?.total_no_checkout)">
+                            {{ summary?.total_no_checkout ?? 0 }}
                         </div>
                         <div>
-                            <div
-                                style="
-                                    font-size: 12px;
-                                    font-weight: 600;
-                                    color: #333;
-                                "
-                            >
+                            <div style="font-size: 11px; margin-top: 4px">
                                 Tidak Check-out
-                            </div>
-                            <div
-                                style="
-                                    font-size: 11px;
-                                    color: #888;
-                                    margin-top: 2px;
-                                "
-                            >
-                                hari tanpa absen pulang
                             </div>
                         </div>
                     </div>
 
                     <!-- Total Keterlambatan -->
                     <div
-                        :style="{
-                            flex: '1 1 120px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            background:
-                                totalLateMinutes > 0 ? '#fff7e6' : '#fafafa',
-                            border: `1.5px solid ${totalLateMinutes > 0 ? '#fa8c16' : '#e8e8e8'}`,
-                            borderRadius: '8px',
-                            padding: '10px 16px',
-                        }"
+                        :style="warningCardStyle(summary?.total_late_duration)"
                     >
                         <div
-                            :style="{
-                                fontSize: '22px',
-                                fontWeight: 800,
-                                color:
-                                    totalLateMinutes > 0 ? '#d46b08' : '#bbb',
-                                minWidth: '36px',
-                                textAlign: 'center',
-                                lineHeight: 1,
-                            }"
+                            :style="
+                                warningNumberStyle(summary?.total_late_duration)
+                            "
                         >
-                            {{ formatMinutes(totalLateMinutes) }}
+                            {{
+                                formatMinutes(summary?.total_late_duration ?? 0)
+                            }}
                         </div>
                         <div>
-                            <div
-                                style="
-                                    font-size: 12px;
-                                    font-weight: 600;
-                                    color: #333;
-                                "
-                            >
+                            <div style="font-size: 11px; margin-top: 4px">
                                 ⏰ Total Keterlambatan
-                            </div>
-                            <div
-                                style="
-                                    font-size: 11px;
-                                    color: #888;
-                                    margin-top: 2px;
-                                "
-                            >
-                                akumulasi menit terlambat masuk
                             </div>
                         </div>
                     </div>
 
                     <!-- Total Pulang Awal -->
                     <div
-                        :style="{
-                            flex: '1 1 120px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            background:
-                                totalEarlyMinutes > 0 ? '#fffbe6' : '#fafafa',
-                            border: `1.5px solid ${totalEarlyMinutes > 0 ? '#faad14' : '#e8e8e8'}`,
-                            borderRadius: '8px',
-                            padding: '10px 16px',
-                        }"
+                        :style="
+                            earlyCardStyle(summary?.total_early_leave_duration)
+                        "
                     >
                         <div
-                            :style="{
-                                fontSize: '22px',
-                                fontWeight: 800,
-                                color:
-                                    totalEarlyMinutes > 0 ? '#d48806' : '#bbb',
-                                minWidth: '36px',
-                                textAlign: 'center',
-                                lineHeight: 1,
-                            }"
+                            :style="
+                                earlyNumberStyle(
+                                    summary?.total_early_leave_duration,
+                                )
+                            "
                         >
-                            {{ formatMinutes(totalEarlyMinutes) }}
+                            {{
+                                formatMinutes(
+                                    summary?.total_early_leave_duration ?? 0,
+                                )
+                            }}
                         </div>
                         <div>
-                            <div
-                                style="
-                                    font-size: 12px;
-                                    font-weight: 600;
-                                    color: #333;
-                                "
-                            >
+                            <div style="font-size: 11px; margin-top: 4px">
                                 🏃 Total Pulang Awal
-                            </div>
-                            <div
-                                style="
-                                    font-size: 11px;
-                                    color: #888;
-                                    margin-top: 2px;
-                                "
-                            >
-                                akumulasi menit pulang sebelum waktunya
                             </div>
                         </div>
                     </div>
 
                     <!-- Alpha -->
-                    <div
-                        :style="{
-                            flex: '1 1 120px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            background: totalAlpha > 0 ? '#2a0000' : '#fafafa',
-                            border: `1.5px solid ${totalAlpha > 0 ? '#820014' : '#e8e8e8'}`,
-                            borderRadius: '8px',
-                            padding: '10px 16px',
-                        }"
-                    >
-                        <div
-                            :style="{
-                                fontSize: '26px',
-                                fontWeight: 800,
-                                color: totalAlpha > 0 ? '#fff' : '#bbb',
-                                minWidth: '36px',
-                                textAlign: 'center',
-                                lineHeight: 1,
-                            }"
-                        >
-                            {{ totalAlpha }}
+                    <div :style="alphaCardStyle(summary?.total_alpha)">
+                        <div :style="alphaNumberStyle(summary?.total_alpha)">
+                            {{ summary?.total_alpha ?? 0 }}
                         </div>
                         <div>
                             <div
-                                :style="{
-                                    fontSize: '12px',
-                                    fontWeight: 600,
-                                    color: totalAlpha > 0 ? '#ffccc7' : '#333',
-                                }"
+                                style="
+                                    color: #ffff;
+                                    font-size: 11px;
+                                    margin-top: 4px;
+                                "
                             >
                                 Alpha
-                            </div>
-                            <div
-                                :style="{
-                                    fontSize: '11px',
-                                    marginTop: '2px',
-                                    color: totalAlpha > 0 ? '#ff7875' : '#888',
-                                }"
-                            >
-                                tidak hadir tanpa keterangan
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- SCORE -->
+            <n-divider />
+
+            <div style="display: flex; justify-content: space-between">
+                <div>
+                    Attendance Rate :
+                    <b>{{ summary.attendance_rate }}%</b>
+                </div>
+
+                <div>
+                    Discipline Score :
+                    <b>{{ summary.discipline_score }}</b>
+                </div>
+            </div>
+        </template>
+
+        <!-- EMPTY -->
+        <template v-else>
+            <n-empty description="Tidak ada data kehadiran" />
         </template>
     </n-card>
 </template>

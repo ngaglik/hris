@@ -30,7 +30,7 @@
         </n-card>
     </div>
 
-    <AttendanceSummary />
+    <AttendanceSummary :key="attendanceSummaryKey" />
 
     <n-tabs class="card-tabs" size="large" animated>
         <n-tab-pane name="user" tab="Jadwal">
