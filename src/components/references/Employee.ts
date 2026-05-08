@@ -5,6 +5,7 @@ import { apiFetch } from "@/services/apiClient";
 import { getAuthData, saveAuthData, logout } from "@/services/authService";
 import selectTree from "@/container/selectTree/selectTree.vue";
 import UserProfile from "../profile/UserProfile.vue";
+import { isWithFaceDetection } from "@vladmandic/face-api";
 
 export default defineComponent({
   components: {
@@ -250,6 +251,12 @@ export default defineComponent({
     ];
 
     const fetchData = async (page = 1) => {
+      if (
+        !inputSearch.value &&
+        !employeeCategoryFilter.value &&
+        !selectedOrgId.value
+      )
+        return;
       loading.value = true;
 
       let url =
@@ -345,6 +352,43 @@ export default defineComponent({
       };
 
       isModalOpen.value = true;
+    };
+
+    const resetFaceDescription = (row: any) => {
+      dialog.warning({
+        title: "Konfirmasi Reset Wajah",
+        content: `Apakah Anda yakin ingin mereset data wajah pegawai ${row.name}?`,
+        positiveText: "Ya",
+        negativeText: "Tidak",
+
+        async onPositiveClick() {
+          try {
+            const payload = {
+              PersonId: row.person_id,
+            };
+
+            const response = await apiFetch(
+              `${Config.UrlBackend}/api/attendance/reset-face`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+              },
+            );
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => null);
+              throw new Error(errorData?.message ?? "Reset wajah gagal");
+            }
+
+            message.success("Wajah berhasil direset");
+          } catch (err: any) {
+            message.error(err.message);
+          }
+        },
+      });
     };
 
     const openProfile = (row: any) => {
@@ -501,6 +545,15 @@ export default defineComponent({
                 onClick: () => openProfile(row),
               },
               { default: () => "Lihat Profil" },
+            ),
+            h(
+              NButton,
+              {
+                size: "small",
+                type: "warning",
+                onClick: () => resetFaceDescription(row),
+              },
+              { default: () => "Reset Wajah" },
             ),
           ]);
         },

@@ -30,6 +30,89 @@
         </n-card>
     </div>
 
+    <!-- ========================= -->
+    <!-- FACE NOT REGISTERED -->
+    <!-- ========================= -->
+    <n-alert
+        v-if="!hasFaceRegistered"
+        type="warning"
+        style="margin-bottom: 16px"
+    >
+        Wajah Anda belum terdaftar. Silakan register wajah terlebih dahulu.
+    </n-alert>
+
+    <n-button
+        v-if="!hasFaceRegistered"
+        type="success"
+        block
+        style="margin-bottom: 16px"
+        @click="openRegisterFaceModal"
+    >
+        Register Wajah
+    </n-button>
+
+    <!-- ========================= -->
+    <!-- REGISTER FACE MODAL -->
+    <!-- ========================= -->
+    <n-modal
+        v-model:show="showRegisterFaceModal"
+        preset="card"
+        title="Register Wajah"
+        style="width: 400px"
+    >
+        <div class="camera-wrapper">
+            <video
+                ref="registerVideoRef"
+                autoplay
+                muted
+                playsinline
+                width="100%"
+            />
+        </div>
+
+        <n-alert type="info" style="margin-top: 16px">
+            Pastikan wajah terlihat jelas dan pencahayaan cukup.
+        </n-alert>
+
+        <n-space justify="end" style="margin-top: 16px">
+            <n-button @click="closeRegisterFaceModal"> Batal </n-button>
+
+            <n-button
+                type="primary"
+                :loading="registerFaceLoading"
+                @click="registerFace"
+            >
+                Simpan Wajah
+            </n-button>
+        </n-space>
+    </n-modal>
+
+    <!-- ========================= -->
+    <!-- VERIFY FACE MODAL -->
+    <!-- ========================= -->
+    <n-modal
+        v-model:show="showFaceModal"
+        preset="card"
+        title="Verifikasi Wajah"
+        style="width: 400px"
+    >
+        <div class="camera-wrapper">
+            <video ref="videoRef" autoplay muted playsinline width="100%" />
+        </div>
+
+        <n-alert type="info" style="margin-top: 16px">
+            Arahkan wajah ke kamera untuk absensi.
+        </n-alert>
+
+        <n-space justify="end" style="margin-top: 16px">
+            <n-button @click="closeFaceModal"> Batal </n-button>
+
+            <n-button type="primary" :loading="faceLoading" @click="verifyFace">
+                Verifikasi Wajah
+            </n-button>
+        </n-space>
+    </n-modal>
+
     <AttendanceSummary :key="attendanceSummaryKey" />
 
     <n-tabs class="card-tabs" size="large" animated>
@@ -49,6 +132,17 @@
 </template>
 
 <style>
+.camera-wrapper {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    background: #000;
+}
+
+.camera-wrapper video {
+    display: block;
+}
+
 .center-text {
     text-align: center;
 }

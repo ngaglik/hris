@@ -7,7 +7,9 @@
   },
   "dependencies": {
     "@vicons/ionicons5": "^0.13.0",
+    "@vladmandic/face-api": "^1.7.15",
     "axios": "^1.10.0",
+    "face-api.js": "^0.22.2",
     "naive-ui": "^2.16.2",
     "seemly": "^0.3.10",
     "vue": "^3.0.5",

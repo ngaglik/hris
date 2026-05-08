@@ -1,41 +1,47 @@
 <template>
     <n-card :bordered="true" size="small" style="margin-bottom: 16px">
         <!-- HEADER -->
-        <n-space
-            align="center"
-            justify="space-between"
-            style="margin-bottom: 14px; flex-wrap: wrap; gap: 8px"
-        >
-            <span style="font-weight: 700; font-size: 15px">
-                📊 Ringkasan Kehadiran
-            </span>
 
-            <n-space :size="8">
+        <span style="font-weight: 700; font-size: 15px">
+            📊 Ringkasan Kehadiran
+        </span>
+        <n-form
+            ref="formRef"
+            inline
+            :label-width="200"
+            :model="filter"
+            :rules="rules"
+            :size="size"
+        >
+            <n-form-item label="Tahun" path="formFilter.year">
                 <n-select
                     v-model:value="filter.year"
+                    style="width: 100px"
+                    placeholder="Select"
                     :options="generalOptions.year"
-                    style="width: 90px"
-                    size="small"
                     @update:value="handleFilterChange"
                 />
+            </n-form-item>
 
+            <n-form-item label="Bulan" path="formFilter.month">
                 <n-select
                     v-model:value="filter.month"
+                    style="width: 180px"
+                    placeholder="Select"
                     :options="generalOptions.month"
-                    style="width: 130px"
-                    size="small"
                     @update:value="handleFilterChange"
                 />
-
+            </n-form-item>
+            <n-form-item>
                 <n-button
-                    size="small"
+                    type="primary"
                     :loading="loading"
                     @click="handleFilterChange"
                 >
                     Tampilkan
                 </n-button>
-            </n-space>
-        </n-space>
+            </n-form-item>
+        </n-form>
 
         <!-- LOADING -->
         <template v-if="loading">
