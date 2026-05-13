@@ -482,6 +482,42 @@ export default defineComponent({
     // table columns
     const columns = [
       { title: "Name", key: "name", fixed: "left" },
+      {
+        title: "Aksi",
+        key: "actions",
+        width: 150,
+        render(row: any) {
+          return h("div", { class: "flex gap-2" }, [
+            h(
+              NButton,
+              {
+                size: "small",
+                type: "primary",
+                onClick: () => openEditModal(row),
+              },
+              { default: () => "Ubah" },
+            ),
+            h(
+              NButton,
+              {
+                size: "small",
+                type: "success",
+                onClick: () => openProfile(row),
+              },
+              { default: () => "Lihat Profil" },
+            ),
+            h(
+              NButton,
+              {
+                size: "small",
+                type: "warning",
+                onClick: () => resetFaceDescription(row),
+              },
+              { default: () => "Reset Wajah" },
+            ),
+          ]);
+        },
+      },
       { title: "EmployeeId", key: "id" },
       { title: "NIP", key: "national_employee_id_number" },
       {
@@ -519,43 +555,6 @@ export default defineComponent({
         width: 120,
         render(row: any) {
           return row.is_active ? "✅ Aktif" : "❌ Nonaktif";
-        },
-      },
-      {
-        title: "Aksi",
-        key: "actions",
-        fixed: "right",
-        width: 150,
-        render(row: any) {
-          return h("div", { class: "flex gap-2" }, [
-            h(
-              NButton,
-              {
-                size: "small",
-                type: "primary",
-                onClick: () => openEditModal(row),
-              },
-              { default: () => "Ubah" },
-            ),
-            h(
-              NButton,
-              {
-                size: "small",
-                type: "success",
-                onClick: () => openProfile(row),
-              },
-              { default: () => "Lihat Profil" },
-            ),
-            h(
-              NButton,
-              {
-                size: "small",
-                type: "warning",
-                onClick: () => resetFaceDescription(row),
-              },
-              { default: () => "Reset Wajah" },
-            ),
-          ]);
         },
       },
     ];

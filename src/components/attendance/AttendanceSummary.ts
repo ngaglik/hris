@@ -3,6 +3,7 @@ import { useMessage } from "naive-ui";
 import { Config, generalOptions, scheduleTypeStyle } from "@/constant/config";
 import { apiFetch } from "@/services/apiClient";
 import { getAuthData, logout } from "@/services/authService";
+import { can, setPermissions } from "@/services/authPermission";
 
 /* =====================================================
    TYPES
@@ -64,31 +65,68 @@ export default defineComponent({
     const filter = ref({
       year: new Date().getFullYear(),
       month: new Date().getMonth() + 1,
+      employee_id: "",
     });
 
-    const summary = ref<AttendanceSummaryDto | null>(null);
+    const auth = getAuthData();
 
+    if (!auth?.employee?.id) {
+      logout();
+      message.error("Session expired");
+      return null;
+    }
+
+    var employeeId = auth.employee.id;
+    //  return auth.employee.id;
+    //});
+    setPermissions(auth.employee?.privilege ?? []);
+
+    const employeeOptions = ref<any[]>([]);
+    const employeeLoading = ref(false);
+
+    const handleInputSearchEmployee = async (keyword?: string) => {
+      // reset list setiap karakter diketik
+      employeeOptions.value = [];
+
+      // validasi minimal 2 karakter
+      if (!keyword || keyword.length < 2) {
+        return;
+      }
+      employeeLoading.value = true;
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/employee?q=${keyword}`,
+          {
+            method: "GET",
+          },
+        );
+
+        const result = await response.json();
+
+        employeeOptions.value = (result.data || []).map((item: any) => ({
+          label: `${item.name} `,
+          value: item.id,
+        }));
+      } catch (error) {
+        console.error(error);
+        message.error("Gagal memuat data employee");
+      } finally {
+        employeeLoading.value = false;
+      }
+    };
+
+    const handleEmployeeSelect = (value: any, option: any) => {
+      employeeId = value;
+      // formFilter.value.employee_id = label;
+      // message.success(employeeId);
+    };
+
+    const summary = ref<AttendanceSummaryDto | null>(null);
     /* ---------------------------------------------
        FETCH SUMMARY
     --------------------------------------------- */
-
     const fetchSummary = async () => {
-      const auth = getAuthData();
-
-      if (!auth) {
-        logout();
-        return;
-      }
-
-      const employeeId = auth.employee?.id;
-
-      if (!employeeId) {
-        message.error("Data pegawai tidak ditemukan");
-        return;
-      }
-
       loading.value = true;
-
       try {
         const url =
           `${Config.UrlBackend}/api/attendance/getattendancereport` +
@@ -209,6 +247,12 @@ export default defineComponent({
       warningCardStyle,
       numberStyle,
       cardStyle,
+
+      handleEmployeeSelect,
+      handleInputSearchEmployee,
+      employeeOptions,
+      employeeLoading,
+      can,
     };
   },
 });

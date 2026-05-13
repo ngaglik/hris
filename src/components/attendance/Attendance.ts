@@ -437,6 +437,7 @@ export default defineComponent({
 
       await openFaceModal(mode);
     };
+
     // =====================================
     // LIFECYCLE
     // =====================================

@@ -13,7 +13,7 @@
             :rules="rules"
             :size="size"
         >
-            <n-form-item label="Tahun" path="formFilter.year">
+            <n-form-item label="Tahun" path="filter.year">
                 <n-select
                     v-model:value="filter.year"
                     style="width: 100px"
@@ -23,7 +23,7 @@
                 />
             </n-form-item>
 
-            <n-form-item label="Bulan" path="formFilter.month">
+            <n-form-item label="Bulan" path="filter.month">
                 <n-select
                     v-model:value="filter.month"
                     style="width: 180px"
@@ -31,6 +31,23 @@
                     :options="generalOptions.month"
                     @update:value="handleFilterChange"
                 />
+            </n-form-item>
+            <n-form-item label="Pegawai" v-if="can('attendance.report.find')">
+                <n-input-group>
+                    <n-button type="primary"> Search </n-button>
+                    <n-select
+                        :style="{ width: '100%' }"
+                        v-model:value="filter.employee_id"
+                        :options="employeeOptions"
+                        :loading="employeeLoading"
+                        filterable
+                        remote
+                        clearable
+                        placeholder="Cari nama..."
+                        @search="handleInputSearchEmployee"
+                        @update:value="handleEmployeeSelect"
+                    />
+                </n-input-group>
             </n-form-item>
             <n-form-item>
                 <n-button

@@ -69,9 +69,19 @@
                 width="100%"
             />
         </div>
+        <!-- Assist Portrait -->
+        <div class="face-guide">
+            <div class="face-oval"></div>
+        </div>
 
         <n-alert type="info" style="margin-top: 16px">
             Pastikan wajah terlihat jelas dan pencahayaan cukup.
+            <p>
+                <small style="color: #ff0000"
+                    >Sistem tidak menyimpan foto Anda, hanya algoritma yang bisa
+                    berbeda di setiap aplikasi pengenal wajah.
+                </small>
+            </p>
         </n-alert>
 
         <n-space justify="end" style="margin-top: 16px">
@@ -99,9 +109,12 @@
         <div class="camera-wrapper">
             <video ref="videoRef" autoplay muted playsinline width="100%" />
         </div>
-
+        <!-- Assist Portrait -->
+        <div class="face-guide">
+            <div class="face-oval"></div>
+        </div>
         <n-alert type="info" style="margin-top: 16px">
-            Arahkan wajah ke kamera untuk absensi.
+            Pastikan wajah terlihat jelas dan pencahayaan cukup.
         </n-alert>
 
         <n-space justify="end" style="margin-top: 16px">
@@ -143,6 +156,35 @@
     display: block;
 }
 
+/* overlay */
+.face-guide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+/* frame wajah */
+.face-oval {
+    width: 180px;
+    height: 240px;
+    border: 3px solid #18a058;
+    border-radius: 50% / 60%;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+}
+
+/* text assist */
+.guide-text {
+    position: absolute;
+    bottom: 10px;
+    color: white;
+    font-size: 14px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 4px 10px;
+    border-radius: 6px;
+}
 .center-text {
     text-align: center;
 }
