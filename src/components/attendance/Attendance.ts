@@ -293,7 +293,12 @@ export default defineComponent({
       } catch (err: any) {
         console.error(err);
 
-        message.error(err?.message ?? "Gagal mengirim absensi");
+        //message.error(err?.message ?? "Gagal mengirim absensi");
+        message.create(err?.message ?? "Gagal mengirim absensi", {
+          type: "error",
+          duration: 0,
+          closable: true,
+        });
       } finally {
         if (mode === 1) {
           loadingCheckIn.value = false;
@@ -355,7 +360,7 @@ export default defineComponent({
           throw new Error(errorData?.message ?? "Verifikasi wajah gagal");
         }
 
-        message.success("Verifikasi wajah berhasil");
+        //message.success("Verifikasi wajah berhasil");
 
         await insertFingerlog(attendanceMode.value);
 

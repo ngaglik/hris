@@ -481,7 +481,23 @@ export default defineComponent({
 
     // table columns
     const columns = [
-      { title: "Name", key: "name", fixed: "left" },
+      {
+        title: "Name",
+        key: "name",
+        width: 180,
+        fixed: "left",
+        render: (row: any) => {
+          const front = row.front_title
+            ? `${row.front_title.replace(/\.$/, "")}.`
+            : "";
+
+          const name = row.name ?? "";
+
+          const end = row.end_title ? `, ${row.end_title}` : "";
+
+          return [front, name].filter(Boolean).join(" ") + end;
+        },
+      },
       {
         title: "Aksi",
         key: "actions",

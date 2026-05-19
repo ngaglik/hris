@@ -146,7 +146,9 @@ export default defineComponent({
     const formData = ref({
       id: null,
       national_id_number: "",
+      front_title: "",
       name: "",
+      end_title: "",
       birth_date: "",
       gender: "",
     });
@@ -157,7 +159,9 @@ export default defineComponent({
       formData.value = {
         id: null,
         national_id_number: "",
+        front_title: "",
         name: "",
+        end_title: "",
         birth_date: "",
         gender: "",
       };
@@ -245,7 +249,23 @@ export default defineComponent({
     // table columns
     const columns = [
       { title: "ID", key: "id", fixed: "left" },
-      { title: "Name", key: "name", fixed: "left" },
+      {
+        title: "Name",
+        key: "name",
+        width: 180,
+        fixed: "left",
+        render: (row: any) => {
+          const front = row.front_title
+            ? `${row.front_title.replace(/\.$/, "")}.`
+            : "";
+
+          const name = row.name ?? "";
+
+          const end = row.end_title ? `, ${row.end_title}` : "";
+
+          return [front, name].filter(Boolean).join(" ") + end;
+        },
+      },
       {
         title: "Aksi",
         key: "actions",
