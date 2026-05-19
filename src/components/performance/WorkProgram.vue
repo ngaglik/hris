@@ -46,17 +46,18 @@
                     </n-form>
                 </n-space>
             </n-space>
-
-            <n-data-table
-                :columns="columns"
-                :data="tableData"
-                :loading="loading"
-                :scroll-x="1400"
-                :max-height="650"
-                :row-key="(row: any) => row.id"
-                v-model:expanded-row-keys="expandedRowKeys"
-                class="wp-table"
-            />
+            <n-config-provider :theme-overrides="themeOverrides">
+                <n-data-table
+                    :columns="columns"
+                    :data="tableData"
+                    :loading="loading"
+                    :scroll-x="1400"
+                    :max-height="650"
+                    :row-key="(row: any) => row.id"
+                    v-model:expanded-row-keys="expandedRowKeys"
+                    class="wp-table"
+                />
+            </n-config-provider>
         </n-space>
 
         <n-modal

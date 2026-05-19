@@ -19,8 +19,8 @@ import Family from "@/components/profile/Family.vue";
 import ProfileBar from "@/components/ProfileBar.vue";
 import Table from "@/components/Table.vue";
 import selectTree from "@/container/selectTree/selectTree.vue";
-import WorkProgram from "@/components/perf/WorkProgram.vue";
-import WorkProgramDashboard from "@/components/perf/WorkProgramDashboard.vue";
+import WorkProgram from "@/components/performance/WorkProgram.vue";
+import WorkProgramDashboard from "@/components/performance/WorkProgramDashboard.vue";
 
 const router = createRouter({
   // 4. Provide the history implementation to use. We are using the hash history for simplicity here.

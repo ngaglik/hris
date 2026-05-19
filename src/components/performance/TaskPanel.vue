@@ -1,16 +1,17 @@
 <template>
     <div class="task-panel">
         <n-button type="primary" @click="openAddModal">Tambah Tugas</n-button>
-        <n-data-table
-            :columns="columns"
-            :data="tableData"
-            :loading="loading"
-            :scroll-x="1300"
-            size="small"
-            :bordered="true"
-            striped
-        />
-
+        <n-config-provider :theme-overrides="themeOverrides">
+            <n-data-table
+                :columns="columns"
+                :data="tableData"
+                :loading="loading"
+                :scroll-x="1300"
+                size="small"
+                :bordered="true"
+                striped
+            />
+        </n-config-provider>
         <!-- ── Modal Tambah / Edit Tugas ──────────────────────────────────── -->
         <n-modal
             v-model:show="isModalOpen"

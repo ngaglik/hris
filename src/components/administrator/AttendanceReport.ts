@@ -263,12 +263,6 @@ export default defineComponent({
         width: 40,
       },
       {
-        title: "Total alpha",
-        key: "total_alpha",
-        align: "center",
-        width: 40,
-      },
-      {
         title: "Total tidak checkin",
         key: "total_no_checkin",
         align: "center",
@@ -305,8 +299,8 @@ export default defineComponent({
         width: 40,
       },
       {
-        title: "Total terlambat",
-        key: "total_late",
+        title: "Total pelanggaran",
+        key: "total_violation",
         align: "center",
         width: 40,
       },

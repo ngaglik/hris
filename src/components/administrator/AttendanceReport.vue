@@ -12,7 +12,7 @@
             <n-form-item label="Tahun" path="formFilter.year">
                 <n-select
                     v-model:value="formFilter.year"
-                    style="width: 100px"
+                    style="width: clamp(100px, 12vw, 140px)"
                     placeholder="Pilih Tahun"
                     :options="generalOptions.year"
                 />
@@ -21,14 +21,14 @@
             <n-form-item label="Bulan" path="formFilter.month">
                 <n-select
                     v-model:value="formFilter.month"
-                    style="width: 100px"
+                    style="width: clamp(100px, 12vw, 140px)"
                     placeholder="Pilih Bulan"
                     :options="generalOptions.month"
                 />
             </n-form-item>
+
             <n-form-item label="Pegawai" v-if="can('attendance.report.find')">
                 <n-input-group>
-                    <n-button type="primary"> Search </n-button>
                     <n-select
                         :style="{ width: '200px' }"
                         v-model:value="formFilter.employee_id"

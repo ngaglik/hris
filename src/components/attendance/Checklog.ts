@@ -3,6 +3,7 @@ import { useMessage, useDialog, NButton, NDatePicker } from "naive-ui";
 import { Config, generalOptions } from "@/constant/config";
 import { apiFetch } from "@/services/apiClient";
 import { getAuthData, saveAuthData, logout } from "@/services/authService";
+import { can, setPermissions } from "@/services/authPermission";
 
 export default defineComponent({
   setup() {
@@ -19,13 +20,67 @@ export default defineComponent({
       year: new Date().getFullYear(),
       month: new Date().getMonth() + 1,
     });
+    /* ===============================
+       AUTH SAFE EMPLOYEE
+    =============================== */
 
+    //const employeeId = computed(() => {
+    const auth = getAuthData();
+
+    if (!auth?.employee?.id) {
+      logout();
+      message.error("Session expired");
+      return null;
+    }
+    var employeeId = auth.employee.id;
+    //  return auth.employee.id;
+    //});
+    setPermissions(auth.employee?.privilege ?? []);
+
+    const employeeOptions = ref<any[]>([]);
+    const employeeLoading = ref(false);
+
+    const handleInputSearchEmployee = async (keyword?: string) => {
+      // reset list setiap karakter diketik
+      employeeOptions.value = [];
+
+      // validasi minimal 2 karakter
+      if (!keyword || keyword.length < 2) {
+        return;
+      }
+      employeeLoading.value = true;
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/option/employee?q=${keyword}`,
+          {
+            method: "GET",
+          },
+        );
+
+        const result = await response.json();
+
+        employeeOptions.value = (result.data || []).map((item: any) => ({
+          label: `${item.name} `,
+          value: item.id,
+        }));
+      } catch (error) {
+        console.error(error);
+        message.error("Gagal memuat data employee");
+      } finally {
+        employeeLoading.value = false;
+      }
+    };
+
+    const handleEmployeeSelect = (value: any, option: any) => {
+      employeeId = value;
+      // formFilter.value.employee_id = label;
+      // message.success(employeeId);
+    };
+
+    /* ===============================
+       FETCH DATA
+    =============================== */
     const fetchData = async (page = 1) => {
-      let auth = getAuthData();
-      let token = auth?.token;
-      let session = auth?.session;
-      let employeeId = auth?.employee.id;
-
       loading.value = true;
       const response = (await apiFetch(
         `${Config.UrlBackend}/api/attendance/getfingerlog?employeeId=${employeeId}&year=${formFilter.value.year}&month=${formFilter.value.month}&page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`,
@@ -88,6 +143,12 @@ export default defineComponent({
 
       generalOptions,
       formFilter,
+
+      handleEmployeeSelect,
+      handleInputSearchEmployee,
+      employeeOptions,
+      employeeLoading,
+      can,
     };
   },
 });

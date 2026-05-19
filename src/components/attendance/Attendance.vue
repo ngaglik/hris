@@ -14,6 +14,11 @@
                         block
                         @click="CheckIn"
                     >
+                        <template #icon>
+                            <n-icon>
+                                <LogInOutline />
+                            </n-icon>
+                        </template>
                         Check In
                     </n-button>
 
@@ -24,6 +29,11 @@
                         @click="CheckOut"
                     >
                         Check Out
+                        <template #icon>
+                            <n-icon>
+                                <LogOutOutline />
+                            </n-icon>
+                        </template>
                     </n-button>
                 </n-space>
             </n-form>
@@ -128,17 +138,37 @@
 
     <AttendanceSummary :key="attendanceSummaryKey" />
 
-    <n-tabs class="card-tabs" size="large" animated>
-        <n-tab-pane name="user" tab="Jadwal">
+    <n-tabs type="card" animated>
+        <n-tab-pane name="schedule">
+            <template #tab>
+                <n-space align="center">
+                    <n-icon><CalendarOutline /></n-icon>
+                    Jadwal
+                </n-space>
+            </template>
+
             <Schedule :employeeId="employeeId" />
         </n-tab-pane>
-        <n-tab-pane name="unit-kerja" tab="Checklog">
+
+        <n-tab-pane name="checklog">
+            <template #tab>
+                <n-space align="center">
+                    <n-icon><TimeOutline /></n-icon>
+                    Checklog
+                </n-space>
+            </template>
+
             <Checklog />
         </n-tab-pane>
-        <!-- <n-tab-pane name="daily" tab="Kehadiran Harian">
-            <DailyAttendance />
-        </n-tab-pane> -->
-        <n-tab-pane name="report" tab="Report Kehadiran">
+
+        <n-tab-pane name="report">
+            <template #tab>
+                <n-space align="center">
+                    <n-icon><BarChartOutline /></n-icon>
+                    Report Kehadiran
+                </n-space>
+            </template>
+
             <PersonalAttendanceReport />
         </n-tab-pane>
     </n-tabs>

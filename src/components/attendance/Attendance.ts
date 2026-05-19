@@ -17,12 +17,25 @@ import PersonalAttendanceReport from "./PersonalAttendanceReport.vue";
 
 import { can, setPermissions } from "@/services/authPermission";
 
+import {
+  CalendarOutline,
+  TimeOutline,
+  BarChartOutline,
+  LogInOutline,
+  LogOutOutline,
+} from "@vicons/ionicons5";
+
 export default defineComponent({
   components: {
     Checklog,
     Schedule,
     AttendanceSummary,
     PersonalAttendanceReport,
+    CalendarOutline,
+    TimeOutline,
+    BarChartOutline,
+    LogInOutline,
+    LogOutOutline,
   },
 
   setup() {

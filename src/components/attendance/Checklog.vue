@@ -26,7 +26,23 @@
                     :options="generalOptions.month"
                 />
             </n-form-item>
-
+            <n-form-item label="Pegawai" v-if="can('attendance.report.find')">
+                <n-input-group>
+                    <n-select
+                        :style="{ width: '100%' }"
+                        v-model:value="formFilter.employee_id"
+                        :options="employeeOptions"
+                        :loading="employeeLoading"
+                        filterable
+                        remote
+                        clearable
+                        placeholder="Cari nama..."
+                        @search="handleInputSearchEmployee"
+                        @update:value="handleEmployeeSelect"
+                    />
+                    <!-- <n-button type="primary" ghost> Search </n-button> -->
+                </n-input-group>
+            </n-form-item>
             <n-form-item>
                 <n-button type="primary" @click="handleInputSearch">
                     Tampilkan

@@ -246,6 +246,13 @@ export default defineComponent({
       }
     };
 
+    const themeOverrides = {
+      DataTable: {
+        thColor: "#eeeeee",
+        tdColor: "#f5f5f5",
+        borderColor: "#e0e0e0",
+      },
+    };
     // ── Columns ──────────────────────────────────────────────────────────────
     const columns = [
       {
@@ -354,6 +361,7 @@ export default defineComponent({
       isModalOpen,
       isEditMode,
       formData,
+      themeOverrides,
       // organization filter
       orgOptions,
       orgLoading,
