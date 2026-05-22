@@ -21,6 +21,7 @@ import Table from "@/components/Table.vue";
 import selectTree from "@/container/selectTree/selectTree.vue";
 import WorkProgram from "@/components/performance/WorkProgram.vue";
 import WorkProgramDashboard from "@/components/performance/WorkProgramDashboard.vue";
+import CertificateGeneratorPDF from "@/components/tools/CertificateGeneratorPDF.vue";
 
 const router = createRouter({
   // 4. Provide the history implementation to use. We are using the hash history for simplicity here.
@@ -101,6 +102,10 @@ const router = createRouter({
     {
       path: "/WorkProgram",
       component: WorkProgram,
+    },
+    {
+      path: "/CertificateGeneratorPDF",
+      component: CertificateGeneratorPDF,
     },
     {
       path: "/WorkProgramDashboard",

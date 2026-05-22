@@ -1,6 +1,6 @@
-import { defineComponent, ref, onMounted, onBeforeUnmount } from "vue";
+import { defineComponent, ref, onMounted, onBeforeUnmount, h } from "vue";
 
-import { useMessage } from "naive-ui";
+import { useMessage, useDialog } from "naive-ui";
 
 import * as faceapi from "@vladmandic/face-api";
 
@@ -43,6 +43,49 @@ export default defineComponent({
     // MESSAGE
     // =====================================
     const message = useMessage();
+
+    const dialog = useDialog();
+
+    const showFaceGuide = () => {
+      dialog.info({
+        title: "Panduan Register Wajah",
+        positiveText: "Lanjutkan",
+        closable: false,
+        maskClosable: false,
+
+        content: () =>
+          h("div", [
+            h(
+              "p",
+              {
+                style: "margin-bottom: 12px",
+              },
+              "Pastikan wajah terlihat jelas, tunggal, posisi sesuai dan pencahayaan cukup.",
+            ),
+
+            h("img", {
+              src: "/face-position.png",
+              style: `
+                            width: 280px;
+                            display: block;
+                            margin: 0 auto 12px auto;
+                        `,
+            }),
+
+            h(
+              "small",
+              {
+                style: "color: #ff0000",
+              },
+              "Sistem tidak menyimpan foto Anda, hanya algoritma saja yang bisa berbeda di setiap aplikasi pengenal wajah.",
+            ),
+          ]),
+
+        onPositiveClick: () => {
+          openRegisterFaceModal();
+        },
+      });
+    };
 
     // =====================================
     // AUTH
@@ -231,7 +274,6 @@ export default defineComponent({
     // =====================================
     const openRegisterFaceModal = async (): Promise<void> => {
       showRegisterFaceModal.value = true;
-
       await startRegisterCamera();
     };
 
@@ -505,6 +547,7 @@ export default defineComponent({
       openRegisterFaceModal,
       closeRegisterFaceModal,
       registerFace,
+      showFaceGuide,
 
       // misc
       employeeId,

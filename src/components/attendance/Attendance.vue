@@ -56,7 +56,7 @@
         type="success"
         block
         style="margin-bottom: 16px"
-        @click="openRegisterFaceModal"
+        @click="showFaceGuide"
     >
         Register Wajah
     </n-button>
@@ -83,16 +83,6 @@
         <div class="face-guide">
             <div class="face-oval"></div>
         </div>
-
-        <n-alert type="info" style="margin-top: 16px">
-            Pastikan wajah terlihat jelas dan pencahayaan cukup.
-            <p>
-                <small style="color: #ff0000"
-                    >Sistem tidak menyimpan foto Anda, hanya algoritma yang bisa
-                    berbeda di setiap aplikasi pengenal wajah.
-                </small>
-            </p>
-        </n-alert>
 
         <n-space justify="end" style="margin-top: 16px">
             <n-button @click="closeRegisterFaceModal"> Batal </n-button>

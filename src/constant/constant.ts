@@ -49,8 +49,8 @@ export const LAYOUT_ITEMS = [
     key: "/administrator",
     children: [
       {
-        label: "Diklat",
-        key: "/profiledevelopment",
+        label: "Generator Sertifikat",
+        key: "/CertificateGeneratorPDF",
       },
       {
         label: "Kepegawaian",
