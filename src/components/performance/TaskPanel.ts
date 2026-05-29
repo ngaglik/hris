@@ -167,6 +167,37 @@ export default defineComponent({
       }
     };
 
+    // ── Employee options for modal form (Penanggung Jawab) ───────────────────
+    const employeeOptions = ref<{ label: string; value: number }[]>([]);
+    const employeeSearchLoading = ref(false);
+
+    const searchEmployees = async (query: string) => {
+      if (!query || query.trim().length < 2) {
+        employeeOptions.value = [];
+        return;
+      }
+      employeeSearchLoading.value = true;
+      try {
+        const res = (await apiFetch(
+          `${Config.UrlBackend}/api/option/employee?q=${encodeURIComponent(query.trim())}`,
+          { method: "GET" },
+        )) as Response | void;
+        if (!res?.ok) return;
+        const json: any = await res.json();
+        const list = json.data ?? json.Data ?? [];
+        employeeOptions.value = (list as { id: number; name?: string }[]).map(
+          (e: any) => ({
+            label: e.name ?? `#${e.id}`,
+            value: e.id,
+          }),
+        );
+      } catch (_) {
+        employeeOptions.value = [];
+      } finally {
+        employeeSearchLoading.value = false;
+      }
+    };
+
     const uploadFiles = async (files: FileList | null) => {
       if (!files || !currentEditingTaskId.value) return;
       uploading.value = true;
@@ -485,6 +516,10 @@ export default defineComponent({
       openAddModal,
       closeModal,
       submitForm,
+      // modal employee search
+      employeeOptions,
+      employeeSearchLoading,
+      searchEmployees,
       // attachments helpers & state
       attachmentsMap,
       loadAttachments,

@@ -78,7 +78,19 @@
                                 />
                             </n-form-item-gi>
                         </n-grid>
-
+                        <n-form-item label="Pelaksana">
+                            <n-select
+                                v-model:value="formData.person_assigned"
+                                :options="employeeOptions"
+                                :loading="employeeSearchLoading"
+                                multiple
+                                filterable
+                                remote
+                                clearable
+                                placeholder="Cari nama pegawai (min. 2 karakter)"
+                                @search="searchEmployees"
+                            />
+                        </n-form-item>
                         <!-- ── Perencanaan ────────────────────────────────── -->
                         <n-divider
                             title-placement="left"

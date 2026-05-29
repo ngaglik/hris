@@ -30,11 +30,12 @@
                     </n-upload>
                 </div>
 
-                <!-- Setting -->
+                <!-- Setting untuk Nama -->
+                <n-divider>Pengaturan Nama Peserta</n-divider>
                 <n-grid :cols="4" :x-gap="12">
                     <n-grid-item>
                         <n-input-number
-                            v-model:value="config.x"
+                            v-model:value="config.name.x"
                             placeholder="Posisi X"
                             style="width: 100%"
                         />
@@ -42,7 +43,7 @@
 
                     <n-grid-item>
                         <n-input-number
-                            v-model:value="config.y"
+                            v-model:value="config.name.y"
                             placeholder="Posisi Y"
                             style="width: 100%"
                         />
@@ -50,7 +51,7 @@
 
                     <n-grid-item>
                         <n-input-number
-                            v-model:value="config.size"
+                            v-model:value="config.name.size"
                             placeholder="Font Size"
                             style="width: 100%"
                         />
@@ -64,21 +65,68 @@
                     </n-grid-item>
                 </n-grid>
 
+                <!-- Setting untuk Nomor Sertifikat -->
+                <n-divider>Pengaturan Nomor Sertifikat</n-divider>
+                <n-grid :cols="4" :x-gap="12">
+                    <n-grid-item>
+                        <n-input-number
+                            v-model:value="config.certNumber.x"
+                            placeholder="Posisi X"
+                            style="width: 100%"
+                        />
+                    </n-grid-item>
+
+                    <n-grid-item>
+                        <n-input-number
+                            v-model:value="config.certNumber.y"
+                            placeholder="Posisi Y"
+                            style="width: 100%"
+                        />
+                    </n-grid-item>
+
+                    <n-grid-item>
+                        <n-input-number
+                            v-model:value="config.certNumber.size"
+                            placeholder="Font Size"
+                            style="width: 100%"
+                        />
+                    </n-grid-item>
+
+                    <n-grid-item>
+                        <n-input
+                            v-model:value="previewCertNumber"
+                            placeholder="Preview No Sertifikat"
+                        />
+                    </n-grid-item>
+                </n-grid>
+
                 <!-- Preview -->
                 <div class="preview">
                     <div class="pdf-wrapper">
                         <canvas ref="pdfCanvas"></canvas>
 
-                        <!-- LIVE PREVIEW -->
+                        <!-- LIVE PREVIEW NAMA -->
                         <div
-                            class="preview-text"
+                            class="preview-text name-text"
                             :style="{
-                                left: `${config.x}px`,
-                                top: `${config.y}px`,
-                                fontSize: `${config.size}px`,
+                                left: `${config.name.x}px`,
+                                top: `${config.name.y}px`,
+                                fontSize: `${config.name.size}px`,
                             }"
                         >
                             {{ previewName }}
+                        </div>
+
+                        <!-- LIVE PREVIEW NOMOR SERTIFIKAT -->
+                        <div
+                            class="preview-text cert-text"
+                            :style="{
+                                left: `${config.certNumber.x}px`,
+                                top: `${config.certNumber.y}px`,
+                                fontSize: `${config.certNumber.size}px`,
+                            }"
+                        >
+                            {{ previewCertNumber }}
                         </div>
                     </div>
                 </div>
@@ -120,6 +168,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+
 // -----------------------------------------------------
 // STATE
 // -----------------------------------------------------
@@ -134,12 +183,22 @@ const pdfCanvas = ref<HTMLCanvasElement | null>(null);
 
 const previewName = ref("Nama Peserta");
 
+const previewCertNumber = ref("No. Sertifikat");
+
 const pdfScale = ref(1);
 
+// Update konfigurasi untuk mendukung nama dan nomor sertifikat
 const config = reactive({
-    x: 420,
-    y: 200,
-    size: 28,
+    name: {
+        x: 420,
+        y: 210,
+        size: 18,
+    },
+    certNumber: {
+        x: 420,
+        y: 125,
+        size: 16,
+    },
 });
 
 // -----------------------------------------------------
@@ -168,7 +227,24 @@ const handleExcelUpload = async ({ file }: any) => {
     participants.value = XLSX.utils.sheet_to_json(sheet);
 
     if (participants.value.length > 0) {
-        previewName.value = participants.value[0].nama || "Nama Peserta";
+        // Mendukung berbagai kemungkinan nama kolom
+        const namaColumn =
+            participants.value[0].nama ||
+            participants.value[0].Nama ||
+            participants.value[0].NAME ||
+            participants.value[0].NamaLengkap ||
+            "";
+
+        const certNumberColumn =
+            participants.value[0].no_sertifikat ||
+            participants.value[0].NoSertifikat ||
+            participants.value[0].CERT_NUMBER ||
+            participants.value[0].noSertifikat ||
+            participants.value[0]["No Sertifikat"] ||
+            "";
+
+        previewName.value = namaColumn || "Nama Peserta";
+        previewCertNumber.value = certNumberColumn || "No. Sertifikat";
     }
 };
 
@@ -224,43 +300,80 @@ const generatePdf = async (participant: any) => {
 
     const page = pdfDoc.getPages()[0];
 
-    const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const normalFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
     // -------------------------------------------
-    // TEXT
+    // SANITIZE NAMA
     // -------------------------------------------
+    const namaText = String(
+        participant.nama ||
+            participant.Nama ||
+            participant.NAME ||
+            participant.NamaLengkap ||
+            "",
+    )
+        .replace(/[\r\n]+/g, " ")
+        .trim();
 
-    const text = participant.nama || "";
-
-    const textWidth = font.widthOfTextAtSize(text, config.size);
-
-    // ----------------------------------
-    // CENTER POINT
-    // config.x = titik tengah horizontal
-    // config.y = titik tengah vertical
-    // ----------------------------------
-    // config.x += 120;
-    // config.y += 70;
-    const pdfX = config.x / pdfScale.value;
-
-    const pdfY = page.getHeight() - config.y / pdfScale.value;
+    const namaWidth = boldFont.widthOfTextAtSize(namaText, config.name.size);
 
     // ----------------------------------
-    // CENTER ALIGN
+    // CENTER POINT UNTUK NAMA
     // ----------------------------------
+    const namaX = config.name.x / pdfScale.value;
+    const namaY = page.getHeight() - config.name.y / pdfScale.value;
 
-    page.drawText(text, {
-        x: pdfX - textWidth / 2,
+    // ----------------------------------
+    // DRAW NAMA TEXT
+    // ----------------------------------
+    if (namaText) {
+        page.drawText(namaText, {
+            x: namaX - namaWidth / 2,
+            y: namaY - config.name.size / 2,
+            size: config.name.size,
+            font: boldFont,
+            color: rgb(0, 0, 0),
+        });
+    }
 
-        // vertical center correction
-        y: pdfY - config.size / 2,
+    // -------------------------------------------
+    // SANITIZE NOMOR SERTIFIKAT
+    // -------------------------------------------
+    const certNumberText = String(
+        participant.no_sertifikat ||
+            participant.NoSertifikat ||
+            participant.CERT_NUMBER ||
+            participant.noSertifikat ||
+            participant["No Sertifikat"] ||
+            "",
+    )
+        .replace(/[\r\n]+/g, " ")
+        .trim();
 
-        size: config.size,
+    const certNumberWidth = normalFont.widthOfTextAtSize(
+        certNumberText,
+        config.certNumber.size,
+    );
 
-        font,
+    // ----------------------------------
+    // CENTER POINT UNTUK NOMOR SERTIFIKAT
+    // ----------------------------------
+    const certNumberX = config.certNumber.x / pdfScale.value;
+    const certNumberY = page.getHeight() - config.certNumber.y / pdfScale.value;
 
-        color: rgb(0, 0, 0),
-    });
+    // ----------------------------------
+    // DRAW NOMOR SERTIFIKAT TEXT
+    // ----------------------------------
+    if (certNumberText) {
+        page.drawText(certNumberText, {
+            x: certNumberX - certNumberWidth / 2,
+            y: certNumberY - config.certNumber.size / 2,
+            size: config.certNumber.size,
+            font: normalFont,
+            color: rgb(0, 0, 0),
+        });
+    }
 
     return await pdfDoc.save();
 };
@@ -280,7 +393,17 @@ const generateAllCertificates = async () => {
 
             if (!pdfBytes) continue;
 
-            zip.file(`${participant.nama}.pdf`, pdfBytes);
+            // Menggunakan nama file yang aman (menghindari karakter ilegal)
+            const namaFile = (
+                participant.nama ||
+                participant.Nama ||
+                participant.NAME ||
+                "peserta"
+            )
+                .replace(/[/\\?%*:|"<>]/g, "-")
+                .trim();
+
+            zip.file(`${namaFile}.pdf`, pdfBytes);
         }
 
         const blob = await zip.generateAsync({
@@ -321,20 +444,18 @@ const generateAllCertificates = async () => {
 
 .preview-text {
     position: absolute;
-
     transform: translate(-50%, -50%);
-
     font-weight: bold;
-
     color: black;
-
     white-space: nowrap;
-
     pointer-events: none;
-
     text-align: center;
-
     line-height: 1;
+}
+
+/* Gaya khusus untuk nomor sertifikat di preview */
+.preview-text.cert-text {
+    font-weight: normal;
 }
 
 canvas {
