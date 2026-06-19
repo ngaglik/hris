@@ -17,6 +17,9 @@ importers:
       axios:
         specifier: ^1.10.0
         version: 1.10.0
+      echarts:
+        specifier: ^6.1.0
+        version: 6.1.0
       face-api.js:
         specifier: ^0.22.2
         version: 0.22.2
@@ -41,6 +44,9 @@ importers:
       vue:
         specifier: ^3.0.5
         version: 3.5.17(typescript@4.9.5)
+      vue-echarts:
+        specifier: ^8.0.1
+        version: 8.0.1(echarts@6.1.0)(vue@3.5.17(typescript@4.9.5))
       vue-router:
         specifier: ^4.0.10
         version: 4.5.1(vue@3.5.17(typescript@4.9.5))
@@ -932,6 +938,9 @@ packages:
 
   duplexer2@0.1.4:
     resolution: {integrity: sha512-asLFVfWWtJ90ZyOUHMqk7/S2w2guQKxUI2itj3d92ADHhxUSbCMGi1f1cBcJ7xM1To+pE/Khbwo1yuNbMEPKeA==}
+
+  echarts@6.1.0:
+    resolution: {integrity: sha512-q0yaFPggC9FUdsWH4blavRWFmxdrIodbkoKNAjJudAI6CA9gNPxHtV2RcZNEepZVlk4yvBYkOkbk6HIVpIyHZA==}
 
   electron-to-chromium@1.5.182:
     resolution: {integrity: sha512-Lv65Btwv9W4J9pyODI6EWpdnhfvrve/us5h1WspW8B2Fb0366REPtY3hX7ounk1CkV/TBjWCEvCBBbYbmV0qCA==}
@@ -2101,6 +2110,9 @@ packages:
   tslib@1.14.1:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
 
+  tslib@2.3.0:
+    resolution: {integrity: sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==}
+
   tsutils@3.21.0:
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
     engines: {node: '>= 6'}
@@ -2186,6 +2198,12 @@ packages:
     resolution: {integrity: sha512-iox0I3RZzxtKlcgYaStQYKEzWWGAduMmq+jS7OrNdQo1FgGfPMubGL3uGHOU9n97NIvfFDBGnpSvkWyb/NSn/Q==}
     peerDependencies:
       vue: ^3.0.0
+
+  vue-echarts@8.0.1:
+    resolution: {integrity: sha512-23rJTFLu1OUEGRWjJGmdGt8fP+8+ja1gVgzMYPIPaHWpXegcO1viIAaeu2H4QHESlVeHzUAHIxKXGrwjsyXAaA==}
+    peerDependencies:
+      echarts: ^6.0.0
+      vue: ^3.3.0
 
   vue-eslint-parser@7.11.0:
     resolution: {integrity: sha512-qh3VhDLeh773wjgNTl7ss0VejY9bMMa0GoDG2fQVyDzRFdiU3L7fw74tWZDHNQXdZqxO3EveQroa9ct39D2nqg==}
@@ -2276,6 +2294,9 @@ packages:
 
   yallist@3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
+
+  zrender@6.1.0:
+    resolution: {integrity: sha512-oEGMDB6pOP2S6OwRR4PdVv610zrjnA3Bh+JnSG12fYJlBKjtNAoEb5fSUoCOOINlH96I2fU38/A2UpRKs67xYQ==}
 
 snapshots:
 
@@ -3241,6 +3262,11 @@ snapshots:
   duplexer2@0.1.4:
     dependencies:
       readable-stream: 2.3.8
+
+  echarts@6.1.0:
+    dependencies:
+      tslib: 2.3.0
+      zrender: 6.1.0
 
   electron-to-chromium@1.5.182: {}
 
@@ -4498,6 +4524,8 @@ snapshots:
 
   tslib@1.14.1: {}
 
+  tslib@2.3.0: {}
+
   tsutils@3.21.0(typescript@4.9.5):
     dependencies:
       tslib: 1.14.1
@@ -4597,6 +4625,11 @@ snapshots:
   vooks@0.2.12(vue@3.5.17(typescript@4.9.5)):
     dependencies:
       evtd: 0.2.4
+      vue: 3.5.17(typescript@4.9.5)
+
+  vue-echarts@8.0.1(echarts@6.1.0)(vue@3.5.17(typescript@4.9.5)):
+    dependencies:
+      echarts: 6.1.0
       vue: 3.5.17(typescript@4.9.5)
 
   vue-eslint-parser@7.11.0(eslint@7.32.0):
@@ -4745,3 +4778,7 @@ snapshots:
       word: 0.3.0
 
   yallist@3.1.1: {}
+
+  zrender@6.1.0:
+    dependencies:
+      tslib: 2.3.0

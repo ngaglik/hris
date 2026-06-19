@@ -19,5 +19,5 @@ export const logout = () => {
   localStorage.removeItem(Config.TokenName);
   localStorage.removeItem(Config.SessionName);
   window.$message?.info("Anda berhasil logout.");
-  window.location.href = "/";
+  window.location.href = import.meta.env.BASE_URL;
 };

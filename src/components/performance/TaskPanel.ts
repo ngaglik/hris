@@ -18,6 +18,7 @@ type TaskItem = {
   progress: number | null; // 0–100
   notes: string | null;
   sort_order: number | null;
+  person_assigned?: number[];
 };
 
 type Attachment = {
@@ -108,6 +109,7 @@ export default defineComponent({
       progress: 0,
       notes: null,
       sort_order: null,
+      person_assigned: [],
     });
 
     const formData = ref<TaskItem>(emptyForm());
@@ -301,6 +303,7 @@ export default defineComponent({
           status: formData.value.status || "planned",
           progress: formData.value.progress ?? 0,
           notes: formData.value.notes || null,
+          person_assigned: formData.value.person_assigned ?? [],
         };
 
         const url = isEditMode.value

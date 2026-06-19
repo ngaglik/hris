@@ -50,6 +50,25 @@ export default defineComponent({
       fetchData();
     };
 
+    // ── Options ──────────────────────────────────────────────────────
+    const functionalOptions = ref<{ label: string; value: string }[]>([]);
+    const fetchFunctionalOptions = async () => {
+      try {
+        const res = (await apiFetch(
+          `${Config.UrlBackend}/api/option/functional`,
+          { method: "GET" },
+        )) as Response;
+        if (!res || !res.ok) return;
+        const result = await res.json();
+        functionalOptions.value = (result.data || result).map((x: any) => ({
+          label: x.name,
+          value: x.id,
+        }));
+      } catch {
+        /* silent */
+      }
+    };
+
     const personOptions = ref<any[]>([]);
     const personLoading = ref(false);
 
@@ -226,7 +245,7 @@ export default defineComponent({
         const result = await response.json();
         professionalOptions.value = (result.data || result).map(
           (item: any) => ({
-            label: item.professional_name,
+            label: item.name,
             value: item.id,
           }),
         );
@@ -306,6 +325,7 @@ export default defineComponent({
       employee_category_id: "",
       organization_id: "",
       position_id: null,
+      functional_id: null,
       address: "",
       tags: "",
       is_active: true, // default aktif
@@ -329,6 +349,7 @@ export default defineComponent({
         professional_id: "",
         organization_id: "",
         position_id: null,
+        functional_id: null,
         address: "",
         tags: "",
         is_active: true, // default aktif
@@ -345,11 +366,20 @@ export default defineComponent({
 
       formData.value = {
         ...row,
-
         // ✅ STRING → ARRAY
         tags: row.tags ? String(row.tags).split(",") : [],
         is_active: !!row.is_active,
       };
+
+      // // Load pre-selected employees into options so the select shows their name
+      // if (row.functional_id) {
+      //   functionalOptions.value = [
+      //     {
+      //       label: row.functional_name || `ID: ${row.functional_id}`,
+      //       value: Number(row.functional_id),
+      //     },
+      //   ];
+      // }
 
       isModalOpen.value = true;
     };
@@ -580,6 +610,7 @@ export default defineComponent({
       fetchEmployeeCategoryOptions();
       fetchOrganizationOptions();
       fetchProfessionalOptions();
+      fetchFunctionalOptions();
       fetchTagOptions();
       fetchPositionOptions(organizationId);
       fetchData(current.value);
@@ -629,6 +660,8 @@ export default defineComponent({
       onOrganizationChange,
       tagOptions,
       fetchTagOptions,
+      fetchFunctionalOptions,
+      functionalOptions,
     };
   },
 });

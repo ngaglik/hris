@@ -1,108 +1,111 @@
-import { defineComponent, ref, h } from 'vue'
-import { useMessage,useDialog, NButton, NDatePicker } from 'naive-ui'
-import { Config } from '@/constant/config'
-import { apiFetch } from "@/services/apiClient"
-import { getAuthData, saveAuthData, logout } from "@/services/authService"
+import { defineComponent, ref, h } from "vue";
+import { useMessage, useDialog, NButton, NDatePicker } from "naive-ui";
+import { Config } from "@/constant/config";
+import { apiFetch } from "@/services/apiClient";
+import { getAuthData, saveAuthData, logout } from "@/services/authService";
 
 export default defineComponent({
   setup() {
-    const dialog = useDialog()
-    const message = useMessage()
-    const inputSearch = ref('')
-    const tableData = ref([])
-    const current = ref(1)
-    const pageSize = ref(20)
-    const total = ref(0)
-    const loading = ref(false)
-    let auth = getAuthData()
-    let token = auth?.token
-    let session = auth?.session
-    let employee = auth?.employee
-    
+    const dialog = useDialog();
+    const message = useMessage();
+    const inputSearch = ref("");
+    const tableData = ref([]);
+    const current = ref(1);
+    const pageSize = ref(20);
+    const total = ref(0);
+    const loading = ref(false);
+    let auth = getAuthData();
+    let token = auth?.token;
+    let session = auth?.session;
+    let employee = auth?.employee;
 
     const fetchData = async (page = 1) => {
-      loading.value = true
-      const response = await apiFetch(Config.UrlBackend+`/api/professional?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`, {
-        method: "GET"
-      });
-      const result = await response.json()
-      tableData.value = result.data || []
-      current.value = result.page || 1
-      total.value = result.total || 0
-      loading.value = false
-    }
+      loading.value = true;
+      const response = await apiFetch(
+        Config.UrlBackend +
+          `/api/professional?page=${page}&pageSize=${pageSize.value}&inputSearch=${inputSearch.value}`,
+        {
+          method: "GET",
+        },
+      );
+      const result = await response.json();
+      tableData.value = result.data || [];
+      current.value = result.page || 1;
+      total.value = result.total || 0;
+      loading.value = false;
+    };
 
-    const isModalOpen = ref(false)
-    const isEditMode = ref(false)
+    const isModalOpen = ref(false);
+    const isEditMode = ref(false);
 
     const formData = ref({
       id: null,
-      professional_name: '',
-      professional_group_name:''
-    })
+      name: "",
+      group_name: "",
+    });
 
     const openAddModal = () => {
-      isEditMode.value = false
+      isEditMode.value = false;
       formData.value = {
         id: null,
-        professional_name: '',
-        professional_group_name:''
-      }
-      isModalOpen.value = true
-    }
+        name: "",
+        group_name: "",
+      };
+      isModalOpen.value = true;
+    };
 
     const openEditModal = (row) => {
-      isEditMode.value = true
-      formData.value = { ...row }
-      isModalOpen.value = true
-    }
+      isEditMode.value = true;
+      formData.value = { ...row };
+      isModalOpen.value = true;
+    };
 
     const closeModal = () => {
-      isModalOpen.value = false
-    }
- 
+      isModalOpen.value = false;
+    };
+
     const handleInputSearch = () => {
-      fetchData(current.value)
-    }
+      fetchData(current.value);
+    };
 
     const handlePageChange = (page) => {
-      current.value = page
-      fetchData(page)
-    }
+      current.value = page;
+      fetchData(page);
+    };
 
     const submitForm = () => {
       if (isEditMode.value) {
-        message.success(`Data updated: ${formData.value.professional_name}`)
+        message.success(`Data updated: ${formData.value.name}`);
         // TODO: panggil API update
       } else {
-        message.success(`Data added: ${formData.value.professional_name}`)
+        message.success(`Data added: ${formData.value.name}`);
         // TODO: panggil API add
       }
-      isModalOpen.value = false
-    }
+      isModalOpen.value = false;
+    };
 
     const columns = [
       {
-        title: 'Aksi',
-        key: 'actions',
+        title: "Aksi",
+        key: "actions",
         render(row) {
           return h(
             NButton,
             {
-              size: 'small',
-              type: 'primary',
-              onClick: () => openEditModal(row)
+              size: "small",
+              type: "primary",
+              onClick: () => openEditModal(row),
             },
-            { default: () => 'Edit' }
-          )
-        }
+            { default: () => "Edit" },
+          );
+        },
       },
-      { title: 'Name', key: 'professional_name' },
-      { title: 'Group Name', key: 'professional_group_name' }
-    ]
+      { title: "Name", key: "name" },
+      { title: "Group Name", key: "group_name" },
+    ];
 
     // Fetch data once created
-    fetchData(current.value)
+    fetchData(current.value);
 
     return {
       columns,
@@ -121,7 +124,7 @@ export default defineComponent({
       openAddModal,
       openEditModal,
       closeModal,
-      submitForm
-    }
-  }
-})
+      submitForm,
+    };
+  },
+});

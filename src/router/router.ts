@@ -22,10 +22,11 @@ import selectTree from "@/container/selectTree/selectTree.vue";
 import WorkProgram from "@/components/performance/WorkProgram.vue";
 import WorkProgramDashboard from "@/components/performance/WorkProgramDashboard.vue";
 import CertificateGeneratorPDF from "@/components/tools/CertificateGeneratorPDF.vue";
+import EmployeeSummaryUnitCategory from "@/components/references/dashboard/EmployeeSummaryUnitCategory.vue";
 
 const router = createRouter({
   // 4. Provide the history implementation to use. We are using the hash history for simplicity here.
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/",
@@ -110,6 +111,10 @@ const router = createRouter({
     {
       path: "/WorkProgramDashboard",
       component: WorkProgramDashboard,
+    },
+    {
+      path: "/EmployeeSummaryUnitCategory",
+      component: EmployeeSummaryUnitCategory,
     },
   ],
 });

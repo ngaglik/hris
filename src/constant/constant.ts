@@ -49,13 +49,13 @@ export const LAYOUT_ITEMS = [
     key: "/administrator",
     children: [
       {
-        label: "Generator Sertifikat",
-        key: "/CertificateGeneratorPDF",
-      },
-      {
         label: "Kepegawaian",
         key: "/profilehumanresource",
         children: [
+          {
+            label: "Dashboard",
+            key: "/EmployeeSummaryUnitCategory",
+          },
           {
             label: "Data Personal",
             key: "/person",
@@ -101,6 +101,16 @@ export const LAYOUT_ITEMS = [
           {
             label: "Agama",
             key: "religion",
+          },
+        ],
+      },
+      {
+        label: "Alat",
+        key: "/",
+        children: [
+          {
+            label: "Generator Sertifikat",
+            key: "/CertificateGeneratorPDF",
           },
         ],
       },

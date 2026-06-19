@@ -129,6 +129,15 @@
                 />
             </n-form-item>
 
+            <n-form-item label="Fungsional">
+                <n-select
+                    v-model:value="formData.functional_id"
+                    :options="functionalOptions"
+                    placeholder=""
+                    clearable
+                />
+            </n-form-item>
+
             <n-form-item label="Unit kerja">
                 <n-select
                     v-model:value="formData.organization_id"
