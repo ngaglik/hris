@@ -39,12 +39,23 @@
             </n-form>
         </n-card>
     </div>
-
+    <n-blockquote
+        v-if="msgGreeting.length > 0"
+        style="
+            margin-bottom: 16px;
+            font-style: italic;
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+        "
+    >
+        💡 {{ msgGreeting }}
+    </n-blockquote>
     <!-- ========================= -->
     <!-- FACE NOT REGISTERED -->
     <!-- ========================= -->
     <n-alert
-        v-if="!hasFaceRegistered"
+        v-if="!hasFaceRegistered && faceRegognition"
         type="warning"
         style="margin-bottom: 16px"
     >
@@ -52,7 +63,7 @@
     </n-alert>
 
     <n-button
-        v-if="!hasFaceRegistered"
+        v-if="!hasFaceRegistered && faceRecognition"
         type="success"
         block
         style="margin-bottom: 16px"

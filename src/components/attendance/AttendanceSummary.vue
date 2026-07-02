@@ -33,7 +33,7 @@
                 />
             </n-form-item>
 
-            <n-form-item label="Pegawai" v-if="can('attendance.report.find')">
+            <n-form-item label="Pegawai">
                 <n-input-group>
                     <n-select
                         :style="{ width: '100%' }"

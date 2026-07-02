@@ -12,4 +12,18 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [vue(), jsx()],
+  build: {
+    chunkSizeWarningLimit: 2500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vue: ["vue"],
+          naiveui: ["naive-ui"],
+          echarts: ["echarts"],
+          pdfjs: ["pdfjs-dist"],
+          icons: ["@vicons/material"],
+        },
+      },
+    },
+  },
 }));

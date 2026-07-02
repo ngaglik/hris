@@ -98,6 +98,8 @@ export default defineComponent({
 
     const employeeId = auth?.employee?.id ?? 0;
     const personId = auth?.employee?.personId ?? 0;
+    const categoryId = auth?.employee?.categoryId ?? 0;
+    const orgId = auth?.employee?.orgId ?? "-";
     //message.create(employeeId);
     setPermissions(auth?.employee?.privilege ?? []);
 
@@ -116,6 +118,8 @@ export default defineComponent({
     // FACE STATUS
     // =====================================
     const hasFaceRegistered = ref(false);
+
+    const faceRecognition = ref(true);
     // =====================================
     // ATTENDANCE
     // =====================================
@@ -123,6 +127,7 @@ export default defineComponent({
 
     const attendanceMode = ref<number>(1);
 
+    var msgGreeting = ref<string>("");
     // =====================================
     // VERIFY FACE MODAL
     // =====================================
@@ -170,7 +175,7 @@ export default defineComponent({
     const checkFaceRegistration = async (): Promise<void> => {
       try {
         const response = (await apiFetch(
-          `${Config.UrlBackend}/api/attendance/check-face/${personId}`,
+          `${Config.UrlBackend}/api/attendance/check-face/${personId}/${categoryId}/${orgId}`,
         )) as Response;
 
         if (!response.ok) {
@@ -180,6 +185,7 @@ export default defineComponent({
         const result = await response.json();
 
         hasFaceRegistered.value = result.registered;
+        faceRecognition.value = result.face_recognition;
       } catch (err) {
         console.error(err);
       }
@@ -330,7 +336,7 @@ export default defineComponent({
           duration: 0,
           closable: true,
         });
-
+        msgGreeting.value = result.greeting;
         attendanceSummaryKey.value++;
       } catch (err: any) {
         console.error(err);
@@ -347,6 +353,7 @@ export default defineComponent({
         } else {
           loadingCheckOut.value = false;
         }
+        closeFaceModal();
       }
     };
 
@@ -413,6 +420,7 @@ export default defineComponent({
         message.error(err?.message ?? "Face recognition gagal");
       } finally {
         faceLoading.value = false;
+        closeFaceModal();
       }
     };
 
@@ -489,13 +497,16 @@ export default defineComponent({
     const CheckOut = (): Promise<void> => handleAttendance(2);
 
     const handleAttendance = async (mode: number): Promise<void> => {
-      if (!hasFaceRegistered.value) {
-        message.error("Anda belum registrasi wajah");
-        openRegisterFaceModal();
-        return;
+      if (faceRecognition.value) {
+        if (!hasFaceRegistered.value) {
+          message.error("Anda belum registrasi wajah");
+          openRegisterFaceModal();
+          return;
+        }
+        await openFaceModal(mode);
+      } else {
+        await insertFingerlog(mode);
       }
-
-      await openFaceModal(mode);
     };
 
     // =====================================
@@ -528,6 +539,7 @@ export default defineComponent({
 
       // face
       hasFaceRegistered,
+      faceRecognition,
 
       // verify modal
       showFaceModal,
@@ -536,7 +548,7 @@ export default defineComponent({
       // action
       CheckIn,
       CheckOut,
-
+      msgGreeting,
       verifyFace,
       closeFaceModal,
 

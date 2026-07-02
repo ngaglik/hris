@@ -22,6 +22,15 @@ export default defineComponent({
       year: new Date().getFullYear(),
       month: new Date().getMonth() + 1,
     });
+    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = new Date().getFullYear();
+
+    const isCurrentMonth = (row: any) => {
+      const d = new Date(row.schedule_date); // sesuaikan nama field tanggal
+      return (
+        d.getMonth() + 1 === currentMonth && d.getFullYear() === currentYear
+      );
+    };
 
     const scheduleTypeOptions = ref<any[]>([]);
     const scheduleGroupOptions = ref<any[]>([]);
@@ -80,6 +89,7 @@ export default defineComponent({
         return;
       }
       const employeeId = auth?.employee?.id;
+      var orgId = auth.employee.organizationId;
 
       loading.value = true;
       try {
@@ -245,7 +255,6 @@ export default defineComponent({
             : t.toTimeString().slice(0, 5);
         },
       },
-
       {
         title: "Ket",
         key: "schedule_type_name",
@@ -254,7 +263,7 @@ export default defineComponent({
           h(NSelect, {
             value: row.schedule_type_id,
             options: scheduleTypeOptions.value,
-            disabled: !!row._updating,
+            disabled: !!row._updating || !isCurrentMonth(row),
             renderLabel: (option: any) => {
               const st = scheduleTypeStyle[option.value as number];
               return h(
@@ -293,7 +302,7 @@ export default defineComponent({
           h(NSelect, {
             value: row.schedule_group_id,
             options: scheduleGroupOptions.value,
-            disabled: !!row._updating,
+            disabled: !!row._updating || !isCurrentMonth(row),
             async onUpdateValue(v: any) {
               row.schedule_group_id = v;
               row.schedule_group_name =

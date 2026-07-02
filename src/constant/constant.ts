@@ -4,46 +4,9 @@ export const LAYOUT_ITEMS = [
     key: "/Attendance",
   },
   {
-    label: "eKERTAS",
-    key: "/performance",
-    children: [
-      {
-        label: "Dashboard",
-        key: "/WorkProgramDashboard",
-      },
-      {
-        label: "Program Kerja",
-        key: "/WorkProgram",
-      },
-      {
-        label: "Uraian Tugas",
-        key: "/JobDesc",
-      },
-    ],
-  },
-  {
     label: "Profile",
     key: "/Profile",
   },
-  {
-    label: "Layanan",
-    key: "/selfservices",
-    children: [
-      {
-        label: "STR/SIP",
-        key: "/legalregistrasion",
-      },
-      {
-        label: "IKI",
-        key: "/individualperformanceindex",
-      },
-      {
-        label: "Sertifikat",
-        key: "/certificate",
-      },
-    ],
-  },
-
   {
     label: "Administrator",
     key: "/administrator",

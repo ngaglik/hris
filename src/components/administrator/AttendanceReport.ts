@@ -80,6 +80,7 @@ export default defineComponent({
       return null;
     }
     var employeeId = "";
+    var orgId = auth.employee.organizationId;
     //  return auth.employee.id;
     //});
     setPermissions(auth.employee?.privilege ?? []);
@@ -98,7 +99,7 @@ export default defineComponent({
       employeeLoading.value = true;
       try {
         const response = await apiFetch(
-          `${Config.UrlBackend}/api/option/employee?q=${keyword}`,
+          `${Config.UrlBackend}/api/option/employee?orgId=${orgId}&q=${keyword}`,
           {
             method: "GET",
           },

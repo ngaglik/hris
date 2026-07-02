@@ -19,8 +19,6 @@ import Family from "@/components/profile/Family.vue";
 import ProfileBar from "@/components/ProfileBar.vue";
 import Table from "@/components/Table.vue";
 import selectTree from "@/container/selectTree/selectTree.vue";
-import WorkProgram from "@/components/performance/WorkProgram.vue";
-import WorkProgramDashboard from "@/components/performance/WorkProgramDashboard.vue";
 import CertificateGeneratorPDF from "@/components/tools/CertificateGeneratorPDF.vue";
 import EmployeeSummaryUnitCategory from "@/components/references/dashboard/EmployeeSummaryUnitCategory.vue";
 
@@ -100,18 +98,12 @@ const router = createRouter({
       path: "/selectTree",
       component: selectTree,
     },
-    {
-      path: "/WorkProgram",
-      component: WorkProgram,
-    },
+
     {
       path: "/CertificateGeneratorPDF",
       component: CertificateGeneratorPDF,
     },
-    {
-      path: "/WorkProgramDashboard",
-      component: WorkProgramDashboard,
-    },
+
     {
       path: "/EmployeeSummaryUnitCategory",
       component: EmployeeSummaryUnitCategory,
