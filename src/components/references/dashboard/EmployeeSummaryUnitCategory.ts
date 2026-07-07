@@ -358,19 +358,17 @@ export default defineComponent({
       loading.value = true;
 
       try {
-        const orgResponse = await apiFetch(
+        const orgResponse = (await apiFetch(
           `${Config.UrlBackend}/api/organization/treetable`,
-          {
-            method: "GET",
-          },
-        );
+          { method: "GET" },
+        )) as Response | void;
 
-        const summaryResponse = await apiFetch(
+        const summaryResponse = (await apiFetch(
           `${Config.UrlBackend}/api/employee/summary/unit-category`,
-          {
-            method: "GET",
-          },
-        );
+          { method: "GET" },
+        )) as Response | void;
+
+        if (!orgResponse || !summaryResponse) return;
 
         const organizations = (await orgResponse.json()) as OrganizationTree[];
 
@@ -386,7 +384,83 @@ export default defineComponent({
       }
     };
 
-    onMounted(loadData);
+    // ── Ringkasan Kehadiran ─────────────────────────────────────────────
+
+    const now = new Date();
+    const attendanceFilter = ref({
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+    });
+    const attendanceSummary = ref<any[]>([]);
+    const attendanceLoading = ref(false);
+
+    const monthOptions = [
+      { label: "Januari", value: 1 },
+      { label: "Februari", value: 2 },
+      { label: "Maret", value: 3 },
+      { label: "April", value: 4 },
+      { label: "Mei", value: 5 },
+      { label: "Juni", value: 6 },
+      { label: "Juli", value: 7 },
+      { label: "Agustus", value: 8 },
+      { label: "September", value: 9 },
+      { label: "Oktober", value: 10 },
+      { label: "November", value: 11 },
+      { label: "Desember", value: 12 },
+    ];
+
+    const attendanceYearOptions = computed(() => {
+      const y = now.getFullYear();
+      return [y - 2, y - 1, y, y + 1].map((v) => ({
+        label: String(v),
+        value: v,
+      }));
+    });
+
+    const loadAttendanceSummary = async () => {
+      attendanceLoading.value = true;
+      try {
+        const res = (await apiFetch(
+          `${Config.UrlBackend}/api/attendance/getattendancereport` +
+            `?year=${attendanceFilter.value.year}&month=${attendanceFilter.value.month}`,
+          { method: "GET" },
+        )) as Response | void;
+        if (!res || !res.ok) {
+          attendanceSummary.value = [];
+          return;
+        }
+        const json = await res.json();
+        attendanceSummary.value = json.data || [];
+      } catch (error) {
+        console.error(error);
+        attendanceSummary.value = [];
+      } finally {
+        attendanceLoading.value = false;
+      }
+    };
+
+    const totalAttendanceReported = computed(
+      () => attendanceSummary.value.length,
+    );
+
+    const scoreHundredCount = computed(
+      () =>
+        attendanceSummary.value.filter((x: any) => x.discipline_score === 100)
+          .length,
+    );
+
+    const scoreHundredPercent = computed(() =>
+      totalAttendanceReported.value > 0
+        ? Math.round(
+            (scoreHundredCount.value / totalAttendanceReported.value) * 100,
+          )
+        : 0,
+    );
+
+    onMounted(() => {
+      loadData();
+      loadAttendanceSummary();
+    });
 
     const columns: DataTableColumns<DashboardTreeRow> = [
       {
@@ -439,19 +513,23 @@ export default defineComponent({
 
     return {
       loading,
-
       treeData,
-
       rowKey,
-
       columns,
-
       totalEmployee,
-
       totalUnit,
-
       totalProfessional,
       kpiCards,
+      // ringkasan kehadiran
+      attendanceFilter,
+      attendanceLoading,
+      attendanceSummary,
+      monthOptions,
+      attendanceYearOptions,
+      loadAttendanceSummary,
+      totalAttendanceReported,
+      scoreHundredCount,
+      scoreHundredPercent,
     };
   },
 });
