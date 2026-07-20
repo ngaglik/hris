@@ -337,6 +337,37 @@ export default defineComponent({
       professional_group_id: "",
     });
 
+    // form validation
+    const formRef = ref<any>(null);
+    const formRules = {
+      person_id: {
+        required: true,
+        message: 'Person wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+      employee_category_id: {
+        required: true,
+        message: 'Kategori pegawai wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+      professional_id: {
+        required: true,
+        message: 'Profesi wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+      organization_id: {
+        required: true,
+        message: 'Unit kerja wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+      tags: {
+        required: true,
+        type: 'array' as const,
+        message: 'Tags wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+    };
+
     // modal methods
     const openAddModal = () => {
       isEditMode.value = false;
@@ -443,6 +474,14 @@ export default defineComponent({
     const submitForm = async () => {
       if (!token) {
         console.error("No token found!");
+        return;
+      }
+
+      // ✅ VALIDASI FORM SEBELUM SUBMIT
+      try {
+        await formRef.value?.validate();
+      } catch (e) {
+        message.error("Harap lengkapi semua isian yang wajib diisi.");
         return;
       }
 
@@ -637,6 +676,8 @@ export default defineComponent({
       isPreviewOpen,
       isModalOpen,
       isEditMode,
+      formRef,
+      formRules,
       formData,
       openAddModal,
       openEditModal,

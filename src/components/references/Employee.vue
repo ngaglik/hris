@@ -80,8 +80,8 @@
         preset="dialog"
         :style="{ width: '600px' }"
     >
-        <n-form :model="formData" label-width="100">
-            <n-form-item label="Person">
+        <n-form ref="formRef" :model="formData" :rules="formRules" label-width="100">
+            <n-form-item label="Person" path="person_id">
                 <n-input-group>
                     <n-button type="primary"> Search </n-button>
                     <n-select
@@ -111,20 +111,20 @@
                     <template #unchecked>Nonaktif</template>
                 </n-switch>
             </n-form-item>
-            <n-form-item label="Kategori Pegawai">
+            <n-form-item label="Kategori Pegawai" path="employee_category_id">
                 <n-select
                     v-model:value="formData.employee_category_id"
                     :options="employeeCategoryOptions"
-                    placeholder=""
+                    placeholder="Wajib diisi"
                     clearable
                 />
             </n-form-item>
 
-            <n-form-item label="Profesi">
+            <n-form-item label="Profesi" path="professional_id">
                 <n-select
                     v-model:value="formData.professional_id"
                     :options="professionalOptions"
-                    placeholder=""
+                    placeholder="Wajib diisi"
                     clearable
                 />
             </n-form-item>
@@ -138,12 +138,12 @@
                 />
             </n-form-item>
 
-            <n-form-item label="Unit kerja">
+            <n-form-item label="Unit kerja" path="organization_id">
                 <n-select
                     v-model:value="formData.organization_id"
                     :options="organizationOptions"
                     @update:value="onOrganizationChange"
-                    placeholder=""
+                    placeholder="Wajib diisi"
                     clearable
                 />
             </n-form-item>
@@ -156,7 +156,7 @@
                     clearable
                 />
             </n-form-item>
-            <n-form-item label="Tags">
+            <n-form-item label="Tags" path="tags">
                 <n-select
                     v-model:value="formData.tags"
                     :options="tagOptions"
@@ -164,7 +164,7 @@
                     filterable
                     clearable
                     tag
-                    placeholder="Pilih atau ketik tags..."
+                    placeholder="Wajib diisi"
                 />
             </n-form-item>
         </n-form>

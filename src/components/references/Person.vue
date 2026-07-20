@@ -48,55 +48,55 @@
         preset="dialog"
         :style="{ width: '600px' }"
     >
-        <n-form :model="formData" label-width="100">
-            <n-form-item label="NIK">
-                <n-input v-model:value="formData.national_id_number" />
+        <n-form ref="formRef" :model="formData" :rules="formRules" label-width="100">
+            <n-form-item label="NIK" path="national_id_number">
+                <n-input v-model:value="formData.national_id_number" placeholder="Wajib diisi" />
             </n-form-item>
             <n-form-item label="Title depan">
                 <n-input v-model:value="formData.front_title" />
             </n-form-item>
-            <n-form-item label="Name">
-                <n-input v-model:value="formData.name" />
+            <n-form-item label="Name" path="name">
+                <n-input v-model:value="formData.name" placeholder="Wajib diisi" />
             </n-form-item>
             <n-form-item label="Title belakang">
                 <n-input v-model:value="formData.end_title" />
             </n-form-item>
-            <n-form-item label="Tgl Lahir">
+            <n-form-item label="Tgl Lahir" path="birth_date">
                 <n-input
                     v-model:value="formData.birth_date"
-                    placeholder="yyyy-mm-dd"
+                    placeholder="yyyy-mm-dd (Wajib diisi)"
                 />
             </n-form-item>
 
-            <n-form-item label="Jenis kelamin">
+            <n-form-item label="Jenis kelamin" path="gender">
                 <n-select
                     v-model:value="formData.gender"
                     :options="genderOptions"
-                    placeholder="Pilih Jenis Kelamin"
+                    placeholder="Pilih Jenis Kelamin (Wajib diisi)"
                     clearable
                 />
             </n-form-item>
-            <n-form-item label="Status Perkawinan (KTP)">
+            <n-form-item label="Status Perkawinan (KTP)" path="is_married">
                 <n-select
                     v-model:value="formData.is_married"
                     :options="marriedOptions"
-                    placeholder="Pilih"
+                    placeholder="Pilih (Wajib diisi)"
                     clearable
                 />
             </n-form-item>
-            <n-form-item label="Alamat">
+            <n-form-item label="Alamat" path="address">
                 <n-input
                     v-model:value="formData.address"
                     type="textarea"
-                    placeholder="Masukkan alamat lengkap"
+                    placeholder="Masukkan alamat lengkap (Wajib diisi)"
                     clearable
                 />
             </n-form-item>
-            <n-form-item label="No HP">
-                <n-input v-model:value="formData.phone_number" />
+            <n-form-item label="No HP" path="phone_number">
+                <n-input v-model:value="formData.phone_number" placeholder="Wajib diisi" />
             </n-form-item>
-            <n-form-item label="Email">
-                <n-input v-model:value="formData.email" />
+            <n-form-item label="Email" path="email">
+                <n-input v-model:value="formData.email" placeholder="Wajib diisi" />
             </n-form-item>
 
             <n-divider title-placement="left"> Penggajian </n-divider>

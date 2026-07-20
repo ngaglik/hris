@@ -151,7 +151,56 @@ export default defineComponent({
       end_title: "",
       birth_date: "",
       gender: "",
+      is_married: null,
+      address: "",
+      phone_number: "",
+      email: "",
     });
+
+    // form validation
+    const formRef = ref<any>(null);
+    const formRules = {
+      national_id_number: {
+        required: true,
+        message: 'NIK wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+      name: {
+        required: true,
+        message: 'Nama wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+      birth_date: {
+        required: true,
+        message: 'Tanggal lahir wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+      gender: {
+        required: true,
+        message: 'Jenis kelamin wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+      is_married: {
+        required: true,
+        message: 'Status perkawinan wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+      address: {
+        required: true,
+        message: 'Alamat wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+      phone_number: {
+        required: true,
+        message: 'No HP wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+      email: {
+        required: true,
+        message: 'Email wajib diisi',
+        trigger: ['blur', 'change'],
+      },
+    };
 
     // modal methods
     const openAddModal = () => {
@@ -164,6 +213,10 @@ export default defineComponent({
         end_title: "",
         birth_date: "",
         gender: "",
+        is_married: null,
+        address: "",
+        phone_number: "",
+        email: "",
       };
       isModalOpen.value = true;
     };
@@ -198,6 +251,14 @@ export default defineComponent({
     // form submit
     const submitForm = async () => {
       if (!token) return;
+
+      // ✅ VALIDASI FORM SEBELUM SUBMIT
+      try {
+        await formRef.value?.validate();
+      } catch (e) {
+        message.error("Harap lengkapi semua isian yang wajib diisi.");
+        return;
+      }
 
       loading.value = true;
       try {
@@ -325,6 +386,8 @@ export default defineComponent({
       isModalOpen,
       isEditMode,
       formData,
+      formRef,
+      formRules,
       openAddModal,
       openEditModal,
       openProfile,
