@@ -1,4 +1,4 @@
-import { onMounted, defineComponent, ref, h } from "vue";
+import { onMounted, defineComponent, ref, computed, h } from "vue";
 import { useMessage, useDialog, NButton } from "naive-ui";
 import { Config } from "@/constant/config";
 import { apiFetch } from "@/services/apiClient";
@@ -339,34 +339,39 @@ export default defineComponent({
 
     // form validation
     const formRef = ref<any>(null);
-    const formRules = {
-      person_id: {
-        required: true,
-        message: 'Person wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-      employee_category_id: {
-        required: true,
-        message: 'Kategori pegawai wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-      professional_id: {
-        required: true,
-        message: 'Profesi wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-      organization_id: {
-        required: true,
-        message: 'Unit kerja wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-      tags: {
-        required: true,
-        type: 'array' as const,
-        message: 'Tags wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-    };
+    const formRules = computed(() => {
+      if (isEditMode.value) {
+        return {};
+      }
+      return {
+        person_id: {
+          required: true,
+          message: 'Person wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+        employee_category_id: {
+          required: true,
+          message: 'Kategori pegawai wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+        professional_id: {
+          required: true,
+          message: 'Profesi wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+        organization_id: {
+          required: true,
+          message: 'Unit kerja wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+        tags: {
+          required: true,
+          type: 'array' as const,
+          message: 'Tags wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+      };
+    });
 
     // modal methods
     const openAddModal = () => {

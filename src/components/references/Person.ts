@@ -1,4 +1,4 @@
-import { onMounted, defineComponent, ref, h } from "vue";
+import { onMounted, defineComponent, ref, computed, h } from "vue";
 import { useMessage, useDialog, NButton } from "naive-ui";
 import { Config } from "@/constant/config";
 import { apiFetch } from "@/services/apiClient";
@@ -151,7 +151,7 @@ export default defineComponent({
       end_title: "",
       birth_date: "",
       gender: "",
-      is_married: null,
+      is_married: false,
       address: "",
       phone_number: "",
       email: "",
@@ -159,48 +159,54 @@ export default defineComponent({
 
     // form validation
     const formRef = ref<any>(null);
-    const formRules = {
-      national_id_number: {
-        required: true,
-        message: 'NIK wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-      name: {
-        required: true,
-        message: 'Nama wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-      birth_date: {
-        required: true,
-        message: 'Tanggal lahir wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-      gender: {
-        required: true,
-        message: 'Jenis kelamin wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-      is_married: {
-        required: true,
-        message: 'Status perkawinan wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-      address: {
-        required: true,
-        message: 'Alamat wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-      phone_number: {
-        required: true,
-        message: 'No HP wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-      email: {
-        required: true,
-        message: 'Email wajib diisi',
-        trigger: ['blur', 'change'],
-      },
-    };
+    const formRules = computed(() => {
+      if (isEditMode.value) {
+        return {};
+      }
+      return {
+        national_id_number: {
+          required: true,
+          message: 'NIK wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+        name: {
+          required: true,
+          message: 'Nama wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+        birth_date: {
+          required: true,
+          message: 'Tanggal lahir wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+        gender: {
+          required: true,
+          message: 'Jenis kelamin wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+        is_married: {
+          required: true,
+          type: 'boolean' as const,
+          message: 'Status perkawinan wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+        address: {
+          required: true,
+          message: 'Alamat wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+        phone_number: {
+          required: true,
+          message: 'No HP wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+        email: {
+          required: true,
+          message: 'Email wajib diisi',
+          trigger: ['blur', 'change'],
+        },
+      };
+    });
 
     // modal methods
     const openAddModal = () => {
@@ -213,7 +219,7 @@ export default defineComponent({
         end_title: "",
         birth_date: "",
         gender: "",
-        is_married: null,
+        is_married: false,
         address: "",
         phone_number: "",
         email: "",

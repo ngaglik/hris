@@ -59,7 +59,7 @@
                         :style="{ borderLeft: '6px solid #4caf50' }"
                     >
                         <n-statistic
-                            label="Score Sempurna (100)"
+                            label="Score Sempurna (≥100)"
                             :value="scoreHundredCount"
                         />
                     </n-card>
@@ -100,7 +100,7 @@
                 <div style="margin-top: 6px; font-size: 12px; color: #888">
                     {{ scoreHundredCount }} dari
                     {{ totalAttendanceReported }} pegawai memiliki disiplin
-                    score = 100
+                    score ≥ 100
                 </div>
             </n-spin>
         </n-card>

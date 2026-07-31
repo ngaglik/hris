@@ -4,37 +4,37 @@ import { Config, generalOptions } from "@/constant/config";
 import { apiFetch } from "@/services/apiClient";
 import { getAuthData, logout } from "@/services/authService";
 import { can, setPermissions } from "@/services/authPermission";
+import * as XLSX from "xlsx";
 
 /* ======================================================
    TYPES
 ====================================================== */
 
-interface AttendanceRow {
+interface AttendanceSummaryRow {
   employee_id: number;
   employee_name: string;
-  schedule_date: string;
 
-  schedule_type_id: number;
-  schedule_type_name: string;
+  total_workday: number;
+  total_present: number;
+  total_alpha: number;
+  total_no_checkin: number;
+  total_no_checkout: number;
 
-  schedule_time_start: string | null;
-  schedule_time_end: string | null;
+  total_late: number;
+  total_late_duration: number;
 
-  check_in: string | null;
-  check_out: string | null;
+  total_early_leave: number;
+  total_early_leave_duration: number;
 
-  attendance_flag: string;
+  total_verification_value: number;
 
-  is_present: boolean;
-  is_late: boolean;
-  late_duration: number | null;
-
-  early_leave: boolean;
-  early_leave_duration: number | null;
+  total_violation: number;
+  attendance_rate: number;
+  discipline_score: number;
 }
 
 interface AttendanceResponse {
-  data: AttendanceRow[];
+  data: AttendanceSummaryRow[];
   total: number;
   page: number;
   pageSize: number;
@@ -54,7 +54,7 @@ export default defineComponent({
        STATE
     =============================== */
 
-    const tableData = ref<AttendanceRow[]>([]);
+    const tableData = ref<AttendanceSummaryRow[]>([]);
     const loading = ref(false);
 
     const current = ref(1);
@@ -222,15 +222,7 @@ export default defineComponent({
        HR ROW STYLE ENGINE
     =============================== */
 
-    const rowProps = (row: AttendanceRow) => {
-      if (row.schedule_type_id !== 1) return { class: "row-not-workday" };
-
-      if (row.attendance_flag === "Alpha") return { class: "row-alpha" };
-
-      if (row.is_late) return { class: "row-late" };
-
-      if (row.early_leave) return { class: "row-early" };
-
+    const rowProps = () => {
       return {};
     };
 
@@ -238,7 +230,13 @@ export default defineComponent({
        TABLE COLUMNS
     =============================== */
 
-    const columns: DataTableColumns<AttendanceRow> = [
+    const columns: DataTableColumns<AttendanceSummaryRow> = [
+      {
+        title: "Id Pegawai",
+        key: "employee_id",
+        align: "center",
+        width: 20,
+      },
       {
         title: "Nama",
         key: "employee_name",
@@ -300,6 +298,15 @@ export default defineComponent({
         width: 40,
       },
       {
+        title: "Total Verifikasi",
+        key: "total_verification_value",
+        align: "center",
+        width: 40,
+        render(row) {
+          return row.total_verification_value ?? 0;
+        },
+      },
+      {
         title: "Total pelanggaran",
         key: "total_violation",
         align: "center",
@@ -329,6 +336,50 @@ export default defineComponent({
     });
 
     /* ===============================
+       DOWNLOAD EXCEL
+    =============================== */
+
+    const handleDownloadExcel = () => {
+      if (!tableData.value.length) {
+        message.warning("Tidak ada data untuk di-download");
+        return;
+      }
+
+      const rows = tableData.value.map((row) => ({
+        "Id Pegawai": row.employee_id,
+        Nama: row.employee_name,
+        "Total Hari Kerja": row.total_workday ?? 0,
+        "Total Kehadiran": row.total_present ?? 0,
+        "Total Alpha": row.total_alpha ?? 0,
+        "Total Tidak Checkin": row.total_no_checkin ?? 0,
+        "Total Tidak Checkout": row.total_no_checkout ?? 0,
+        "Total Terlambat": row.total_late ?? 0,
+        "Total Durasi Terlambat (menit)": row.total_late_duration ?? 0,
+        "Total Pulang Awal": row.total_early_leave ?? 0,
+        "Total Durasi Pulang Awal (menit)": row.total_early_leave_duration ?? 0,
+        "Total Verifikasi": row.total_verification_value ?? 0,
+        "Total Pelanggaran": row.total_violation ?? 0,
+        "Rata-rata Kehadiran (%)": row.attendance_rate ?? 0,
+        "Skor Kedisiplinan": row.discipline_score ?? 0,
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "AttendanceReport");
+
+      // Auto-fit column widths
+      const colWidths = Object.keys(rows[0]).map((key) => ({
+        wch: Math.max(key.length, 15),
+      }));
+      worksheet["!cols"] = colWidths;
+
+      const fileName = `Attendance_Report_${formFilter.value.year}_${String(formFilter.value.month).padStart(2, "0")}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+
+      message.success(`Data berhasil di-download sebagai ${fileName}`);
+    };
+
+    /* ===============================
        EXPORT
     =============================== */
 
@@ -354,6 +405,7 @@ export default defineComponent({
       employeeCategoryOptions,
       fetchEmployeeCategoryOptions,
       handleCategoryFilter,
+      handleDownloadExcel,
     };
   },
 });

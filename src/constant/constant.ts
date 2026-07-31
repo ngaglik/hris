@@ -28,6 +28,10 @@ export const LAYOUT_ITEMS = [
             key: "/employee",
           },
           {
+            label: "Verifikasi Absensi",
+            key: "/AbsenceVerification",
+          },
+          {
             label: "Report Presensi",
             key: "/AttendanceReport",
           },

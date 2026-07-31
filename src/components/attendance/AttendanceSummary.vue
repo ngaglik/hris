@@ -122,6 +122,32 @@
                             Hadir
                         </div>
                     </div>
+
+                    <!-- Total Verifikasi -->
+                    <div
+                        :style="{
+                            flex: '1 1 90px',
+                            minWidth: '80px',
+                            background: '#f9f0ff',
+                            borderLeft: '4px solid #722ed1',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            textAlign: 'center',
+                        }"
+                    >
+                        <div
+                            style="
+                                font-size: 24px;
+                                font-weight: 800;
+                                color: #531dab;
+                            "
+                        >
+                            {{ summary?.total_verification_value ?? 0 }}
+                        </div>
+                        <div style="font-size: 11px; margin-top: 4px">
+                            Total Verifikasi
+                        </div>
+                    </div>
                 </div>
             </div>
 

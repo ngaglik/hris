@@ -1,5 +1,5 @@
-import { defineComponent, ref, onMounted, computed } from "vue";
-import { useMessage, DataTableColumns } from "naive-ui";
+import { defineComponent, ref, onMounted, computed, h } from "vue";
+import { useMessage, DataTableColumns, NInput } from "naive-ui";
 import { Config, generalOptions } from "@/constant/config";
 import { apiFetch } from "@/services/apiClient";
 import { getAuthData, logout } from "@/services/authService";
@@ -10,6 +10,7 @@ import { can, setPermissions } from "@/services/authPermission";
 ====================================================== */
 
 interface AttendanceRow {
+  id_seq: number;
   employee_id: number;
   employee_name: string;
   schedule_date: string;
@@ -33,6 +34,9 @@ interface AttendanceRow {
   early_leave_duration: number | null;
 
   verification_value: number | null;
+
+  // string mentah yang sedang diketik di textbox (agar desimal tidak terpotong)
+  verification_value_text?: string;
 }
 
 interface AttendanceResponse {
@@ -143,7 +147,8 @@ export default defineComponent({
           `year=${formFilter.value.year}&` +
           `month=${formFilter.value.month}&` +
           `page=${page}&` +
-          `pageSize=${pageSize.value}`;
+          `pageSize=${pageSize.value}&` +
+          `absenceOnly=true`;
 
         const response = await apiFetch(url, { method: "GET" });
 
@@ -177,6 +182,40 @@ export default defineComponent({
     const handlePageChange = async (page: number) => {
       current.value = page;
       await fetchData(page);
+    };
+
+    /* ===============================
+       UPDATE VERIFICATION VALUE
+    =============================== */
+
+    const handleUpdateVerification = async (row: AttendanceRow) => {
+      // parse string mentah dari textbox menjadi bilangan desimal
+      const raw = (row.verification_value_text ?? "").trim();
+      const parsed = raw === "" ? null : parseFloat(raw);
+      row.verification_value = Number.isNaN(parsed as number) ? null : parsed;
+
+      try {
+        const response = await apiFetch(
+          `${Config.UrlBackend}/api/attendance/schedule/verification`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id_seq: row.id_seq,
+              verification_value: row.verification_value,
+            }),
+          },
+        );
+
+        if (!response?.ok) throw new Error(await response?.text());
+
+        message.success("Verification value berhasil diupdate");
+      } catch (err: any) {
+        console.error(err);
+        message.error(err?.message ?? "Gagal update verification value");
+      }
     };
 
     /* ===============================
@@ -253,12 +292,29 @@ export default defineComponent({
         title: "Verifikasi",
         key: "verification_value",
         align: "center",
-        width: 120,
+        width: 140,
         render(row) {
-          return row.verification_value === null ||
+          const displayValue =
+            row.verification_value_text ??
+            (row.verification_value === null ||
             row.verification_value === undefined
-            ? "-"
-            : String(row.verification_value);
+              ? ""
+              : String(row.verification_value));
+
+          return h(NInput, {
+            value: displayValue,
+            placeholder: "-",
+            size: "small",
+            style: "width: 110px",
+            // simpan string mentah saat diketik agar desimal bisa diketik mulus
+            onUpdateValue: (val: string) => {
+              row.verification_value_text = val;
+            },
+            // onchange → parse desimal & simpan ke hr.schedule.verification_value
+            onChange: () => {
+              handleUpdateVerification(row);
+            },
+          });
         },
       },
 
@@ -339,6 +395,7 @@ export default defineComponent({
       employeeOptions,
       employeeLoading,
       can,
+      handleUpdateVerification,
     };
   },
 });

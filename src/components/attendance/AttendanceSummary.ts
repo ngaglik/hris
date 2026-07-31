@@ -26,6 +26,8 @@ interface AttendanceSummaryDto {
   total_early_leave: number;
   total_early_leave_duration: number;
 
+  total_verification_value: number;
+
   attendance_rate: number;
   discipline_score: number;
 }

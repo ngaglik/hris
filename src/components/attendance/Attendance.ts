@@ -119,7 +119,7 @@ export default defineComponent({
     // =====================================
     const hasFaceRegistered = ref(false);
 
-    const faceRecognition = ref(true);
+    const faceRecognition = ref(false);
     // =====================================
     // ATTENDANCE
     // =====================================
@@ -514,8 +514,7 @@ export default defineComponent({
     // =====================================
     onMounted(async () => {
       await loadModels();
-
-      await checkFaceRegistration();
+      if(faceRecognition.value) await checkFaceRegistration();
     });
 
     onBeforeUnmount(() => {

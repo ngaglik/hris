@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h3>Report Kehadiran</h3>
+        <h3>Verifikasi Absensi</h3>
 
         <n-form
             ref="formRef"
@@ -27,10 +27,10 @@
                 />
             </n-form-item>
 
-            <n-form-item label="Pegawai" v-if="can('attendance.report.find')">
+            <n-form-item label="Pegawai">
                 <n-input-group>
                     <n-select
-                        :style="{ width: '200px' }"
+                        :style="{ width: '100%' }"
                         v-model:value="formFilter.employee_id"
                         :options="employeeOptions"
                         :loading="employeeLoading"
@@ -44,20 +44,6 @@
                     <!-- <n-button type="primary" ghost> Search </n-button> -->
                 </n-input-group>
             </n-form-item>
-            <!-- ✅ FILTER KATEGORI -->
-            <n-form-item label="Kategori">
-                <n-input-group>
-                    <n-button type="primary"> Pilih </n-button>
-                    <n-select
-                        v-model:value="employeeCategoryFilter"
-                        :options="employeeCategoryOptions"
-                        placeholder="Filter kategori pegawai"
-                        clearable
-                        style="width: 120px"
-                        @update:value="handleCategoryFilter"
-                    />
-                </n-input-group>
-            </n-form-item>
             <n-form-item>
                 <n-button
                     type="primary"
@@ -65,14 +51,6 @@
                     :loading="loading"
                 >
                     Tampilkan
-                </n-button>
-                <n-button
-                    type="success"
-                    @click="handleDownloadExcel"
-                    :disabled="tableData.length === 0"
-                    style="margin-left: 8px"
-                >
-                    Download Excel
                 </n-button>
             </n-form-item>
         </n-form>
@@ -110,7 +88,7 @@
     </div>
 </template>
 
-<script src="./AttendanceReport.ts" />
+<script src="./AbsenceVerification.ts" />
 <style scoped>
 :deep(.row-not-workday td) {
     color: #ff0000 !important;

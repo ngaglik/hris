@@ -445,7 +445,7 @@ export default defineComponent({
 
     const scoreHundredCount = computed(
       () =>
-        attendanceSummary.value.filter((x: any) => x.discipline_score === 100)
+        attendanceSummary.value.filter((x: any) => x.discipline_score >= 100)
           .length,
     );
 
