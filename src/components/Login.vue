@@ -7,8 +7,11 @@
     </n-marquee>
 
     <div class="login-wrapper">
-        <n-card title="Login" style="max-width: 400px; margin: 0 auto">
-            <small>Silakan menggunakan akun SiJEMPOL</small>
+        <n-card style="max-width: 400px; margin: 0 auto">
+            <div class="login-logo">
+                <img :src="logoRspaw" alt="Logo RSPAW" />
+            </div>
+            <small>Silakan login menggunakan akun SiJEMPOL</small>
             <n-divider />
 
             <n-form

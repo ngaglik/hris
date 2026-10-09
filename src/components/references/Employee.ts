@@ -346,21 +346,25 @@ export default defineComponent({
       return {
         person_id: {
           required: true,
+          type: 'number' as const,
           message: 'Person wajib diisi',
           trigger: ['blur', 'change'],
         },
         employee_category_id: {
           required: true,
+          type: 'number' as const,
           message: 'Kategori pegawai wajib diisi',
           trigger: ['blur', 'change'],
         },
         professional_id: {
           required: true,
+          type: 'string' as const,
           message: 'Profesi wajib diisi',
           trigger: ['blur', 'change'],
         },
         organization_id: {
           required: true,
+          type: 'string' as const,
           message: 'Unit kerja wajib diisi',
           trigger: ['blur', 'change'],
         },
@@ -450,6 +454,43 @@ export default defineComponent({
             }
 
             message.success("Wajah berhasil direset");
+          } catch (err: any) {
+            message.error(err.message);
+          }
+        },
+      });
+    };
+
+    const resetPasswordDescription = (row: any) => {
+      dialog.warning({
+        title: "Konfirmasi Reset Password",
+        content: `Password akun pegawai ${row.name} akan direset menjadi 123456. Lanjutkan?`,
+        positiveText: "Ya",
+        negativeText: "Tidak",
+
+        async onPositiveClick() {
+          try {
+            const payload = {
+              PersonId: row.person_id,
+            };
+
+            const response = await apiFetch(
+              `${Config.UrlBackend}/api/employee/reset-password`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+              },
+            );
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => null);
+              throw new Error(errorData?.message ?? "Reset password gagal");
+            }
+
+            message.success("Password berhasil direset menjadi 123456");
           } catch (err: any) {
             message.error(err.message);
           }
@@ -575,7 +616,7 @@ export default defineComponent({
       {
         title: "Aksi",
         key: "actions",
-        width: 150,
+        width: 320,
         render(row: any) {
           return h("div", { class: "flex gap-2" }, [
             h(
@@ -604,6 +645,15 @@ export default defineComponent({
                 onClick: () => resetFaceDescription(row),
               },
               { default: () => "Reset Wajah" },
+            ),
+            h(
+              NButton,
+              {
+                size: "small",
+                type: "error",
+                onClick: () => resetPasswordDescription(row),
+              },
+              { default: () => "Reset Password" },
             ),
           ]);
         },

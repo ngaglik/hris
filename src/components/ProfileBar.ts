@@ -1,14 +1,15 @@
 import type { Component } from "vue";
 import router from "@/router/router";
 import { getAuthData, saveAuthData, logout } from "@/services/authService";
+import ChangePassword from "@/components/ChangePassword.vue";
 
 import {
-  Pencil as EditIcon,
+  KeyOutline as KeyIcon,
   LogOutOutline as LogoutIcon,
   PersonCircleOutline as UserIcon,
 } from "@vicons/ionicons5";
 import { NIcon, useMessage } from "naive-ui";
-import { defineComponent, h } from "vue";
+import { defineComponent, h, ref } from "vue";
 
 function renderIcon(icon: Component) {
   return () => {
@@ -19,6 +20,7 @@ function renderIcon(icon: Component) {
 }
 
 export default defineComponent({
+  components: { ChangePassword },
   emits: ["logout"],
   setup(_, { emit }) {
     const message = useMessage();
@@ -32,6 +34,7 @@ export default defineComponent({
 
     const employee = auth.employee;
     const welcomeName = employee?.personName;
+    const showChangePassword = ref(false);
 
     const handleSelect = (key: string) => {
       switch (key) {
@@ -42,17 +45,29 @@ export default defineComponent({
         case "editProfile":
           message.info("Edit your profile");
           break;
+        case "changePassword":
+          showChangePassword.value = true;
+          break;
         case "logout":
           emit("logout");
           break;
       }
     };
     return {
+      showChangePassword,
       options: [
         {
           label: "Profile",
           key: "profile",
           icon: renderIcon(UserIcon),
+        },
+        {
+          type: "divider",
+        },
+        {
+          label: "Ubah Password",
+          key: "changePassword",
+          icon: renderIcon(KeyIcon),
         },
         {
           type: "divider",
