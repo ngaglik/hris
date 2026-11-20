@@ -23,6 +23,7 @@ import {
   BarChartOutline,
   LogInOutline,
   LogOutOutline,
+  WarningOutline,
 } from "@vicons/ionicons5";
 
 export default defineComponent({
@@ -36,6 +37,7 @@ export default defineComponent({
     BarChartOutline,
     LogInOutline,
     LogOutOutline,
+    WarningOutline,
   },
 
   setup() {
