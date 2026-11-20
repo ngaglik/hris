@@ -8,6 +8,32 @@ export const LAYOUT_ITEMS = [
     key: "/Profile",
   },
   {
+    label: "Performance Individu",
+    key: "/PerformanceIndividu",
+    children: [
+      {
+        label: "Dashboard",
+        key: "/DashboardPerformance",
+      },
+      {
+        label: "Entri Kinerja",
+        key: "/EntriKinerja",
+      },
+      {
+        label: "Rekap Kinerja",
+        key: "/RekapKinerja",
+      },
+      {
+        label: "Master Indikator",
+        key: "/MasterIndikator",
+      },
+      {
+        label: "Mapping Indikator",
+        key: "/MappingIndikator",
+      },
+    ],
+  },
+  {
     label: "Administrator",
     key: "/administrator",
     children: [
