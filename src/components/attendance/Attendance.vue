@@ -36,6 +36,25 @@
                         </template>
                     </n-button>
                 </n-space>
+
+                <n-space horizontal class="btn-group">
+                    <n-button
+                        tag="a"
+                        href="https://inova.rspaw.or.id/laporinsiden/lapor"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        type="error"
+                        block
+                        style="margin-top: 30px; margin-left: 25px; text-decoration: none"
+                    >
+                        Lapor Insiden
+                        <template #icon>
+                            <n-icon>
+                                <WarningOutline  />
+                            </n-icon>
+                        </template>
+                    </n-button>
+                </n-space>
             </n-form>
         </n-card>
     </div>

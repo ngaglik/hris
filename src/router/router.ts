@@ -22,6 +22,12 @@ import Table from "@/components/Table.vue";
 import selectTree from "@/container/selectTree/selectTree.vue";
 import CertificateGeneratorPDF from "@/components/tools/CertificateGeneratorPDF.vue";
 import EmployeeSummaryUnitCategory from "@/components/references/dashboard/EmployeeSummaryUnitCategory.vue";
+import PerformanceIndividu from "@/components/performance/PerformanceIndividu.vue";
+import DashboardPerformance from "@/components/performance/DashboardPerformance.vue";
+import EntriKinerja from "@/components/performance/EntriKinerja.vue";
+import RekapKinerja from "@/components/performance/RekapKinerja.vue";
+import MasterIndikator from "@/components/performance/MasterIndikator.vue";
+import MappingIndikator from "@/components/performance/MappingIndikator.vue";
 
 const router = createRouter({
   // 4. Provide the history implementation to use. We are using the hash history for simplicity here.
@@ -112,6 +118,30 @@ const router = createRouter({
     {
       path: "/EmployeeSummaryUnitCategory",
       component: EmployeeSummaryUnitCategory,
+    },
+    {
+      path: "/PerformanceIndividu",
+      component: PerformanceIndividu,
+    },
+    {
+      path: "/DashboardPerformance",
+      component: DashboardPerformance,
+    },
+    {
+      path: "/EntriKinerja",
+      component: EntriKinerja,
+    },
+    {
+      path: "/RekapKinerja",
+      component: RekapKinerja,
+    },
+    {
+      path: "/MasterIndikator",
+      component: MasterIndikator,
+    },
+    {
+      path: "/MappingIndikator",
+      component: MappingIndikator,
     },
   ],
 });

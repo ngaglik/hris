@@ -158,6 +158,7 @@ export default defineComponent({
       if (!emp?.tags?.includes("OSDM")) {
         menu = removeNodeByKey(menu, "/administrator");
         menu = removeNodeByKey(menu, "/performance");
+        menu = removeNodeByKey(menu, "/PerformanceIndividu");
       }
 
       if (emp?.id !== 381) {
