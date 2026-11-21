@@ -36,6 +36,9 @@
         </n-form-item>  
         <n-form-item label="Name">
           <n-input v-model:value="formData.name" placeholder="Nama kategori pegawai" />
+        </n-form-item>
+        <n-form-item label="Order By">
+          <n-input-number v-model:value="formData.orderBy" placeholder="Urutan" style="width: 100%" clearable />
         </n-form-item>  
         </n-form>      
       <n-space horizontal>

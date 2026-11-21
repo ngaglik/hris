@@ -49,18 +49,23 @@ export default defineComponent({
 
     const formData = ref({
       id: null as number | null,
-      name: ''
+      name: '',
+      orderBy: null as number | null
     })
 
     const openAddModal = () => {
       isEditMode.value = false
-      formData.value = { id: null, name: '' }
+      formData.value = { id: null, name: '', orderBy: null }
       isModalOpen.value = true
     }
 
     const openEditModal = (row: any) => {
       isEditMode.value = true
-      formData.value = { id: row.id ?? null, name: row.name ?? '' }
+      formData.value = {
+        id: row.id ?? null,
+        name: row.name ?? '',
+        orderBy: row.orderBy ?? row.order_by ?? null
+      }
       isModalOpen.value = true
     }
 
@@ -93,7 +98,10 @@ export default defineComponent({
         const response = await apiFetch(url, {
           method: isEditMode.value ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: formData.value.name })
+          body: JSON.stringify({
+            name: formData.value.name,
+            orderBy: formData.value.orderBy
+          })
         })
 
         const result = await response.json().catch(() => ({}))
@@ -151,6 +159,7 @@ export default defineComponent({
     const columns = [
       { title: 'Id', key: 'id', width: 140 },
       { title: 'Name', key: 'name' },
+      { title: 'Order By', key: 'orderBy', width: 140 },
       {
         title: 'Aksi',
         key: 'actions',
