@@ -6,6 +6,7 @@ import { getAuthData, saveAuthData, logout } from "@/services/authService";
 import selectTree from "@/container/selectTree/selectTree.vue";
 import UserProfile from "../profile/UserProfile.vue";
 import { isWithFaceDetection } from "@vladmandic/face-api";
+import * as XLSX from "xlsx";
 
 export default defineComponent({
   components: {
@@ -264,23 +265,17 @@ export default defineComponent({
       return option?.label ?? "-";
     };
 
+    const professionalFilter = ref<string | number | null>(null);
+
     const genderOptions = [
       { label: "Laki-Laki", value: "L" },
       { label: "Perempuan", value: "P" },
     ];
 
-    const fetchData = async (page = 1) => {
-      if (
-        !inputSearch.value &&
-        !employeeCategoryFilter.value &&
-        !selectedOrgId.value
-      )
-        return;
-      loading.value = true;
-
+    // Bangun URL list employee dengan filter aktif (dipakai tabel & export)
+    const buildEmployeeUrl = (page: number, size: number) => {
       let url =
-        `${Config.UrlBackend}/api/employee?` +
-        `page=${page}&pageSize=${pageSize.value}`;
+        `${Config.UrlBackend}/api/employee?` + `page=${page}&pageSize=${size}`;
 
       if (isActiveFilter.value) {
         url += `&isActive=${isActiveFilter.value.toString()}`;
@@ -288,6 +283,10 @@ export default defineComponent({
 
       if (employeeCategoryFilter.value) {
         url += `&employeeCategoryId=${employeeCategoryFilter.value}`;
+      }
+
+      if (professionalFilter.value) {
+        url += `&professionalId=${professionalFilter.value}`;
       }
 
       if (selectedOrgId.value) {
@@ -298,7 +297,20 @@ export default defineComponent({
         url += `&inputSearch=${inputSearch.value}`;
       }
 
-      const res = await apiFetch(url);
+      return url;
+    };
+
+    const fetchData = async (page = 1) => {
+      if (
+        !inputSearch.value &&
+        !employeeCategoryFilter.value &&
+        !professionalFilter.value &&
+        !selectedOrgId.value
+      )
+        return;
+      loading.value = true;
+
+      const res = await apiFetch(buildEmployeeUrl(page, pageSize.value));
       const result = await res.json();
 
       tableData.value = result.data;
@@ -310,6 +322,123 @@ export default defineComponent({
     const handleCategoryFilter = async () => {
       current.value = 1;
       await fetchData(1);
+    };
+
+    const handleProfessionalFilter = async () => {
+      current.value = 1;
+      await fetchData(1);
+    };
+
+    // ── Download Excel ───────────────────────────────────────────────
+    const exportLoading = ref(false);
+
+    const formatExportDate = (value: any) => {
+      if (!value) return "";
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return value;
+      const pad = (n: number) => String(n).padStart(2, "0");
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+        date.getDate(),
+      )}`;
+    };
+
+    const getGenderLabel = (value: any) => {
+      if (value == null) return "";
+      const option = genderOptions.find((o) => o.value === value);
+      return option?.label ?? value;
+    };
+
+    const EXPORT_COLUMNS: { header: string; get: (row: any) => any }[] = [
+      {
+        header: "Nama",
+        get: (row) => {
+          const front = row.front_title
+            ? `${row.front_title.replace(/\.$/, "")}.`
+            : "";
+          const end = row.end_title ? `, ${row.end_title}` : "";
+          return [front, row.name ?? ""].filter(Boolean).join(" ") + end;
+        },
+      },
+      { header: "EmployeeId", get: (row) => row.id },
+      { header: "NIP", get: (row) => row.national_employee_id_number },
+      {
+        header: "Status Pegawai",
+        get: (row) =>
+          row.employee_category_name ??
+          getEmployeeCategoryLabel(row.employee_category_id),
+      },
+      {
+        header: "Jabatan Profesi",
+        get: (row) =>
+          row.professional_name ?? getProfessionalLabel(row.professional_id),
+      },
+      {
+        header: "Unit Kerja",
+        get: (row) =>
+          row.organization_name ?? getOrganizationLabel(row.organization_id),
+      },
+      {
+        header: "Jabatan Manajerial",
+        get: (row) => row.position_name ?? getPositionLabel(row.position_id),
+      },
+      { header: "Tag", get: (row) => row.tags },
+      { header: "PersonId", get: (row) => row.person_id },
+      { header: "NIK", get: (row) => row.national_id_number },
+      { header: "Tgl Lahir", get: (row) => formatExportDate(row.birth_date) },
+      { header: "Jenis Kelamin", get: (row) => getGenderLabel(row.gender) },
+      { header: "Alamat", get: (row) => row.address },
+      { header: "Phone", get: (row) => row.phone_number },
+      { header: "Email", get: (row) => row.email },
+      {
+        header: "Status",
+        get: (row) => (row.is_active ? "Aktif" : "Nonaktif"),
+      },
+    ];
+
+    /** Unduh seluruh data pegawai sesuai filter/pencarian aktif ke Excel. */
+    const handleDownloadExcel = async () => {
+      exportLoading.value = true;
+      try {
+        // Ambil semua baris (bukan hanya halaman aktif) dengan filter yang sama.
+        const exportPageSize = total.value > 0 ? total.value : 100000;
+        const res = await apiFetch(buildEmployeeUrl(1, exportPageSize));
+        const result = await res.json();
+        const data: any[] = result.data || [];
+
+        if (!data.length) {
+          message.warning("Tidak ada data untuk di-download");
+          return;
+        }
+
+        const sheetRows = data.map((row) => {
+          const out: Record<string, any> = {};
+          for (const col of EXPORT_COLUMNS) {
+            out[col.header] = col.get(row) ?? "";
+          }
+          return out;
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(sheetRows, {
+          header: EXPORT_COLUMNS.map((c) => c.header),
+        });
+        worksheet["!cols"] = EXPORT_COLUMNS.map((c) => ({
+          wch: Math.max(c.header.length, 18),
+        }));
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "DataPegawai");
+
+        const stamp = new Date().toISOString().slice(0, 10);
+        const fileName = `Data_Pegawai_${stamp}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+
+        message.success(`Data berhasil di-download sebagai ${fileName}`);
+      } catch (error) {
+        console.error(error);
+        message.error("Gagal mengunduh data pegawai");
+      } finally {
+        exportLoading.value = false;
+      }
     };
 
     // modal state
@@ -721,7 +850,11 @@ export default defineComponent({
       handleInputSearch,
       employeeCategoryFilter,
       handleCategoryFilter,
+      professionalFilter,
+      handleProfessionalFilter,
       handleInputSearchPerson,
+      exportLoading,
+      handleDownloadExcel,
       personOptions,
       personLoading,
       onOrgSelected: (orgId: string | number | null) => {

@@ -300,6 +300,12 @@ export default defineComponent({
 
     const totalUnit = computed(() => summaryData.value.length);
 
+    // Total shown inside the "Struktur Organisasi dan SDM" table. After merging
+    // every summary unit into the tree this matches the "Total Pegawai" KPI.
+    const treeTotalEmployee = computed(() =>
+      treeData.value.reduce((sum, item) => sum + item.totalEmployee, 0),
+    );
+
     const totalProfessional = computed(() => {
       const set = new Set<string>();
 
@@ -351,7 +357,35 @@ export default defineComponent({
         };
       };
 
-      return organizations.map(buildNode).map(aggregateTree);
+      const treeNodes = organizations.map(buildNode).map(aggregateTree);
+
+      // The organization tree only contains active units reachable from the
+      // root. Employees assigned to inactive or unassigned units are still
+      // counted by the summary endpoint, so surface them as extra rows to keep
+      // the table total consistent with the "Total Pegawai" KPI.
+      const knownUnitIds = new Set<string>();
+
+      const collectUnitIds = (nodes: DashboardTreeRow[]) => {
+        nodes.forEach((node) => {
+          knownUnitIds.add(String(node.index));
+          if (node.children?.length) collectUnitIds(node.children);
+        });
+      };
+
+      collectUnitIds(treeNodes);
+
+      const orphanNodes: DashboardTreeRow[] = summaries
+        .filter((summary) => !knownUnitIds.has(String(summary.unitId)))
+        .map((summary) => ({
+          index: summary.unitId != null ? String(summary.unitId) : "UNASSIGNED",
+          name: summary.unitKerja ?? "Tanpa Unit Kerja",
+          totalEmployee: summary.total,
+          professionalCount: summary.professional?.length ?? 0,
+          professional: summary.professional ?? [],
+          children: [],
+        }));
+
+      return [...treeNodes, ...orphanNodes];
     };
 
     const loadData = async (): Promise<void> => {
@@ -519,6 +553,7 @@ export default defineComponent({
       totalEmployee,
       totalUnit,
       totalProfessional,
+      treeTotalEmployee,
       kpiCards,
       // ringkasan kehadiran
       attendanceFilter,

@@ -108,6 +108,11 @@
         <!-- ORGANIZATION TREE -->
 
         <n-card title="Struktur Organisasi dan SDM">
+            <template #header-extra>
+                <n-tag type="primary" round>
+                    Total Pegawai: {{ treeTotalEmployee }}
+                </n-tag>
+            </template>
             <n-spin :show="loading">
                 <n-data-table
                     striped

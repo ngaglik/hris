@@ -19,6 +19,7 @@
           <n-data-table
             :columns="columns"
             :data="tableData"
+            :loading="loading"
             :max-height="300"
           />
           <n-pagination
@@ -31,18 +32,24 @@
   <n-modal v-model:show="isModalOpen" :title="isEditMode ? 'Edit Data' : 'Tambah Data'" preset="dialog" :style="{ width: '600px' }">
       <n-form :model="formData" label-width="100">
         <n-form-item label="Id">
-          <n-input v-model:value="formData.id" />
+          <n-input v-model:value="formData.id" :disabled="isEditMode" placeholder="Kosongkan untuk dibuat otomatis" />
         </n-form-item>  
         <n-form-item label="Nama">
-          <n-input v-model:value="formData.position_name" />
+          <n-input v-model:value="formData.name" placeholder="Nama jabatan" />
         </n-form-item>  
         <n-form-item label="Unit kerja">
-          <n-input v-model:value="formData.organization_name" />
+          <n-select
+            v-model:value="formData.organizationId"
+            :options="organizationOptions"
+            clearable
+            filterable
+            placeholder="Pilih unit kerja"
+          />
         </n-form-item> 
         </n-form>      
       <n-space horizontal>
         <n-button @click="closeModal">Batal</n-button>
-        <n-button type="primary" @click="submitForm">
+        <n-button type="primary" :loading="loading" @click="submitForm">
           {{ isEditMode ? 'Simpan Perubahan' : 'Tambah' }}
         </n-button>
       </n-space>

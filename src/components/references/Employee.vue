@@ -13,6 +13,13 @@
                 <n-button type="primary" @click="openAddModal" class="mb-4">
                     Tambah Data
                 </n-button>
+                <n-button
+                    type="success"
+                    :loading="exportLoading"
+                    @click="handleDownloadExcel"
+                >
+                    Download Excel
+                </n-button>
                 <n-input-group>
                     <n-button type="primary"> Search </n-button>
                     <n-input
@@ -32,6 +39,18 @@
                         clearable
                         style="width: 220px"
                         @update:value="handleCategoryFilter"
+                    />
+                </n-input-group>
+                <!-- ✅ FILTER PROFESI -->
+                <n-input-group>
+                    <n-button type="primary">Profesi</n-button>
+                    <n-select
+                        v-model:value="professionalFilter"
+                        :options="professionalOptions"
+                        placeholder="Filter profesi"
+                        clearable
+                        style="width: 220px"
+                        @update:value="handleProfessionalFilter"
                     />
                 </n-input-group>
                 <n-input-group>
